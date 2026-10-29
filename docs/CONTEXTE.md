@@ -1,6 +1,6 @@
 # Sofalgri — Contexte de l'instance Odoo
 
-_Dernière mise à jour : 29/10/2026_
+_Dernière mise à jour : 29/10/2026 (déploiement PROD des PR #5 à #7)_
 
 ## Environnement
 
@@ -21,12 +21,12 @@ _Dernière mise à jour : 29/10/2026_
 
 | Module | Rôle | Version | Dépend de | Installé |
 |---|---|---|---|---|
-| `custom_lot_sequences` | Numéros de lot personnalisés (réceptions, OF) | 18.0.2.2.0 (branche `feat/lot-reception-avant-validation`) | stock, mrp, picking_custom_addons | ✅ |
-| `mrp_component_lot_check` | OF : popup de vérification des palettes / lots composants à la confirmation, obligatoire avant « Produire » | 18.0.1.0.1 (`18.0`) | mrp | ✅ |
-| `mrp_production_storage` | OF : conditionnement, quantité, frigo et n° de palette S saisis sur l'OF, étiquette palette produit fini (avec fabrication en 1 étape, remplace le transfert SFP) | 18.0.1.1.0 (`18.0`) | mrp | ✅ |
+| `custom_lot_sequences` | Numéros de lot personnalisés (réceptions, OF) | 18.0.2.2.0 (`18.0`, PROD) | stock, mrp, picking_custom_addons | ✅ |
+| `mrp_component_lot_check` | OF : popup de vérification des palettes / lots composants à la confirmation, obligatoire avant « Produire » | 18.0.1.0.1 (`18.0`, PROD) | mrp | ✅ |
+| `mrp_production_storage` | OF : conditionnement, quantité, frigo et n° de palette S saisis sur l'OF, étiquette palette produit fini (avec fabrication en 1 étape, remplace le transfert SFP) | 18.0.1.1.0 (`18.0`, PROD) | mrp | ✅ |
 | `delivery_carrier_custom` | Personnalisations des modes de livraison | 18.0.1.0.0 | delivery, stock_delivery | ✅ |
 | `package_packaging` | Affiche le conditionnement produit dans les colis | 18.0.1.0.0 | stock, product | ❌ |
-| `picking_custom_addons` | Personnalisations des transferts de stock | 18.0.4.5.0 (`18.0`, non déployé en PROD) ; 18.0.4.10.0 (`18.0`) ; 18.0.4.11.0 sur `fix/fifo-ordre-palettes` | stock, product | ✅ |
+| `picking_custom_addons` | Personnalisations des transferts de stock | 18.0.4.11.0 (`18.0`, PROD) | stock, product | ✅ |
 | `product_packaging_unit_price` | Prix unitaire par conditionnement (ventes et factures) | 18.0.6.3.0 | base, stock, sale_stock, sale_management, account | ✅ |
 | `purchase_order_workflow` | Achat : facture fournisseur et paiement en espèces automatiques | 1.0 | purchase, account | ✅ |
 | `sale_advance_payment` | Acomptes sur commandes de vente | 18.0.1.1.0 | sale_management, account | ✅ |

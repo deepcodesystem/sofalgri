@@ -31,12 +31,17 @@ class StockQuantPackage(models.Model):
     )
 
     def write(self, vals):
-        # On n'archive que des colis vides, pour ne pas masquer du stock réel
+        # On n'archive pas un colis encore en stock chez nous ; un colis livré
+        # garde ses quants chez le client (emplacement non interne) et reste archivable
         if 'active' in vals and not vals['active']:
-            not_empty = self.filtered('quant_ids')
-            if not_empty:
+            in_stock = self.filtered(lambda p: p.quant_ids.filtered(
+                lambda q: q.location_id.usage in ('internal', 'transit')))
+            if in_stock:
+                names = in_stock.mapped('display_name')
                 raise UserError(_(
-                    "Impossible d'archiver des colis qui contiennent encore du stock : %s",
-                    ", ".join(not_empty.mapped('display_name'))
+                    "Impossible d'archiver %(count)s colis encore en stock : %(names)s%(more)s",
+                    count=len(names),
+                    names=", ".join(names[:20]),
+                    more=" …" if len(names) > 20 else "",
                 ))
         return super().write(vals)

@@ -29,7 +29,7 @@
         <field name="arch" type="xml">
             <xpath expr="//filter[@name='internal']" position="after">
                 <separator/>
-                <filter string="Vides" name="empty" domain="[('quant_ids', '=', False)]"/>
+                <filter string="Hors stock" name="empty" domain="['!', ('quant_ids.location_id.usage', 'in', ('internal', 'transit'))]"/>
                 <separator/>
                 <filter string="Archivés" name="inactive" domain="[('active', '=', False)]"/>
             </xpath>

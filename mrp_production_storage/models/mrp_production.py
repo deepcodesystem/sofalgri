@@ -11,6 +11,9 @@ class MrpProduction(models.Model):
         'product.packaging',
         string="Conditionnement",
         domain="[('product_id', '=', product_id)]",
+        compute='_compute_product_packaging_id',
+        store=True,
+        readonly=False,
         check_company=True,
         copy=False,
         tracking=True,
@@ -43,6 +46,19 @@ class MrpProduction(models.Model):
         help="Palette de sortie du produit fini. Laisser vide pour créer automatiquement "
              "la palette suivante (S001, S002...) à l'impression de l'étiquette ou à la production.",
     )
+
+    @api.depends('bom_id', 'product_id')
+    def _compute_product_packaging_id(self):
+        """ Nomenclature carton 4 kg ou plastique 10 kg -> conditionnement correspondant de l'article.
+        Sans correspondance, on garde le choix de l'opérateur s'il concerne bien cet article. """
+        for production in self:
+            packaging = production.bom_id._get_product_packaging(production.product_id) if production.bom_id else False
+            if packaging:
+                production.product_packaging_id = packaging
+            elif production.product_packaging_id.product_id != production.product_id:
+                production.product_packaging_id = False
+            else:
+                production.product_packaging_id = production.product_packaging_id
 
     @api.depends('product_packaging_id', 'product_qty', 'product_uom_id')
     def _compute_product_packaging_qty(self):

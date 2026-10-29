@@ -1,15 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
+        <!-- Format propre au module : évite la dépendance circulaire vers sofalgri_package_reports -->
+        <record id="paperformat_pallet_label" model="report.paperformat">
+            <field name="name">Étiquette palette A5 paysage</field>
+            <field name="format">A5</field>
+            <field name="orientation">Landscape</field>
+            <field name="margin_top">6</field>
+            <field name="margin_bottom">6</field>
+            <field name="margin_left">6</field>
+            <field name="margin_right">6</field>
+            <field name="header_line" eval="False"/>
+            <field name="header_spacing">0</field>
+            <field name="dpi">90</field>
+        </record>
+
         <record id="action_report_package" model="ir.actions.report">
             <field name="name">Étiquette de colis</field>
             <field name="model">stock.move.line</field>
             <field name="report_type">qweb-pdf</field>
             <field name="report_name">picking_custom_addons.report_package_template</field>
             <field name="report_file">picking_custom_addons.report_package_template</field>
+            <field name="print_report_name">'Palette - %s' % (object.result_package_id.name or object.lot_name or object.id)</field>
             <field name="binding_model_id" eval="False"/>
             <field name="binding_type">report</field>
-            <field name="paperformat_id" ref="sofalgri_package_reports.paperformat_a5_label"/>
+            <field name="paperformat_id" ref="paperformat_pallet_label"/>
         </record>
     </data>
 </odoo>

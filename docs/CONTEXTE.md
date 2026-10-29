@@ -24,7 +24,7 @@ _Dernière mise à jour : 29/10/2026_
 | `custom_lot_sequences` | Numéros de lot personnalisés (réceptions, OF) | 18.0.2.2.0 (branche `feat/lot-reception-avant-validation`) | stock, mrp, picking_custom_addons | ✅ |
 | `delivery_carrier_custom` | Personnalisations des modes de livraison | 18.0.1.0.0 | delivery, stock_delivery | ✅ |
 | `package_packaging` | Affiche le conditionnement produit dans les colis | 18.0.1.0.0 | stock, product | ❌ |
-| `picking_custom_addons` | Personnalisations des transferts de stock | 18.0.4.5.0 (`18.0`, non déployé en PROD) ; 18.0.4.9.0 sur `feat/lot-reception-avant-validation` | stock, product | ✅ |
+| `picking_custom_addons` | Personnalisations des transferts de stock | 18.0.4.5.0 (`18.0`, non déployé en PROD) ; 18.0.4.10.0 sur `feat/lot-reception-avant-validation` | stock, product | ✅ |
 | `product_packaging_unit_price` | Prix unitaire par conditionnement (ventes et factures) | 18.0.6.3.0 | base, stock, sale_stock, sale_management, account | ✅ |
 | `purchase_order_workflow` | Achat : facture fournisseur et paiement en espèces automatiques | 1.0 | purchase, account | ✅ |
 | `sale_advance_payment` | Acomptes sur commandes de vente | 18.0.1.1.0 | sale_management, account | ✅ |
@@ -92,9 +92,9 @@ Dépendances inter-modules à respecter :
 
 - **Lots d'OF non gérés par le code actif** : la génération du lot produit fini (`<4 premiers caractères du lot composant>S<JJMMAAAA>`) est dans `stock_picking_old.py`, **non importé**. Le commentaire du code actif renvoie pourtant à `MrpProduction.button_mark_done()`. Ce code ne produit aucun lot actuel (voir le point précédent : séquence native ou saisie manuelle). Fichiers morts : `stock_picking_old.py`, `stock_picking.py.old`.
 - **Dépendances cachées** :
-  - `picking_custom_addons` référence `sofalgri_package_reports.paperformat_a5_label` alors que c'est `sofalgri_package_reports` qui dépend de `picking_custom_addons` → dépendance circulaire ; une installation sur base vierge échouerait.
+  - `picking_custom_addons` référence `sofalgri_package_reports.paperformat_a5_label` alors que c'est `sofalgri_package_reports` qui dépend de `picking_custom_addons` → dépendance circulaire ; une installation sur base vierge échouerait. **Corrigé en 18.0.4.10.0** (format papier propre `paperformat_pallet_label`, branche `feat/lot-reception-avant-validation`).
   - Le rapport facture de `product_packaging_unit_price` utilise `calibre` et `number_ggn` (définis dans `sofalgri_package_reports`) sans en dépendre.
-  - Le rapport de `picking_custom_addons` utilise `product_variety` (même cas).
+  - Le rapport de `picking_custom_addons` utilise `product_variety` (même cas). **Corrigé en 18.0.4.10.0** : variété, station et GGN affichés seulement si les champs existent.
 - **`package_packaging` est un doublon** de la partie `stock.quant` + vues de `sofalgri_package_reports` (même code, mêmes champs).
 - **Fichiers `.pyc` versionnés** dans Git (`__pycache__/`), dont un `stock_quant_package.cpython-311.pyc` sans source.
 - `purchase_order_workflow` : aucun contrôle si le journal espèces est absent (sortie silencieuse) ; facture validée sans relecture.

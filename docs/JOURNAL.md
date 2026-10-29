@@ -5,13 +5,20 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-10-29 · Nouveau design de l'étiquette palette
+- Demande : refaire l'étiquette palette (« Étiquette de colis ») avec un design plus professionnel, avant la PR.
+- Fait : `picking_custom_addons` 18.0.4.10.0 : modèle refait en A5 paysage (cadre, en-tête société + station + GGN + badge « Réception », n° de palette et n° de lot en grand avec codes-barres Code128, produit / variété / date, fournisseur / référence / emplacement, bandeau de pesée nb colis · brut · tare · **net** en négatif, pied avec caisse, palette, date et auteur de l'impression). Mise en page en tableaux (wkhtmltopdf). Champs de `sofalgri_package_reports` (variété, station, GGN) affichés seulement s'ils existent. Format papier propre au module (`paperformat_pallet_label`, marges 6 mm) : supprime la dépendance circulaire vers `sofalgri_package_reports.paperformat_a5_label`. Nom du PDF : « Palette - <n° de palette> ».
+- Bases : aucune requête.
+- Modules/modèles : `picking_custom_addons` · rapport `report_package_template`, `report.paperformat`.
+- Commit : branche `feat/lot-reception-avant-validation` (non committé, non testé dans Odoo).
+
 ## 2026-10-29 · Numérotation automatique des palettes (E entrée / S sortie)
 - Demande : numéroter automatiquement les palettes, en distinguant les palettes de réception (E001…) et de sortie (S001…) ; les palettes de sortie sont créées en fin de calibrage (OF). Format choisi : 3 chiffres, compteur continu.
 - Constat (TEST) : palettes nommées à la main avec des doublons (plusieurs « 001 », dont un colis réutilisé toute la saison avec 170 820 kg cumulés) ; séquence native des colis `stock.seq_quant_package` réglée sur `PAL` (5 numéros utilisés) ; types de colis « Palettes de réception » et « Palettes de Livraison » existants.
 - Fait : `picking_custom_addons` 18.0.4.9.0 : séquence `stock.quant.package.reception` (E, 3 chiffres) ; dans l'assistant palette, le n° de palette devient facultatif : vide → création de la palette E suivante, type « Palettes de réception » ; curseur sur le poids brut. Séquence native des colis passée en préfixe S, 3 chiffres (compteur conservé), réappliqué à chaque mise à jour du module.
 - Bases : lecture seule TEST (types de colis, séquences, colis).
 - Modules/modèles : `picking_custom_addons` · `ir.sequence`, `stock.pallet.wizard`.
-- Commit : branche `feat/lot-reception-avant-validation` (non committé, non testé dans Odoo).
+- Commit : `e9228ac` sur `feat/lot-reception-avant-validation` (poussé).
 - Limites : un colis créé en tapant un nom (création rapide) garde ce nom ; seuls « Mettre en colis » et la création sans nom utilisent S. Le type « Palettes de Livraison » n'est pas posé automatiquement sur les palettes S.
 
 ## 2026-10-29 · Assistant palette : n° de palette et saisie regroupée

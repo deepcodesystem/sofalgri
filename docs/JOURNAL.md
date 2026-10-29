@@ -11,7 +11,7 @@ Les entrées les plus récentes en haut.
 - Fait : `custom_lot_sequences` 18.0.2.2.0 : méthode `_assign_receipt_lot_names` (un lot par produit et par réception, réutilise le lot déjà attribué à une autre palette), appelée au clic « Imprimer l'étiquette » et à la validation ; dépend désormais de `picking_custom_addons` ; auteur GetapPRO, licence LGPL-3. `picking_custom_addons` 18.0.4.6.0 : l'étiquette affiche `lot_id.name` ou à défaut `lot_name` (texte et QR code). La date du lot devient celle de la première impression.
 - Bases : lecture seule TEST (type d'opération « Réceptions »).
 - Modules/modèles : `custom_lot_sequences` · `stock.picking`, `stock.move.line` ; `picking_custom_addons` · rapport « Étiquette de colis ».
-- Commit : branche `feat/lot-reception-avant-validation` (non committé, non testé dans Odoo).
+- Commits : `f508223` et `2376927` sur `feat/lot-reception-avant-validation` (non poussée, non testée dans Odoo).
 
 ## 2026-10-29 · Archivage des lots de l'ancienne saison
 - Demande : pouvoir archiver les lots et numéros de série de l'ancienne saison, comme les colis.

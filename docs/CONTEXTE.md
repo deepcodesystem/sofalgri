@@ -21,10 +21,10 @@ _Dernière mise à jour : 29/10/2026_
 
 | Module | Rôle | Version | Dépend de | Installé |
 |---|---|---|---|---|
-| `custom_lot_sequences` | Numéros de lot personnalisés (réceptions, OF) | 18.0.2.1.1 | stock, mrp | ✅ |
+| `custom_lot_sequences` | Numéros de lot personnalisés (réceptions, OF) | 18.0.2.2.0 (branche `feat/lot-reception-avant-validation`) | stock, mrp, picking_custom_addons | ✅ |
 | `delivery_carrier_custom` | Personnalisations des modes de livraison | 18.0.1.0.0 | delivery, stock_delivery | ✅ |
 | `package_packaging` | Affiche le conditionnement produit dans les colis | 18.0.1.0.0 | stock, product | ❌ |
-| `picking_custom_addons` | Personnalisations des transferts de stock | 18.0.4.5.0 (`18.0`, non déployé en PROD) | stock, product | ✅ |
+| `picking_custom_addons` | Personnalisations des transferts de stock | 18.0.4.5.0 (`18.0`, non déployé en PROD) ; 18.0.4.6.0 sur `feat/lot-reception-avant-validation` | stock, product | ✅ |
 | `product_packaging_unit_price` | Prix unitaire par conditionnement (ventes et factures) | 18.0.6.3.0 | base, stock, sale_stock, sale_management, account | ✅ |
 | `purchase_order_workflow` | Achat : facture fournisseur et paiement en espèces automatiques | 1.0 | purchase, account | ✅ |
 | `sale_advance_payment` | Acomptes sur commandes de vente | 18.0.1.1.0 | sale_management, account | ✅ |
@@ -34,6 +34,7 @@ _Dernière mise à jour : 29/10/2026_
 
 Dépendances inter-modules à respecter :
 - `sofalgri_package_reports` → `picking_custom_addons` (custom) + `stock_move_packaging_qty` (OCA)
+- `custom_lot_sequences` → `picking_custom_addons` (à partir de 18.0.2.2.0 : hérite du bouton d'impression de l'étiquette palette)
 
 ## Modules tiers par domaine
 
@@ -62,7 +63,8 @@ Dépendances inter-modules à respecter :
 
 | Module | Modèle | Champs / comportement ajoutés |
 |---|---|---|
-| `custom_lot_sequences` | `stock.picking` | `button_validate` : sur une **réception**, génère un lot par produit `<séquence lot.receipt.sequence><partner.ref><JJMMAAAA>` ; bloque si le fournisseur n'a pas de **Réf** |
+| `custom_lot_sequences` | `stock.picking` | `_assign_receipt_lot_names` : sur une **réception**, un lot par produit `<séquence lot.receipt.sequence><partner.ref><JJMMAAAA>` (réutilise le lot déjà attribué à une autre palette du même produit) ; bloque si le fournisseur n'a pas de **Réf**. Appelée par `button_validate` et (18.0.2.2.0) à l'impression de l'étiquette palette |
+| | `stock.move.line` | (18.0.2.2.0) `action_print_package_report` : attribue le `lot_name` avant d'imprimer, pour que l'étiquette porte le lot avant validation |
 | `delivery_carrier_custom` | `delivery.carrier`, `stock.picking` | `driver_id` (chauffeur, res.partner), `matricule` (véhicule) |
 | `picking_custom_addons` | `stock.move.line` | `net_weight` (libellé « Poids Brut »), `pallet_weight` (déf. 17), `crate_product_id` (article de catégorie **« Colis »**), `crate_weight` (related poids article), `crate_quantity`, `tare` = palette + nb caisses × poids caisse ; onchange : `quantity` = brut − tare ; à la validation, cumule poids/tare/nb caisses sur le colis de destination |
 | | `stock.move` | `total_net_weight`, `total_tare` (sommes des lignes) |

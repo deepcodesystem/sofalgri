@@ -5,6 +5,14 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-10-29 · Lot de réception disponible à l'impression de l'étiquette palette
+- Demande : à la réception vrac, l'étiquette de chaque palette doit porter le n° de lot avant la validation du transfert ; le lot n'était généré qu'à la validation.
+- Cause : le nom de lot n'était écrit dans `lot_name` qu'au `button_validate` ; de plus le type « Réceptions » crée les lots par nom (`use_create_lots`), donc `lot_id` reste vide jusqu'à la validation alors que l'étiquette affichait `lot_id.name`.
+- Fait : `custom_lot_sequences` 18.0.2.2.0 : méthode `_assign_receipt_lot_names` (un lot par produit et par réception, réutilise le lot déjà attribué à une autre palette), appelée au clic « Imprimer l'étiquette » et à la validation ; dépend désormais de `picking_custom_addons` ; auteur GetapPRO, licence LGPL-3. `picking_custom_addons` 18.0.4.6.0 : l'étiquette affiche `lot_id.name` ou à défaut `lot_name` (texte et QR code). La date du lot devient celle de la première impression.
+- Bases : lecture seule TEST (type d'opération « Réceptions »).
+- Modules/modèles : `custom_lot_sequences` · `stock.picking`, `stock.move.line` ; `picking_custom_addons` · rapport « Étiquette de colis ».
+- Commit : branche `feat/lot-reception-avant-validation` (non committé, non testé dans Odoo).
+
 ## 2026-10-29 · Archivage des lots de l'ancienne saison
 - Demande : pouvoir archiver les lots et numéros de série de l'ancienne saison, comme les colis.
 - Constat (TEST) : `stock.lot` n'a pas de champ `active` ; la recherche native offre déjà les filtres « En stock » et « Date de création » (choix de la saison).

@@ -14,7 +14,7 @@
                         icon="fa-search"
                         invisible="state not in ('confirmed', 'progress', 'to_close')"/>
             </xpath>
-            <xpath expr="//field[@name='bom_id']" position="after">
+            <xpath expr="//div[@name='bom_div']" position="after">
                 <field name="component_lots_checked" readonly="1" invisible="state == 'draft'"/>
             </xpath>
         </field>

@@ -5,7 +5,8 @@
         <field name="model">mrp.production</field>
         <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='bom_id']" position="after">
+            <!-- Après la ligne de la nomenclature (bom_id est dans une div o_row, sans libellé) -->
+            <xpath expr="//div[@name='bom_div']" position="after">
                 <field name="storage_parent_location_id" invisible="1"/>
                 <field name="product_packaging_id" options="{'no_create': True, 'no_open': True}"
                        readonly="state in ('done', 'cancel')"/>

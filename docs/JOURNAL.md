@@ -5,6 +5,13 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-10-29 · OF : champs conditionnement et frigo introuvables
+- Demande : les champs conditionnement et frigo n'apparaissent pas sur le formulaire de l'OF (module installé en TEST).
+- Cause : dans Odoo 18, `bom_id` est dans une `div class="o_row"` (`bom_div`) ; les champs insérés après lui se retrouvaient sur la même ligne, sans libellé. Même défaut pour « Lots composants vérifiés ».
+- Fait : insertion après `//div[@name='bom_div']` dans les deux modules ; `mrp_production_storage` et `mrp_component_lot_check` en 18.0.1.0.1.
+- Bases : lecture seule TEST (modules installés, vue formulaire OF).
+- Commit : branche `feat/of-verification-lots` (non committé).
+
 ## 2026-10-29 · OF : conditionnement et frigo sur l'OF (suppression du transfert de stockage)
 - Demande : se passer du transfert « Stocker les produits finis » créé après chaque OF, qui sert seulement à saisir le conditionnement, sa quantité et le frigo.
 - Constat (TEST) : entrepôt en fabrication 3 étapes ; l'étape de prélèvement n'est déjà plus utilisée (« Fabrication » prend dans `Zone de réception`) ; le transfert SFP (`Post-fabrication` → `Frigo 0X`) est validé ~1 min après l'OF, avec seulement conditionnement (ex. « CARTON 4KG GOLD FRUTAS », 220) et frigo. Conditionnements définis par variante (4 kg carton, 10 kg plastique, type « Palettes de Livraison »).
@@ -12,7 +19,7 @@ Les entrées les plus récentes en haut.
 - Configuration à faire ensuite (TEST puis PROD, par l'utilisateur ou avec accord) : valider les transferts SFP en attente, passer l'entrepôt en fabrication **1 étape**, puis vérifier que l'opération « Fabrication » garde `Zone de réception` comme emplacement source.
 - Bases : lecture seule TEST (types d'opération, transfert SFP, conditionnements, vue OF).
 - Modules/modèles : `mrp_production_storage` · `mrp.production`.
-- Commit : branche `feat/of-verification-lots` (non committé, non testé dans Odoo).
+- Commit : `10e84fe` sur `feat/of-verification-lots` (poussé). Installé en TEST par l'utilisateur.
 
 ## 2026-10-29 · Vérification des lots composants à la confirmation des OF
 - Demande : à la confirmation d'un OF de calibrage, afficher le lot du vrac « Avocats pour export » utilisé et pouvoir le changer : les opérateurs ne vérifient pas le lot, la traçabilité est impossible.

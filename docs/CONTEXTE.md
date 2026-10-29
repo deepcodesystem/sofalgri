@@ -22,8 +22,8 @@ _Dernière mise à jour : 29/10/2026_
 | Module | Rôle | Version | Dépend de | Installé |
 |---|---|---|---|---|
 | `custom_lot_sequences` | Numéros de lot personnalisés (réceptions, OF) | 18.0.2.2.0 (branche `feat/lot-reception-avant-validation`) | stock, mrp, picking_custom_addons | ✅ |
-| `mrp_component_lot_check` | OF : popup de vérification des palettes / lots composants à la confirmation, obligatoire avant « Produire » | 18.0.1.0.0 (branche `feat/of-verification-lots`) | mrp | ❌ (à installer) |
-| `mrp_production_storage` | OF : conditionnement, quantité et frigo saisis sur l'OF (avec fabrication en 1 étape, remplace le transfert SFP) | 18.0.1.0.0 (branche `feat/of-verification-lots`) | mrp | ❌ (à installer) |
+| `mrp_component_lot_check` | OF : popup de vérification des palettes / lots composants à la confirmation, obligatoire avant « Produire » | 18.0.1.0.1 (branche `feat/of-verification-lots`) | mrp | ✅ TEST |
+| `mrp_production_storage` | OF : conditionnement, quantité et frigo saisis sur l'OF (avec fabrication en 1 étape, remplace le transfert SFP) | 18.0.1.0.1 (branche `feat/of-verification-lots`) | mrp | ✅ TEST |
 | `delivery_carrier_custom` | Personnalisations des modes de livraison | 18.0.1.0.0 | delivery, stock_delivery | ✅ |
 | `package_packaging` | Affiche le conditionnement produit dans les colis | 18.0.1.0.0 | stock, product | ❌ |
 | `picking_custom_addons` | Personnalisations des transferts de stock | 18.0.4.5.0 (`18.0`, non déployé en PROD) ; 18.0.4.10.0 sur `feat/lot-reception-avant-validation` | stock, product | ✅ |

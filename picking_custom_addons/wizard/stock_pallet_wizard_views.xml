@@ -8,23 +8,29 @@
                 <field name="picking_id" invisible="1"/>
                 <field name="picking_location_dest_id" invisible="1"/>
                 <field name="allowed_product_ids" invisible="1"/>
-                <group>
+                <!-- Champs saisis à chaque palette, en tête et en grand -->
+                <group string="Pesée de la palette" class="fs-4">
+                    <group>
+                        <field name="result_package_id" default_focus="1"
+                               options="{'no_create_edit': True, 'no_open': True}"/>
+                        <field name="net_weight"/>
+                        <field name="crate_quantity"/>
+                    </group>
+                    <group>
+                        <field name="tare"/>
+                        <field name="quantity" class="fw-bold"/>
+                    </group>
+                </group>
+                <!-- Valeurs reprises de la palette précédente, rarement modifiées -->
+                <group string="Paramètres">
                     <group>
                         <field name="product_id" options="{'no_create': True}"/>
                         <field name="location_dest_id" options="{'no_create': True}"/>
-                        <field name="net_weight"/>
                     </group>
                     <group>
                         <field name="crate_product_id" options="{'no_create': True}"/>
                         <field name="crate_weight"/>
-                        <field name="crate_quantity"/>
                         <field name="pallet_weight"/>
-                    </group>
-                </group>
-                <group>
-                    <group>
-                        <field name="tare"/>
-                        <field name="quantity"/>
                     </group>
                 </group>
                 <footer>

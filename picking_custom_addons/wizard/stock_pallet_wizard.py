@@ -23,6 +23,14 @@ class StockPalletWizard(models.TransientModel):
         domain="[('id', 'child_of', picking_location_dest_id)]",
     )
 
+    result_package_id = fields.Many2one(
+        'stock.quant.package',
+        string="N° de palette",
+        required=True,
+        domain="[('quant_ids', '=', False)]",
+        help="Colis de destination de la palette. Saisir un nouveau numéro pour le créer.",
+    )
+
     # --- Mêmes champs que sur la ligne de mouvement ---
     net_weight = fields.Float(string="Poids Brut", digits='Stock Weight', help="Poids brut total mesuré sur la balance.")
     crate_product_id = fields.Many2one(
@@ -91,6 +99,7 @@ class StockPalletWizard(models.TransientModel):
 
         vals = {
             'location_dest_id': self.location_dest_id.id,
+            'result_package_id': self.result_package_id.id,
             'quantity': self.quantity,
             'picked': True,
             'net_weight': self.net_weight,

@@ -24,7 +24,7 @@ _Dernière mise à jour : 29/10/2026_
 | `custom_lot_sequences` | Numéros de lot personnalisés (réceptions, OF) | 18.0.2.2.0 (branche `feat/lot-reception-avant-validation`) | stock, mrp, picking_custom_addons | ✅ |
 | `delivery_carrier_custom` | Personnalisations des modes de livraison | 18.0.1.0.0 | delivery, stock_delivery | ✅ |
 | `package_packaging` | Affiche le conditionnement produit dans les colis | 18.0.1.0.0 | stock, product | ❌ |
-| `picking_custom_addons` | Personnalisations des transferts de stock | 18.0.4.5.0 (`18.0`, non déployé en PROD) ; 18.0.4.7.0 sur `feat/lot-reception-avant-validation` | stock, product | ✅ |
+| `picking_custom_addons` | Personnalisations des transferts de stock | 18.0.4.5.0 (`18.0`, non déployé en PROD) ; 18.0.4.8.0 sur `feat/lot-reception-avant-validation` | stock, product | ✅ |
 | `product_packaging_unit_price` | Prix unitaire par conditionnement (ventes et factures) | 18.0.6.3.0 | base, stock, sale_stock, sale_management, account | ✅ |
 | `purchase_order_workflow` | Achat : facture fournisseur et paiement en espèces automatiques | 1.0 | purchase, account | ✅ |
 | `sale_advance_payment` | Acomptes sur commandes de vente | 18.0.1.1.0 | sale_management, account | ✅ |
@@ -72,7 +72,7 @@ Dépendances inter-modules à respecter :
 | | `stock.lot` | `active` (archivage des lots hors stock interne, v18.0.4.5.0, fusionné dans `18.0` : PR #3) |
 | | `stock.quant` | `crate_quantity` (related colis), `tare` |
 | | rapport | « Étiquette de colis » (`stock.move.line`, A5) ; affiche `lot_id` ou à défaut `lot_name` (18.0.4.6.0) |
-| | `stock.pallet.wizard` | (18.0.4.7.0) assistant « Ajouter une palette » (bouton en haut des réceptions) : pesée, tare, poids net ; crée la ligne de la palette et imprime son étiquette avec le lot |
+| | `stock.pallet.wizard` | (18.0.4.7.0) assistant « Ajouter une palette » (bouton en haut des réceptions) : n° de palette (colis de destination, obligatoire), pesée, tare, poids net ; crée la ligne de la palette et imprime son étiquette avec le lot |
 | `product_packaging_unit_price` | `product.packaging` | `unit_price_package`, `standard_price_package` (= prix produit × qté, modifiables), `description_sale` |
 | | `sale.order.line`, `account.move.line` | `price_unit_package` ↔ `price_unit` synchronisés par onchange ; conditionnement propagé à la facture |
 | | `sale.order`, `account.move` | `delivery_truck_number` (matricule camion, propagé à la facture) |

@@ -5,13 +5,21 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-10-29 · Assistant palette : n° de palette et saisie regroupée
+- Demande : ajouter le colis de destination (n° de palette, saisi à la main pour l'instant) et regrouper les champs à saisir par le réceptionniste.
+- Fait : champ obligatoire « N° de palette » (`result_package_id`, colis vides uniquement, création rapide en tapant un nouveau numéro), reporté sur la ligne ; formulaire réorganisé : bloc « Pesée de la palette » en tête (n° de palette avec le curseur, poids brut, quantité colis, tare et poids net), bloc « Paramètres » en dessous (article, emplacement, caisse, poids palette). Version 18.0.4.8.0.
+- Bases : aucune requête.
+- Modules/modèles : `picking_custom_addons` · `stock.pallet.wizard`.
+- Commit : branche `feat/lot-reception-avant-validation` (non committé, non testé dans Odoo).
+- Suite prévue : numérotation automatique des palettes.
+
 ## 2026-10-29 · Assistant « Ajouter une palette » sur les réceptions
 - Demande : retour du test en TEST : le lot est bien attribué, mais le bouton d'impression de la ligne affiche « Veuillez d'abord enregistrer vos changements » ; il faut enregistrer, rouvrir le popup « Opérations détaillées », puis imprimer.
 - Cause : ce popup est ouvert depuis la réception ; une nouvelle ligne n'existe que dans le navigateur tant que la réception n'est pas enregistrée, donc aucun bouton serveur (impression ou génération de lot) ne peut agir dessus.
 - Fait : `picking_custom_addons` 18.0.4.7.0 : assistant `stock.pallet.wizard` ouvert par le bouton « Ajouter une palette » en haut de la réception (réceptions prêtes ou en attente). Saisie : article (pré-rempli s'il est seul), emplacement, poids brut, caisse, nb caisses, poids palette ; tare et poids net calculés. « Ajouter et imprimer » crée la ligne (ou complète la ligne réservée par Odoo encore vide), puis imprime l'étiquette ; le lot est attribué par `custom_lot_sequences` et le popup se ferme. Caisse, palette et emplacement repris de la palette précédente. Ajout de `security/ir.model.access.csv` (groupe Utilisateur stock).
 - Bases : lecture seule TEST (lignes de réceptions validées : pas de colis de destination, caisse « Caisse de Réception » 3 kg).
 - Modules/modèles : `picking_custom_addons` · `stock.pallet.wizard`, vue formulaire `stock.picking`.
-- Commit : branche `feat/lot-reception-avant-validation` (non testé dans Odoo).
+- Commit : `d89015b` sur `feat/lot-reception-avant-validation` (poussé). Idée validée par l'utilisateur, à affiner (entrée suivante).
 
 ## 2026-10-29 · Lot de réception disponible à l'impression de l'étiquette palette
 - Demande : à la réception vrac, l'étiquette de chaque palette doit porter le n° de lot avant la validation du transfert ; le lot n'était généré qu'à la validation.

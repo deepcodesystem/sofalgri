@@ -5,12 +5,19 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-10-29 · OF : n° de palette S et étiquette palette produit fini
+- Demande : sur l'OF, une étiquette colis avec un numéro de palette, comme pour la réception.
+- Fait : `mrp_production_storage` 18.0.1.1.0 : champ « N° de palette » (`result_package_id`, colis vides ; vide → palette créée par la séquence native S001… avec le type du conditionnement, à défaut « Palettes de Livraison ») ; bouton « Étiquette palette » (exige le lot produit, crée la palette si besoin) ; à « Produire », palette créée si absente et reportée avec le frigo sur les lignes du produit fini (`_post_inventory`). Nouvelle étiquette A5 paysage sur `mrp.production`, même présentation que la réception : n° de palette et lot avec codes-barres, produit, variété, calibre, conditionnement, marque, date, nb colis, poids par colis, frigo, poids net. Bouton ancré sur l'en-tête (le bouton `action_confirm` est renommé par `mrp_component_lot_check`).
+- Bases : aucune requête (champs `calibre` / `product_variety` lus dans le dépôt).
+- Modules/modèles : `mrp_production_storage` · `mrp.production`, rapport `report_production_pallet`.
+- Commit : branche `feat/of-verification-lots` (non committé, non testé dans Odoo).
+
 ## 2026-10-29 · OF : champs conditionnement et frigo introuvables
 - Demande : les champs conditionnement et frigo n'apparaissent pas sur le formulaire de l'OF (module installé en TEST).
 - Cause : dans Odoo 18, `bom_id` est dans une `div class="o_row"` (`bom_div`) ; les champs insérés après lui se retrouvaient sur la même ligne, sans libellé. Même défaut pour « Lots composants vérifiés ».
 - Fait : insertion après `//div[@name='bom_div']` dans les deux modules ; `mrp_production_storage` et `mrp_component_lot_check` en 18.0.1.0.1.
 - Bases : lecture seule TEST (modules installés, vue formulaire OF).
-- Commit : branche `feat/of-verification-lots` (non committé).
+- Commit : `7fc5f0b` sur `feat/of-verification-lots` (poussé). Validé par l'utilisateur (« édition beaucoup plus simple »).
 
 ## 2026-10-29 · OF : conditionnement et frigo sur l'OF (suppression du transfert de stockage)
 - Demande : se passer du transfert « Stocker les produits finis » créé après chaque OF, qui sert seulement à saisir le conditionnement, sa quantité et le frigo.

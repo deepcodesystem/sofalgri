@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'OF : conditionnement et frigo de stockage',
-    'version': '18.0.1.0.1',
+    'version': '18.0.1.1.0',
     'category': 'Manufacturing',
     'summary': "Conditionnement, quantité et frigo saisis sur l'OF (fabrication en 1 étape)",
     'description': """
@@ -13,6 +13,7 @@
     'website': 'https://www.getap.pro',
     'depends': ['mrp'],
     'data': [
+        'reports/production_pallet_report.xml',
         'views/mrp_production_views.xml',
     ],
     'installable': True,

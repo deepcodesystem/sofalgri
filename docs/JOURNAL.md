@@ -11,7 +11,8 @@ Les entrées les plus récentes en haut.
 - Fait : seul le stock en emplacement interne ou de transit bloque l'archivage ; message limité à 20 colis ; filtre « Vides » remplacé par « Hors stock » ; version 18.0.4.4.1.
 - Bases : lecture seule TEST (quants des colis).
 - Modules/modèles : `picking_custom_addons` · `stock.quant.package`.
-- Commit : `b32a9a2` sur `feat/archivage-colis` (poussé, à retester en TEST).
+- Commit : `b32a9a2` sur `feat/archivage-colis` (poussé).
+- **Validé en TEST** par l'utilisateur (archivage en masse « Hors stock » sans erreur). PR vers `18.0` : deepcodesystem/sofalgri#2. PROD : non déployé.
 
 ## 2026-10-29 · Archivage des colis
 - Demande : pouvoir archiver ou supprimer des colis (`stock.quant.package`) ; aucune action disponible.

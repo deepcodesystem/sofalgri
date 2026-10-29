@@ -5,6 +5,15 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-10-29 · OF : conditionnement choisi selon la nomenclature
+- Demande : sélectionner automatiquement le conditionnement de l'OF selon la nomenclature choisie (caisse carton 4 kg ou caisse plastique 10 kg).
+- Constat (TEST) : chaque variante calibrée a un conditionnement de 4 kg (« CARTON 4KG … ») et un de 10 kg (« PLASTIQUE … 10KG … »), parfois des conditionnements parasites à 1 kg (« 2640 », « 3436 », « pl ») ; nomenclatures 4 kg (880 kg) : ids 7, 8, 12, 16, et 15 « déchets ferme » ; 10 kg (1000 kg) : ids 9, 10, 13, 17 ; « Déchets usines » (11) sans conditionnement.
+- Fait : `mrp_production_storage` 18.0.1.2.0 : champ « Poids par colis » (`packaging_unit_qty`) sur la nomenclature (formulaire, après la référence) ; sur l'OF, `product_packaging_id` devient calculé (stocké, modifiable) d'après la nomenclature et l'article : conditionnement de l'article dont la contenance est égale au poids par colis (le premier par séquence) ; sans correspondance, le choix de l'opérateur est conservé s'il concerne l'article.
+- À faire après mise à jour : renseigner « Poids par colis » sur les nomenclatures (4 ou 10).
+- Bases : lecture seule TEST (conditionnements des variantes calibrées, nomenclatures, vue formulaire nomenclature).
+- Modules/modèles : `mrp_production_storage` · `mrp.bom`, `mrp.production`.
+- Commit : branche `feat/conditionnement-auto-nomenclature` (non committé, non testé dans Odoo).
+
 ## 2026-10-29 · Déploiement en PROD
 - PR deepcodesystem/sofalgri#7 (FIFO par n° de palette) **fusionnée** dans `18.0` (`e76637a`).
 - PROD mise à jour par l'utilisateur : `18.0` à jour (PR #5 à #7), modules `custom_lot_sequences` 18.0.2.2.0, `picking_custom_addons` 18.0.4.11.0, `mrp_component_lot_check` 18.0.1.0.1, `mrp_production_storage` 18.0.1.1.0 ; fabrication en 1 étape configurée.

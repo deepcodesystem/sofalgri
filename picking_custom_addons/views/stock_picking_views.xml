@@ -15,4 +15,19 @@
             </xpath>
         </field>
     </record>
+
+    <!-- Réception : pesée d'une palette et impression de son étiquette en un clic -->
+    <record id="view_picking_form_inherit_pallet_wizard" model="ir.ui.view">
+        <field name="name">stock.picking.form.inherit.pallet.wizard</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/button[@name='button_validate']" position="before">
+                <button name="%(picking_custom_addons.action_stock_pallet_wizard)d" type="action"
+                        string="Ajouter une palette" class="btn-primary" icon="fa-balance-scale"
+                        context="{'default_picking_id': id}"
+                        invisible="picking_type_code != 'incoming' or state in ('draft', 'done', 'cancel')"/>
+            </xpath>
+        </field>
+    </record>
 </odoo>

@@ -5,13 +5,21 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-10-29 · Assistant « Ajouter une palette » sur les réceptions
+- Demande : retour du test en TEST : le lot est bien attribué, mais le bouton d'impression de la ligne affiche « Veuillez d'abord enregistrer vos changements » ; il faut enregistrer, rouvrir le popup « Opérations détaillées », puis imprimer.
+- Cause : ce popup est ouvert depuis la réception ; une nouvelle ligne n'existe que dans le navigateur tant que la réception n'est pas enregistrée, donc aucun bouton serveur (impression ou génération de lot) ne peut agir dessus.
+- Fait : `picking_custom_addons` 18.0.4.7.0 : assistant `stock.pallet.wizard` ouvert par le bouton « Ajouter une palette » en haut de la réception (réceptions prêtes ou en attente). Saisie : article (pré-rempli s'il est seul), emplacement, poids brut, caisse, nb caisses, poids palette ; tare et poids net calculés. « Ajouter et imprimer » crée la ligne (ou complète la ligne réservée par Odoo encore vide), puis imprime l'étiquette ; le lot est attribué par `custom_lot_sequences` et le popup se ferme. Caisse, palette et emplacement repris de la palette précédente. Ajout de `security/ir.model.access.csv` (groupe Utilisateur stock).
+- Bases : lecture seule TEST (lignes de réceptions validées : pas de colis de destination, caisse « Caisse de Réception » 3 kg).
+- Modules/modèles : `picking_custom_addons` · `stock.pallet.wizard`, vue formulaire `stock.picking`.
+- Commit : branche `feat/lot-reception-avant-validation` (non testé dans Odoo).
+
 ## 2026-10-29 · Lot de réception disponible à l'impression de l'étiquette palette
 - Demande : à la réception vrac, l'étiquette de chaque palette doit porter le n° de lot avant la validation du transfert ; le lot n'était généré qu'à la validation.
 - Cause : le nom de lot n'était écrit dans `lot_name` qu'au `button_validate` ; de plus le type « Réceptions » crée les lots par nom (`use_create_lots`), donc `lot_id` reste vide jusqu'à la validation alors que l'étiquette affichait `lot_id.name`.
 - Fait : `custom_lot_sequences` 18.0.2.2.0 : méthode `_assign_receipt_lot_names` (un lot par produit et par réception, réutilise le lot déjà attribué à une autre palette), appelée au clic « Imprimer l'étiquette » et à la validation ; dépend désormais de `picking_custom_addons` ; auteur GetapPRO, licence LGPL-3. `picking_custom_addons` 18.0.4.6.0 : l'étiquette affiche `lot_id.name` ou à défaut `lot_name` (texte et QR code). La date du lot devient celle de la première impression.
 - Bases : lecture seule TEST (type d'opération « Réceptions »).
 - Modules/modèles : `custom_lot_sequences` · `stock.picking`, `stock.move.line` ; `picking_custom_addons` · rapport « Étiquette de colis ».
-- Commits : `f508223` et `2376927` sur `feat/lot-reception-avant-validation` (non poussée, non testée dans Odoo).
+- Commits : `f508223` et `2376927` sur `feat/lot-reception-avant-validation` (poussée). Testé en TEST par l'utilisateur : lot correct, mais impression bloquée tant que la réception n'est pas enregistrée (voir l'entrée « Assistant Ajouter une palette »).
 
 ## 2026-10-29 · Archivage des lots de l'ancienne saison
 - Demande : pouvoir archiver les lots et numéros de série de l'ancienne saison, comme les colis.

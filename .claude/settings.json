@@ -1,0 +1,25 @@
+{
+  "enabledMcpjsonServers": ["odoo-test", "odoo-ai-hub"],
+  "permissions": {
+    "allow": [
+      "mcp__odoo-test__search_records",
+      "mcp__odoo-ai-hub__search_records"
+    ],
+    "ask": [
+      "mcp__odoo-test__create_record",
+      "mcp__odoo-test__update_record",
+      "mcp__odoo-test__delete_record",
+      "mcp__odoo-test__unlink_record",
+      "mcp__odoo-test__analyze_records",
+      "mcp__odoo-test__ask_ai",
+      "mcp__odoo-ai-hub__create_record",
+      "mcp__odoo-ai-hub__update_record",
+      "mcp__odoo-ai-hub__delete_record",
+      "mcp__odoo-ai-hub__unlink_record",
+      "mcp__odoo-ai-hub__analyze_records",
+      "mcp__odoo-ai-hub__ask_ai",
+      "Bash(git push:*)",
+      "PowerShell(git push:*)"
+    ]
+  }
+}

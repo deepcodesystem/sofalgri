@@ -1,0 +1,9 @@
+# Secrets : jetons MCP
+.mcp.json
+
+# Réglages Claude Code personnels
+.claude/settings.local.json
+
+# Python
+__pycache__/
+*.py[cod]

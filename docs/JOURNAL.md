@@ -5,12 +5,21 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-10-29 · Vérification des lots composants à la confirmation des OF
+- Demande : à la confirmation d'un OF de calibrage, afficher le lot du vrac « Avocats pour export » utilisé et pouvoir le changer : les opérateurs ne vérifient pas le lot, la traçabilité est impossible.
+- Constat (TEST) : l'OF consomme directement depuis `ST/Stock/Zone de réception` (pas de prélèvement) ; à la confirmation, Odoo réserve automatiquement palettes et lots (les plus anciens d'abord) ; l'OF est créé, confirmé et produit en moins d'une minute (ex. WH/MOF/03664 : palettes `001` et `014`, lots 500LA… et 5019A…).
+- Fait : nouveau module `mrp_component_lot_check` 18.0.1.0.0. Le bouton « Confirmer » confirme puis ouvre le popup « Vérifier les lots des composants » : une ligne par palette réservée (composant, palette, lot, quantité), modifiable ; choisir une palette remplit le lot ; lignes ajoutables et supprimables. « Valider les lots » met à jour les réservations, coche « Lots composants vérifiés » et écrit le détail dans le fil de l'OF. « Produire » rouvre le popup tant que les lots ne sont pas validés, puis enchaîne la production. Bouton « Lots composants » pour rouvrir le popup.
+- Bases : lecture seule TEST (OF, mouvements et lignes de composants, vue formulaire OF).
+- Modules/modèles : `mrp_component_lot_check` · `mrp.production`, `mrp.component.lot.wizard(.line)`.
+- Commit : branche `feat/of-verification-lots` (non committé, non testé dans Odoo).
+- À surveiller : un OF terminé par un autre module (ex. production en masse) sur un seul OF non vérifié serait arrêté par le popup ; contexte `skip_component_lot_check` prévu pour le contourner.
+
 ## 2026-10-29 · Nouveau design de l'étiquette palette
 - Demande : refaire l'étiquette palette (« Étiquette de colis ») avec un design plus professionnel, avant la PR.
 - Fait : `picking_custom_addons` 18.0.4.10.0 : modèle refait en A5 paysage (cadre, en-tête société + station + GGN + badge « Réception », n° de palette et n° de lot en grand avec codes-barres Code128, produit / variété / date, fournisseur / référence / emplacement, bandeau de pesée nb colis · brut · tare · **net** en négatif, pied avec caisse, palette, date et auteur de l'impression). Mise en page en tableaux (wkhtmltopdf). Champs de `sofalgri_package_reports` (variété, station, GGN) affichés seulement s'ils existent. Format papier propre au module (`paperformat_pallet_label`, marges 6 mm) : supprime la dépendance circulaire vers `sofalgri_package_reports.paperformat_a5_label`. Nom du PDF : « Palette - <n° de palette> ».
 - Bases : aucune requête.
 - Modules/modèles : `picking_custom_addons` · rapport `report_package_template`, `report.paperformat`.
-- Commit : branche `feat/lot-reception-avant-validation` (non committé, non testé dans Odoo).
+- Commit : `c283bf5` sur `feat/lot-reception-avant-validation`. PR deepcodesystem/sofalgri#5 (lot à l'impression, assistant palette, numérotation E/S, étiquette) **fusionnée** dans `18.0` (`f81976a`) ; modules mis à jour par l'utilisateur.
 
 ## 2026-10-29 · Numérotation automatique des palettes (E entrée / S sortie)
 - Demande : numéroter automatiquement les palettes, en distinguant les palettes de réception (E001…) et de sortie (S001…) ; les palettes de sortie sont créées en fin de calibrage (OF). Format choisi : 3 chiffres, compteur continu.

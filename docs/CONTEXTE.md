@@ -22,6 +22,7 @@ _Dernière mise à jour : 29/10/2026_
 | Module | Rôle | Version | Dépend de | Installé |
 |---|---|---|---|---|
 | `custom_lot_sequences` | Numéros de lot personnalisés (réceptions, OF) | 18.0.2.2.0 (branche `feat/lot-reception-avant-validation`) | stock, mrp, picking_custom_addons | ✅ |
+| `mrp_component_lot_check` | OF : popup de vérification des palettes / lots composants à la confirmation, obligatoire avant « Produire » | 18.0.1.0.0 (branche `feat/of-verification-lots`) | mrp | ❌ (à installer) |
 | `delivery_carrier_custom` | Personnalisations des modes de livraison | 18.0.1.0.0 | delivery, stock_delivery | ✅ |
 | `package_packaging` | Affiche le conditionnement produit dans les colis | 18.0.1.0.0 | stock, product | ❌ |
 | `picking_custom_addons` | Personnalisations des transferts de stock | 18.0.4.5.0 (`18.0`, non déployé en PROD) ; 18.0.4.10.0 sur `feat/lot-reception-avant-validation` | stock, product | ✅ |
@@ -78,6 +79,8 @@ Dépendances inter-modules à respecter :
 | | `sale.order`, `account.move` | `delivery_truck_number` (matricule camion, propagé à la facture) |
 | | `res.partner` / `res.partner.bank` | `eori_number`, `tax_code`, `btw_identification`, `gln` / `code_swift`, `iban` |
 | | rapport | **Remplace le tableau et le pied de la facture** : calibre, nb colis, emballage, poids net, prix/colis, nb palettes (220 colis/palette, 100 si emballage contient « PLASTIQUE »), GGN |
+| `mrp_component_lot_check` | `mrp.production` | `component_lots_checked` ; bouton « Confirmer » → `action_confirm_check_lots` (confirme puis ouvre le popup) ; `button_mark_done` rouvre le popup tant que non vérifié (contournable par le contexte `skip_component_lot_check`) |
+| | `mrp.component.lot.wizard` | Popup : lignes composant / palette / lot / quantité ; valide en modifiant les lignes réservées et trace le détail dans le fil de l'OF |
 | `purchase_order_workflow` | `purchase.order` | `action_create_invoice` : date facture = date de confirmation, **facture validée** puis **paiement espèces** (1er journal `cash`) automatiquement |
 | `sale_advance_payment` | `sale.order`, `account.payment` | Acomptes clients (fork du module OCA/ForgeFlow) : `account_payment_ids`, `amount_residual`, `advance_payment_status` ; assistant `account.voucher.wizard.sale` |
 | `sale_order_template_custom` | `sale.order.template.line` | `product_packaging_id`, `product_packaging_qty`, reportés sur la ligne de devis |

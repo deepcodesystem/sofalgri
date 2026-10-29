@@ -24,7 +24,7 @@ _Dernière mise à jour : 29/10/2026_
 | `custom_lot_sequences` | Numéros de lot personnalisés (réceptions, OF) | 18.0.2.1.1 | stock, mrp | ✅ |
 | `delivery_carrier_custom` | Personnalisations des modes de livraison | 18.0.1.0.0 | delivery, stock_delivery | ✅ |
 | `package_packaging` | Affiche le conditionnement produit dans les colis | 18.0.1.0.0 | stock, product | ❌ |
-| `picking_custom_addons` | Personnalisations des transferts de stock | 18.0.4.3.0 | stock, product | ✅ |
+| `picking_custom_addons` | Personnalisations des transferts de stock | 18.0.4.5.0 (`18.0`, non déployé en PROD) | stock, product | ✅ |
 | `product_packaging_unit_price` | Prix unitaire par conditionnement (ventes et factures) | 18.0.6.3.0 | base, stock, sale_stock, sale_management, account | ✅ |
 | `purchase_order_workflow` | Achat : facture fournisseur et paiement en espèces automatiques | 1.0 | purchase, account | ✅ |
 | `sale_advance_payment` | Acomptes sur commandes de vente | 18.0.1.1.0 | sale_management, account | ✅ |
@@ -66,7 +66,8 @@ Dépendances inter-modules à respecter :
 | `delivery_carrier_custom` | `delivery.carrier`, `stock.picking` | `driver_id` (chauffeur, res.partner), `matricule` (véhicule) |
 | `picking_custom_addons` | `stock.move.line` | `net_weight` (libellé « Poids Brut »), `pallet_weight` (déf. 17), `crate_product_id` (article de catégorie **« Colis »**), `crate_weight` (related poids article), `crate_quantity`, `tare` = palette + nb caisses × poids caisse ; onchange : `quantity` = brut − tare ; à la validation, cumule poids/tare/nb caisses sur le colis de destination |
 | | `stock.move` | `total_net_weight`, `total_tare` (sommes des lignes) |
-| | `stock.quant.package` | `crate_quantity`, `tare`, `packaging_datetime` (remplace `pack_date` dans le formulaire) ; `active` (archivage des colis hors stock interne, branche `feat/archivage-colis`, v18.0.4.4.1) |
+| | `stock.quant.package` | `crate_quantity`, `tare`, `packaging_datetime` (remplace `pack_date` dans le formulaire) ; `active` (archivage des colis hors stock interne, v18.0.4.4.1, fusionné dans `18.0` : PR #2) |
+| | `stock.lot` | `active` (archivage des lots hors stock interne, v18.0.4.5.0, fusionné dans `18.0` : PR #3) |
 | | `stock.quant` | `crate_quantity` (related colis), `tare` |
 | | rapport | « Étiquette de colis » (`stock.move.line`, A5) |
 | `product_packaging_unit_price` | `product.packaging` | `unit_price_package`, `standard_price_package` (= prix produit × qté, modifiables), `description_sale` |
@@ -84,7 +85,9 @@ Dépendances inter-modules à respecter :
 
 ### Constats techniques
 
-- **Lots d'OF non gérés par le code actif** : la génération du lot produit fini (`<4 premiers caractères du lot composant>S<JJMMAAAA>`) est dans `stock_picking_old.py`, **non importé**. Le commentaire du code actif renvoie pourtant à `MrpProduction.button_mark_done()`. À vérifier : qui nomme les lots d'OF aujourd'hui (OCA `mrp_lot_number_propagation` ?). Fichiers morts : `stock_picking_old.py`, `stock_picking.py.old`.
+- **Lots générés sur les OF** (bouton « Générer ») : séquence native `stock.lot.serial` (« Serial Numbers »), réglée dans Paramètres > Technique > Séquences. Ne pas utiliser `%(range_year)s` / `%(range_month)s` dans son suffixe (date de début de plage, pas date du jour). Les lots `00xxS<JJMMAAAA>` des sessions de calibrage sont saisis à la main.
+
+- **Lots d'OF non gérés par le code actif** : la génération du lot produit fini (`<4 premiers caractères du lot composant>S<JJMMAAAA>`) est dans `stock_picking_old.py`, **non importé**. Le commentaire du code actif renvoie pourtant à `MrpProduction.button_mark_done()`. Ce code ne produit aucun lot actuel (voir le point précédent : séquence native ou saisie manuelle). Fichiers morts : `stock_picking_old.py`, `stock_picking.py.old`.
 - **Dépendances cachées** :
   - `picking_custom_addons` référence `sofalgri_package_reports.paperformat_a5_label` alors que c'est `sofalgri_package_reports` qui dépend de `picking_custom_addons` → dépendance circulaire ; une installation sur base vierge échouerait.
   - Le rapport facture de `product_packaging_unit_price` utilise `calibre` et `number_ggn` (définis dans `sofalgri_package_reports`) sans en dépendre.
@@ -112,7 +115,7 @@ Lots créés surtout de nov. 2025 à fév. 2026 ; derniers lots d'OF le 01/03/20
 
 **Nommage des lots constaté** :
 - Réception vrac : `<séq><Réf fournisseur><JJMMAAAA>` (ex. `570BA19062026`) → conforme au code actif.
-- OF (calibrés, déchets) : `<4 car.>S<JJMMAAAA>` (ex. `0044S01032026`) → format du code **absent du dépôt** (`stock_picking_old.py` non importé). Le code déployé sur le VPS diffère probablement de Git : **à vérifier avant la prochaine saison**.
+- OF (calibrés, déchets) : `<4 car.>S<JJMMAAAA>` (ex. `0044S01032026`) → saisis à la main par session de calibrage, ou générés par la séquence native `stock.lot.serial` (bouton « Générer »). Aucun code du dépôt n'intervient ; rien n'indique que le code du VPS diffère de Git.
 
 **MCP** : TEST et PROD utilisent le **même jeton** ; la lecture seule PROD n'est donc garantie que par les règles côté Claude (`.claude/settings.json`), pas par le serveur.
 

@@ -21,10 +21,10 @@ _Dernière mise à jour : 29/10/2026_
 
 | Module | Rôle | Version | Dépend de | Installé |
 |---|---|---|---|---|
-| `custom_lot_sequences` | Numéros de lot personnalisés (réceptions, OF) | 18.0.2.1.1 | stock, mrp | ✅ |
+| `custom_lot_sequences` | Numéros de lot personnalisés (réceptions, OF) | 18.0.2.2.0 (branche `feat/lot-reception-avant-validation`) | stock, mrp, picking_custom_addons | ✅ |
 | `delivery_carrier_custom` | Personnalisations des modes de livraison | 18.0.1.0.0 | delivery, stock_delivery | ✅ |
 | `package_packaging` | Affiche le conditionnement produit dans les colis | 18.0.1.0.0 | stock, product | ❌ |
-| `picking_custom_addons` | Personnalisations des transferts de stock | 18.0.4.5.0 (`18.0`, non déployé en PROD) | stock, product | ✅ |
+| `picking_custom_addons` | Personnalisations des transferts de stock | 18.0.4.5.0 (`18.0`, non déployé en PROD) ; 18.0.4.10.0 sur `feat/lot-reception-avant-validation` | stock, product | ✅ |
 | `product_packaging_unit_price` | Prix unitaire par conditionnement (ventes et factures) | 18.0.6.3.0 | base, stock, sale_stock, sale_management, account | ✅ |
 | `purchase_order_workflow` | Achat : facture fournisseur et paiement en espèces automatiques | 1.0 | purchase, account | ✅ |
 | `sale_advance_payment` | Acomptes sur commandes de vente | 18.0.1.1.0 | sale_management, account | ✅ |
@@ -34,6 +34,7 @@ _Dernière mise à jour : 29/10/2026_
 
 Dépendances inter-modules à respecter :
 - `sofalgri_package_reports` → `picking_custom_addons` (custom) + `stock_move_packaging_qty` (OCA)
+- `custom_lot_sequences` → `picking_custom_addons` (à partir de 18.0.2.2.0 : hérite du bouton d'impression de l'étiquette palette)
 
 ## Modules tiers par domaine
 
@@ -62,14 +63,16 @@ Dépendances inter-modules à respecter :
 
 | Module | Modèle | Champs / comportement ajoutés |
 |---|---|---|
-| `custom_lot_sequences` | `stock.picking` | `button_validate` : sur une **réception**, génère un lot par produit `<séquence lot.receipt.sequence><partner.ref><JJMMAAAA>` ; bloque si le fournisseur n'a pas de **Réf** |
+| `custom_lot_sequences` | `stock.picking` | `_assign_receipt_lot_names` : sur une **réception**, un lot par produit `<séquence lot.receipt.sequence><partner.ref><JJMMAAAA>` (réutilise le lot déjà attribué à une autre palette du même produit) ; bloque si le fournisseur n'a pas de **Réf**. Appelée par `button_validate` et (18.0.2.2.0) à l'impression de l'étiquette palette |
+| | `stock.move.line` | (18.0.2.2.0) `action_print_package_report` : attribue le `lot_name` avant d'imprimer, pour que l'étiquette porte le lot avant validation |
 | `delivery_carrier_custom` | `delivery.carrier`, `stock.picking` | `driver_id` (chauffeur, res.partner), `matricule` (véhicule) |
 | `picking_custom_addons` | `stock.move.line` | `net_weight` (libellé « Poids Brut »), `pallet_weight` (déf. 17), `crate_product_id` (article de catégorie **« Colis »**), `crate_weight` (related poids article), `crate_quantity`, `tare` = palette + nb caisses × poids caisse ; onchange : `quantity` = brut − tare ; à la validation, cumule poids/tare/nb caisses sur le colis de destination |
 | | `stock.move` | `total_net_weight`, `total_tare` (sommes des lignes) |
 | | `stock.quant.package` | `crate_quantity`, `tare`, `packaging_datetime` (remplace `pack_date` dans le formulaire) ; `active` (archivage des colis hors stock interne, v18.0.4.4.1, fusionné dans `18.0` : PR #2) |
 | | `stock.lot` | `active` (archivage des lots hors stock interne, v18.0.4.5.0, fusionné dans `18.0` : PR #3) |
 | | `stock.quant` | `crate_quantity` (related colis), `tare` |
-| | rapport | « Étiquette de colis » (`stock.move.line`, A5) |
+| | rapport | « Étiquette de colis » (`stock.move.line`, A5) ; affiche `lot_id` ou à défaut `lot_name` (18.0.4.6.0) |
+| | `stock.pallet.wizard` | (18.0.4.7.0) assistant « Ajouter une palette » (bouton en haut des réceptions) : n° de palette (colis de destination ; vide → palette E001, E002… créée automatiquement, type « Palettes de réception »), pesée, tare, poids net ; crée la ligne de la palette et imprime son étiquette avec le lot |
 | `product_packaging_unit_price` | `product.packaging` | `unit_price_package`, `standard_price_package` (= prix produit × qté, modifiables), `description_sale` |
 | | `sale.order.line`, `account.move.line` | `price_unit_package` ↔ `price_unit` synchronisés par onchange ; conditionnement propagé à la facture |
 | | `sale.order`, `account.move` | `delivery_truck_number` (matricule camion, propagé à la facture) |
@@ -89,9 +92,9 @@ Dépendances inter-modules à respecter :
 
 - **Lots d'OF non gérés par le code actif** : la génération du lot produit fini (`<4 premiers caractères du lot composant>S<JJMMAAAA>`) est dans `stock_picking_old.py`, **non importé**. Le commentaire du code actif renvoie pourtant à `MrpProduction.button_mark_done()`. Ce code ne produit aucun lot actuel (voir le point précédent : séquence native ou saisie manuelle). Fichiers morts : `stock_picking_old.py`, `stock_picking.py.old`.
 - **Dépendances cachées** :
-  - `picking_custom_addons` référence `sofalgri_package_reports.paperformat_a5_label` alors que c'est `sofalgri_package_reports` qui dépend de `picking_custom_addons` → dépendance circulaire ; une installation sur base vierge échouerait.
+  - `picking_custom_addons` référence `sofalgri_package_reports.paperformat_a5_label` alors que c'est `sofalgri_package_reports` qui dépend de `picking_custom_addons` → dépendance circulaire ; une installation sur base vierge échouerait. **Corrigé en 18.0.4.10.0** (format papier propre `paperformat_pallet_label`, branche `feat/lot-reception-avant-validation`).
   - Le rapport facture de `product_packaging_unit_price` utilise `calibre` et `number_ggn` (définis dans `sofalgri_package_reports`) sans en dépendre.
-  - Le rapport de `picking_custom_addons` utilise `product_variety` (même cas).
+  - Le rapport de `picking_custom_addons` utilise `product_variety` (même cas). **Corrigé en 18.0.4.10.0** : variété, station et GGN affichés seulement si les champs existent.
 - **`package_packaging` est un doublon** de la partie `stock.quant` + vues de `sofalgri_package_reports` (même code, mêmes champs).
 - **Fichiers `.pyc` versionnés** dans Git (`__pycache__/`), dont un `stock_quant_package.cpython-311.pyc` sans source.
 - `purchase_order_workflow` : aucun contrôle si le journal espèces est absent (sortie silencieuse) ; facture validée sans relecture.
@@ -112,6 +115,8 @@ Dépendances inter-modules à respecter :
 
 **Volumes** : 10 BoM ; **0 OF** sur les 30 derniers jours ; **1 794 lots** (561 vrac « Avocats pour export », 1 132 calibrés, 101 déchets).
 Lots créés surtout de nov. 2025 à fév. 2026 ; derniers lots d'OF le 01/03/2026 ; dernières réceptions vrac le 19/06/2026 → **hors saison actuellement**.
+
+**Numérotation des palettes (colis)** : à partir de `picking_custom_addons` 18.0.4.9.0, palettes de réception `E001…` (séquence `stock.quant.package.reception`, assistant palette) et palettes de sortie `S001…` (séquence native `stock.seq_quant_package`, forcée en préfixe S à chaque mise à jour du module). Avant : noms saisis à la main, avec doublons (« 001 »).
 
 **Nommage des lots constaté** :
 - Réception vrac : `<séq><Réf fournisseur><JJMMAAAA>` (ex. `570BA19062026`) → conforme au code actif.

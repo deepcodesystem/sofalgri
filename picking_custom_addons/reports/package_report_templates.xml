@@ -1,99 +1,133 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Étiquette palette (ligne de mouvement), A5 paysage.
+         Mise en page en tableaux : wkhtmltopdf ne gère pas correctement flexbox. -->
     <template id="report_package_template">
         <t t-call="web.basic_layout">
-        <t t-foreach="docs" t-as="o">
-            <div class="page">
-                <div class="oe_structure"/>
-                <div class="row mb-2">
-                    <img t-if="o.company_id.logo" class="o_company_logo_big text-center" t-att-src="image_data_uri(o.company_id.logo)" alt="Logo"/>
-                    <div t-if="o.company_id.report_header" t-field="o.company_id.report_header" class="o_company_tagline fw-bold mt-2">Company tagline</div>
-                </div>
-                <div class="row mb-2">
-                    <h1 class="text-center">
-                        <span>Fiche Palette</span>
-                    </h1>
-                </div>
-                <table class="w-100 table table-sm table-striped">
-                    <tr>
-                        <td style="width: 30%;">N° de Lot</td>
-                        <td><span t-field="o.lot_id.name" class="mt-2"/></td>
-                    </tr>
-                    <tr>
-                        <td style="width:30%;">Nbre Colis</td>
-                        <td><span t-esc="o.crate_quantity"></span></td>
-                    </tr>
-                    <tr>
-                        <td style="width: 30%;">Produit</td>
-                        <td><span t-field="o.product_id.display_name"/></td>
-                    </tr>
-                    <tr>
-                        <td style="width: 30%;">Variété</td>
-                        <td><span t-field="o.product_id.product_variety"/></td>
-                    </tr>
-                    <tr>
-                        <td style="width: 30%;">Poids Brut</td>
-                        <td>
-                            <span t-field="o.net_weight">3.00</span>
-                            <span t-field="o.product_id.uom_id.name" groups="uom.group_uom">Units</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="width: 30%;">Tare</td>
-                        <td>
-                            <span t-field="o.tare">3.00</span>
-                            <span t-field="o.product_id.uom_id.name" groups="uom.group_uom">Units</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Poids Net</td>
-                        <td>
-                            <span t-esc="o.quantity">3.00</span>
-                            <span t-field="o.product_id.uom_id.name" groups="uom.group_uom">Units</span>
-                        </td>
-                    </tr>
-                </table>
-                <table class="w-100 table table-sm table-striped">
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <div t-if="o.result_package_id.valid_sscc" class="col-6 text-center">
-                                        <t t-set="barcode" t-value="'00' + o.lot_id.name"/>
-                                        <!--<t t-if="o.lot_id.pack_date" t-set="barcode" t-value="barcode + '13' + o.pack_date.strftime('%y%m%d')"/>-->
-                                        <div name="datamatrix_barcode" t-out="barcode" t-options="{'widget': 'barcode', 'symbology': 'QR', 'width': 100, 'height': 100}">
-                                            <div class="bg-light border-1 rounded d-flex flex-column align-items-center justify-content-center px-1 py-2 opacity-75 text-muted text-center">
-                                            (package barcode)
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div t-else="" class="col-6 text-center">
-                                        <div t-field="o.result_package_id.name" t-options="{'widget': 'barcode', 'width': 600, 'height': 100, 'img_style': 'width:300px;height:70px;'}">
-                                            <div class="bg-light border-1 rounded d-flex flex-column align-items-center justify-content-center px-1 py-2 opacity-75 text-muted text-center">
-                                            (package barcode)
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="text-center">
-                                    <span style="border-bottom: 1px solid #000; padding-bottom: 5px;text-align: center !important">N° de Palette</span><br/>
-                                    <span style="font-size:50px;font-weight: bold;line-height: 60px; text-align: center !important" t-field="o.result_package_id.name"/>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <span t-field="o.result_package_id.packaging_datetime"/>
-                                </td>
-                                <td>
-                                    <div t-if="o.result_package_id.package_type_id" class="o_packaging_type col">
-                                        <strong>Package Type:</strong>
-                                        <span t-field="o.result_package_id.package_type_id.name">Pallet</span>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
+            <style>
+                .spl-label { width: 100%; border: 2px solid #000; border-collapse: collapse; font-size: 13px; color: #000; }
+                .spl-label td { border: 1px solid #000; padding: 6px 10px; vertical-align: top; }
+                .spl-caption { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: #555; }
+                .spl-value { font-size: 15px; font-weight: bold; }
+                .spl-head td { border-bottom: 2px solid #000; vertical-align: middle; }
+                .spl-company { font-size: 18px; font-weight: bold; }
+                .spl-badge { display: inline-block; border: 2px solid #000; padding: 3px 12px; font-size: 13px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; }
+                .spl-pallet { font-size: 64px; font-weight: bold; line-height: 70px; }
+                .spl-lot { font-size: 34px; font-weight: bold; line-height: 70px; }
+                .spl-weights td { text-align: center; vertical-align: middle; border-top: 2px solid #000; }
+                .spl-weight { font-size: 24px; font-weight: bold; }
+                .spl-net { background-color: #000; color: #fff; }
+                .spl-net .spl-caption { color: #ddd; }
+                .spl-net .spl-weight { font-size: 30px; }
+                .spl-foot { font-size: 10px; color: #555; padding-top: 4px; }
+            </style>
+            <t t-foreach="docs" t-as="o">
+                <!-- Sur une réception non validée, le lot n'existe que par son nom (lot_name) -->
+                <t t-set="lot_label" t-value="o.lot_id.name or o.lot_name or ''"/>
+                <t t-set="pallet_label" t-value="o.result_package_id.name or ''"/>
+                <t t-set="product" t-value="o.product_id"/>
+                <t t-set="company" t-value="o.company_id"/>
+                <t t-set="warehouse" t-value="o.picking_id.picking_type_id.warehouse_id"/>
+                <t t-set="is_receipt" t-value="o.picking_code == 'incoming'"/>
+                <t t-set="uom" t-value="o.product_uom_id.name or 'kg'"/>
+                <!-- Champs de sofalgri_package_reports, affichés seulement s'ils existent -->
+                <t t-set="variety" t-value="'product_variety' in product._fields and product.product_variety"/>
+                <t t-set="station" t-value="'number_station' in warehouse._fields and warehouse.number_station"/>
+                <t t-set="ggn" t-value="'number_ggn' in company._fields and company.number_ggn"/>
+
+                <div class="page" t-att-style="'page-break-after: always;' if not o_last else ''">
+                    <table class="spl-label">
+                        <!-- En-tête : société, station, type d'étiquette -->
+                        <tr class="spl-head">
+                            <td style="width: 22%; border-right: none;">
+                                <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-height: 55px; max-width: 150px;" alt="Logo"/>
+                            </td>
+                            <td colspan="2" style="border-left: none; border-right: none;">
+                                <div class="spl-company" t-out="company.name"/>
+                                <div class="spl-caption">
+                                    <t t-if="station">Station n° <t t-out="station"/></t>
+                                    <t t-if="station and ggn"> · </t>
+                                    <t t-if="ggn">GGN <t t-out="ggn"/></t>
+                                </div>
+                            </td>
+                            <td style="width: 26%; border-left: none; text-align: right;">
+                                <span class="spl-badge" t-out="'Réception' if is_receipt else 'Palette'"/>
+                            </td>
+                        </tr>
+
+                        <!-- Identifiants : n° de palette et n° de lot, avec codes-barres -->
+                        <tr>
+                            <td colspan="2" style="width: 50%; text-align: center;">
+                                <div class="spl-caption">N° de palette</div>
+                                <div class="spl-pallet" t-out="pallet_label or '-'"/>
+                                <div t-if="pallet_label" t-out="pallet_label"
+                                     t-options="{'widget': 'barcode', 'symbology': 'Code128', 'width': 600, 'height': 100, 'img_style': 'width: 75mm; height: 11mm;'}"/>
+                            </td>
+                            <td colspan="2" style="text-align: center;">
+                                <div class="spl-caption">N° de lot</div>
+                                <div class="spl-lot" t-out="lot_label or '-'"/>
+                                <div t-if="lot_label" t-out="lot_label"
+                                     t-options="{'widget': 'barcode', 'symbology': 'Code128', 'width': 600, 'height': 100, 'img_style': 'width: 75mm; height: 11mm;'}"/>
+                            </td>
+                        </tr>
+
+                        <!-- Informations produit et provenance -->
+                        <tr>
+                            <td colspan="2">
+                                <div class="spl-caption">Produit</div>
+                                <div class="spl-value" t-out="product.display_name"/>
+                            </td>
+                            <td>
+                                <div class="spl-caption">Variété</div>
+                                <div class="spl-value" t-out="variety or '-'"/>
+                            </td>
+                            <td>
+                                <div class="spl-caption">Date</div>
+                                <div class="spl-value" t-field="o.date" t-options="{'widget': 'date'}"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <div class="spl-caption" t-out="'Fournisseur' if is_receipt else 'Partenaire'"/>
+                                <div class="spl-value" t-out="o.picking_id.partner_id.name or '-'"/>
+                            </td>
+                            <td>
+                                <div class="spl-caption">Référence</div>
+                                <div class="spl-value" t-out="o.picking_id.name or o.reference or '-'"/>
+                            </td>
+                            <td>
+                                <div class="spl-caption">Emplacement</div>
+                                <div class="spl-value" t-out="o.location_dest_id.name"/>
+                            </td>
+                        </tr>
+
+                        <!-- Pesée -->
+                        <tr class="spl-weights">
+                            <td style="width: 22%;">
+                                <div class="spl-caption">Nb colis</div>
+                                <div class="spl-weight" t-out="'%g' % o.crate_quantity"/>
+                            </td>
+                            <td style="width: 26%;">
+                                <div class="spl-caption">Poids brut</div>
+                                <div class="spl-weight"><t t-out="'%g' % o.net_weight"/> <t t-out="uom"/></div>
+                            </td>
+                            <td>
+                                <div class="spl-caption">Tare</div>
+                                <div class="spl-weight"><t t-out="'%g' % o.tare"/> <t t-out="uom"/></div>
+                            </td>
+                            <td class="spl-net">
+                                <div class="spl-caption">Poids net</div>
+                                <div class="spl-weight"><t t-out="'%g' % o.quantity"/> <t t-out="uom"/></div>
+                            </td>
+                        </tr>
                     </table>
-            </div>
+                    <div class="spl-foot">
+                        <t t-if="o.crate_product_id">Colis : <t t-out="o.crate_product_id.name"/> (<t t-out="'%g' % o.crate_weight"/> kg) · </t>
+                        Palette : <t t-out="'%g' % o.pallet_weight"/> kg
+                        <span style="float: right;">Imprimé le <t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/> par <t t-out="user.name"/></span>
+                    </div>
+                </div>
+            </t>
         </t>
-    </t>
     </template>
 </odoo>

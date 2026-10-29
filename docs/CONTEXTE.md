@@ -66,7 +66,7 @@ Dépendances inter-modules à respecter :
 | `delivery_carrier_custom` | `delivery.carrier`, `stock.picking` | `driver_id` (chauffeur, res.partner), `matricule` (véhicule) |
 | `picking_custom_addons` | `stock.move.line` | `net_weight` (libellé « Poids Brut »), `pallet_weight` (déf. 17), `crate_product_id` (article de catégorie **« Colis »**), `crate_weight` (related poids article), `crate_quantity`, `tare` = palette + nb caisses × poids caisse ; onchange : `quantity` = brut − tare ; à la validation, cumule poids/tare/nb caisses sur le colis de destination |
 | | `stock.move` | `total_net_weight`, `total_tare` (sommes des lignes) |
-| | `stock.quant.package` | `crate_quantity`, `tare`, `packaging_datetime` (remplace `pack_date` dans le formulaire) ; `active` (archivage des colis vides, branche `feat/archivage-colis`, v18.0.4.4.0) |
+| | `stock.quant.package` | `crate_quantity`, `tare`, `packaging_datetime` (remplace `pack_date` dans le formulaire) ; `active` (archivage des colis hors stock interne, branche `feat/archivage-colis`, v18.0.4.4.1) |
 | | `stock.quant` | `crate_quantity` (related colis), `tare` |
 | | rapport | « Étiquette de colis » (`stock.move.line`, A5) |
 | `product_packaging_unit_price` | `product.packaging` | `unit_price_package`, `standard_price_package` (= prix produit × qté, modifiables), `description_sale` |

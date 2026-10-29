@@ -5,6 +5,14 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-10-29 · Archivage des colis : correction pour les colis livrés
+- Demande : erreur « Impossible d'archiver des colis qui contiennent encore du stock » sur des centaines de colis, après installation en TEST.
+- Cause : un colis livré garde ses quants sur `Partenaires/Clients` ; la règle bloquait tout colis ayant des quants.
+- Fait : seul le stock en emplacement interne ou de transit bloque l'archivage ; message limité à 20 colis ; filtre « Vides » remplacé par « Hors stock » ; version 18.0.4.4.1.
+- Bases : lecture seule TEST (quants des colis).
+- Modules/modèles : `picking_custom_addons` · `stock.quant.package`.
+- Commit : `b32a9a2` sur `feat/archivage-colis` (poussé, à retester en TEST).
+
 ## 2026-10-29 · Archivage des colis
 - Demande : pouvoir archiver ou supprimer des colis (`stock.quant.package`) ; aucune action disponible.
 - Constat : le modèle natif n'a pas de champ `active` (pas d'archivage) ; la suppression est bloquée dès qu'un colis a des mouvements. En TEST, la plupart des colis sont vides et sans emplacement.

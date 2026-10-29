@@ -5,13 +5,18 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-10-29 · Déploiement en PROD
+- PR deepcodesystem/sofalgri#7 (FIFO par n° de palette) **fusionnée** dans `18.0` (`e76637a`).
+- PROD mise à jour par l'utilisateur : `18.0` à jour (PR #5 à #7), modules `custom_lot_sequences` 18.0.2.2.0, `picking_custom_addons` 18.0.4.11.0, `mrp_component_lot_check` 18.0.1.0.1, `mrp_production_storage` 18.0.1.1.0 ; fabrication en 1 étape configurée.
+- Bases : aucune requête.
+
 ## 2026-10-29 · FIFO : palettes d'une même réception proposées dans l'ordre inverse
 - Demande : l'OF propose E005 puis E004 au lieu de E001 puis E002, alors que le FIFO est paramétré.
 - Cause (TEST) : E001 à E005 viennent de la même réception validée en une fois (même `in_date` 29/10 22:24:02, même lot `001FA29102026`). À date égale, le FIFO natif départage par id du quant (`in_date ASC, id`) ; or la validation traite les lignes dans l'ordre `result_package_id desc`, donc E005 reçoit le plus petit id (E004 → 18640 … E001 → 18643). Le FIFO entre réceptions est correct.
 - Fait : `picking_custom_addons` 18.0.4.11.0 : `stock.quant._get_removal_strategy_order` → FIFO = `in_date ASC, package_id ASC, id` (tri des colis par nom).
 - Bases : lecture seule TEST (colis E001–E005, quants).
 - Modules/modèles : `picking_custom_addons` · `stock.quant`.
-- Commit : branche `fix/fifo-ordre-palettes` (non committé, non testé dans Odoo).
+- Commit : `347e7af` sur `fix/fifo-ordre-palettes`. **Validé en TEST** ; PR #7 fusionnée.
 
 ## 2026-10-29 · Doubles emplacements des emballages (ST/Stock et Zone de réception)
 - Constat (TEST et PROD, lecture seule) : 7 articles d'emballage avec du stock dans `ST/Stock` (inventaire du 02/07/2026 par l'administrateur), alors que les réceptions arrivent dans `Zone de réception` et que les OF ne consommaient que là.

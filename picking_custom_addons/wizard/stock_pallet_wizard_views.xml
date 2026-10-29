@@ -11,9 +11,9 @@
                 <!-- Champs saisis à chaque palette, en tête et en grand -->
                 <group string="Pesée de la palette" class="fs-4">
                     <group>
-                        <field name="result_package_id" default_focus="1"
+                        <field name="result_package_id" placeholder="Automatique (E001, E002...)"
                                options="{'no_create_edit': True, 'no_open': True}"/>
-                        <field name="net_weight"/>
+                        <field name="net_weight" default_focus="1"/>
                         <field name="crate_quantity"/>
                     </group>
                     <group>

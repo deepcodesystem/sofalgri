@@ -26,9 +26,9 @@ class StockPalletWizard(models.TransientModel):
     result_package_id = fields.Many2one(
         'stock.quant.package',
         string="N° de palette",
-        required=True,
         domain="[('quant_ids', '=', False)]",
-        help="Colis de destination de la palette. Saisir un nouveau numéro pour le créer.",
+        help="Colis de destination de la palette. Laisser vide pour créer automatiquement "
+             "la palette suivante (E001, E002...).",
     )
 
     # --- Mêmes champs que sur la ligne de mouvement ---
@@ -84,6 +84,15 @@ class StockPalletWizard(models.TransientModel):
             wizard.tare = wizard.pallet_weight + (wizard.crate_quantity * wizard.crate_weight)
             wizard.quantity = max(wizard.net_weight - wizard.tare, 0.0)
 
+    def _create_reception_package(self):
+        """ Palette d'entrée numérotée E001, E002... avec le type « Palettes de réception »
+        (le type choisit le modèle d'étiquette de sofalgri_package_reports). """
+        package_type = self.env['stock.package.type'].search([('name', '=', 'Palettes de réception')], limit=1)
+        return self.env['stock.quant.package'].create({
+            'name': self.env['ir.sequence'].next_by_code('stock.quant.package.reception'),
+            'package_type_id': package_type.id,
+        })
+
     def action_add_and_print(self):
         """ Crée la ligne de la palette sur la réception puis imprime son étiquette.
         Le lot est attribué à l'impression (custom_lot_sequences). """
@@ -96,6 +105,9 @@ class StockPalletWizard(models.TransientModel):
         )[:1]
         if not move:
             raise UserError(_("L'article %s n'est pas prévu sur cette réception.") % self.product_id.display_name)
+
+        if not self.result_package_id:
+            self.result_package_id = self._create_reception_package()
 
         vals = {
             'location_dest_id': self.location_dest_id.id,

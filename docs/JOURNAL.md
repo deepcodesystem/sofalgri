@@ -5,13 +5,22 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-10-29 · Numérotation automatique des palettes (E entrée / S sortie)
+- Demande : numéroter automatiquement les palettes, en distinguant les palettes de réception (E001…) et de sortie (S001…) ; les palettes de sortie sont créées en fin de calibrage (OF). Format choisi : 3 chiffres, compteur continu.
+- Constat (TEST) : palettes nommées à la main avec des doublons (plusieurs « 001 », dont un colis réutilisé toute la saison avec 170 820 kg cumulés) ; séquence native des colis `stock.seq_quant_package` réglée sur `PAL` (5 numéros utilisés) ; types de colis « Palettes de réception » et « Palettes de Livraison » existants.
+- Fait : `picking_custom_addons` 18.0.4.9.0 : séquence `stock.quant.package.reception` (E, 3 chiffres) ; dans l'assistant palette, le n° de palette devient facultatif : vide → création de la palette E suivante, type « Palettes de réception » ; curseur sur le poids brut. Séquence native des colis passée en préfixe S, 3 chiffres (compteur conservé), réappliqué à chaque mise à jour du module.
+- Bases : lecture seule TEST (types de colis, séquences, colis).
+- Modules/modèles : `picking_custom_addons` · `ir.sequence`, `stock.pallet.wizard`.
+- Commit : branche `feat/lot-reception-avant-validation` (non committé, non testé dans Odoo).
+- Limites : un colis créé en tapant un nom (création rapide) garde ce nom ; seuls « Mettre en colis » et la création sans nom utilisent S. Le type « Palettes de Livraison » n'est pas posé automatiquement sur les palettes S.
+
 ## 2026-10-29 · Assistant palette : n° de palette et saisie regroupée
 - Demande : ajouter le colis de destination (n° de palette, saisi à la main pour l'instant) et regrouper les champs à saisir par le réceptionniste.
 - Fait : champ obligatoire « N° de palette » (`result_package_id`, colis vides uniquement, création rapide en tapant un nouveau numéro), reporté sur la ligne ; formulaire réorganisé : bloc « Pesée de la palette » en tête (n° de palette avec le curseur, poids brut, quantité colis, tare et poids net), bloc « Paramètres » en dessous (article, emplacement, caisse, poids palette). Version 18.0.4.8.0.
 - Bases : aucune requête.
 - Modules/modèles : `picking_custom_addons` · `stock.pallet.wizard`.
-- Commit : branche `feat/lot-reception-avant-validation` (non committé, non testé dans Odoo).
-- Suite prévue : numérotation automatique des palettes.
+- Commit : `d224f79` sur `feat/lot-reception-avant-validation` (poussé).
+- Suite : numérotation automatique des palettes (entrée suivante).
 
 ## 2026-10-29 · Assistant « Ajouter une palette » sur les réceptions
 - Demande : retour du test en TEST : le lot est bien attribué, mais le bouton d'impression de la ligne affiche « Veuillez d'abord enregistrer vos changements » ; il faut enregistrer, rouvrir le popup « Opérations détaillées », puis imprimer.

@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="paperformat_production_pallet_label" model="report.paperformat">
+        <field name="name">Étiquette palette produit fini A5 paysage</field>
+        <field name="format">A5</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">6</field>
+        <field name="margin_bottom">6</field>
+        <field name="margin_left">6</field>
+        <field name="margin_right">6</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="action_report_production_pallet" model="ir.actions.report">
+        <field name="name">Étiquette palette</field>
+        <field name="model">mrp.production</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">mrp_production_storage.report_production_pallet</field>
+        <field name="report_file">mrp_production_storage.report_production_pallet</field>
+        <field name="print_report_name">'Palette - %s' % (object.result_package_id.name or object.name)</field>
+        <field name="binding_model_id" ref="mrp.model_mrp_production"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="paperformat_production_pallet_label"/>
+    </record>
+
+    <!-- Étiquette palette de sortie (produit fini), même présentation que l'étiquette de réception.
+         Mise en page en tableaux : wkhtmltopdf ne gère pas correctement flexbox. -->
+    <template id="report_production_pallet">
+        <t t-call="web.basic_layout">
+            <style>
+                .spl-label { width: 100%; border: 2px solid #000; border-collapse: collapse; font-size: 13px; color: #000; }
+                .spl-label td { border: 1px solid #000; padding: 6px 10px; vertical-align: top; }
+                .spl-caption { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: #555; }
+                .spl-value { font-size: 15px; font-weight: bold; }
+                .spl-head td { border-bottom: 2px solid #000; vertical-align: middle; }
+                .spl-company { font-size: 18px; font-weight: bold; }
+                .spl-badge { display: inline-block; border: 2px solid #000; padding: 3px 12px; font-size: 13px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; }
+                .spl-pallet { font-size: 64px; font-weight: bold; line-height: 70px; }
+                .spl-lot { font-size: 34px; font-weight: bold; line-height: 70px; }
+                .spl-weights td { text-align: center; vertical-align: middle; border-top: 2px solid #000; }
+                .spl-weight { font-size: 24px; font-weight: bold; }
+                .spl-net { background-color: #000; color: #fff; }
+                .spl-net .spl-caption { color: #ddd; }
+                .spl-net .spl-weight { font-size: 30px; }
+                .spl-foot { font-size: 10px; color: #555; padding-top: 4px; }
+            </style>
+            <t t-foreach="docs" t-as="o">
+                <t t-set="lot_label" t-value="o.lot_producing_id.name or ''"/>
+                <t t-set="pallet_label" t-value="o.result_package_id.name or ''"/>
+                <t t-set="product" t-value="o.product_id"/>
+                <t t-set="company" t-value="o.company_id"/>
+                <t t-set="warehouse" t-value="o.picking_type_id.warehouse_id"/>
+                <t t-set="packaging" t-value="o.product_packaging_id"/>
+                <t t-set="net_qty" t-value="o.qty_producing or o.product_qty"/>
+                <t t-set="uom" t-value="o.product_uom_id.name or 'kg'"/>
+                <!-- Champs d'autres modules (sofalgri_package_reports, product_brand), affichés s'ils existent -->
+                <t t-set="variety" t-value="'product_variety' in product._fields and product.product_variety"/>
+                <t t-set="calibre" t-value="'calibre' in product._fields and product.calibre"/>
+                <t t-set="brand" t-value="'product_brand_id' in product._fields and product.product_brand_id.name"/>
+                <t t-set="station" t-value="'number_station' in warehouse._fields and warehouse.number_station"/>
+                <t t-set="ggn" t-value="'number_ggn' in company._fields and company.number_ggn"/>
+
+                <div class="page" t-att-style="'page-break-after: always;' if not o_last else ''">
+                    <table class="spl-label">
+                        <!-- En-tête : société, station, type d'étiquette -->
+                        <tr class="spl-head">
+                            <td style="width: 22%; border-right: none;">
+                                <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-height: 55px; max-width: 150px;" alt="Logo"/>
+                            </td>
+                            <td colspan="2" style="border-left: none; border-right: none;">
+                                <div class="spl-company" t-out="company.name"/>
+                                <div class="spl-caption">
+                                    <t t-if="station">Station n° <t t-out="station"/></t>
+                                    <t t-if="station and ggn"> · </t>
+                                    <t t-if="ggn">GGN <t t-out="ggn"/></t>
+                                </div>
+                            </td>
+                            <td style="width: 26%; border-left: none; text-align: right;">
+                                <span class="spl-badge">Export</span>
+                            </td>
+                        </tr>
+
+                        <!-- Identifiants : n° de palette et n° de lot, avec codes-barres -->
+                        <tr>
+                            <td colspan="2" style="width: 50%; text-align: center;">
+                                <div class="spl-caption">N° de palette</div>
+                                <div class="spl-pallet" t-out="pallet_label or '-'"/>
+                                <div t-if="pallet_label" t-out="pallet_label"
+                                     t-options="{'widget': 'barcode', 'symbology': 'Code128', 'width': 600, 'height': 100, 'img_style': 'width: 75mm; height: 11mm;'}"/>
+                            </td>
+                            <td colspan="2" style="text-align: center;">
+                                <div class="spl-caption">N° de lot</div>
+                                <div class="spl-lot" t-out="lot_label or '-'"/>
+                                <div t-if="lot_label" t-out="lot_label"
+                                     t-options="{'widget': 'barcode', 'symbology': 'Code128', 'width': 600, 'height': 100, 'img_style': 'width: 75mm; height: 11mm;'}"/>
+                            </td>
+                        </tr>
+
+                        <!-- Produit -->
+                        <tr>
+                            <td colspan="2">
+                                <div class="spl-caption">Produit</div>
+                                <div class="spl-value" t-out="product.display_name"/>
+                            </td>
+                            <td>
+                                <div class="spl-caption">Variété</div>
+                                <div class="spl-value" t-out="variety or '-'"/>
+                            </td>
+                            <td>
+                                <div class="spl-caption">Calibre</div>
+                                <div class="spl-value" t-out="calibre or '-'"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <div class="spl-caption">Conditionnement</div>
+                                <div class="spl-value" t-out="packaging.name or '-'"/>
+                            </td>
+                            <td>
+                                <div class="spl-caption">Marque</div>
+                                <div class="spl-value" t-out="brand or '-'"/>
+                            </td>
+                            <td>
+                                <div class="spl-caption">Date</div>
+                                <div class="spl-value" t-field="o.date_start" t-options="{'widget': 'date'}"/>
+                            </td>
+                        </tr>
+
+                        <!-- Contenu de la palette -->
+                        <tr class="spl-weights">
+                            <td style="width: 22%;">
+                                <div class="spl-caption">Nb colis</div>
+                                <div class="spl-weight" t-out="'%g' % o.product_packaging_qty if packaging else '-'"/>
+                            </td>
+                            <td style="width: 26%;">
+                                <div class="spl-caption">Poids par colis</div>
+                                <div class="spl-weight"><t t-out="'%g' % packaging.qty if packaging else '-'"/> <t t-if="packaging" t-out="product.uom_id.name"/></div>
+                            </td>
+                            <td>
+                                <div class="spl-caption">Frigo</div>
+                                <div class="spl-weight" t-out="o.storage_location_id.name or '-'"/>
+                            </td>
+                            <td class="spl-net">
+                                <div class="spl-caption">Poids net</div>
+                                <div class="spl-weight"><t t-out="'%g' % net_qty"/> <t t-out="uom"/></div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="spl-foot">
+                        OF <t t-out="o.name"/>
+                        <span style="float: right;">Imprimé le <t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/> par <t t-out="user.name"/></span>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

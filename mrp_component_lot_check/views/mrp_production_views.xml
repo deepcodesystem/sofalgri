@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mrp_production_form_view_inherit_component_lot_check" model="ir.ui.view">
+        <field name="name">mrp.production.form.inherit.component.lot.check</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+            <!-- « Confirmer » confirme puis affiche les palettes et lots réservés -->
+            <xpath expr="//header/button[@name='action_confirm']" position="attributes">
+                <attribute name="name">action_confirm_check_lots</attribute>
+            </xpath>
+            <xpath expr="//header/button[@name='action_confirm_check_lots']" position="after">
+                <button name="action_open_component_lot_wizard" type="object" string="Lots composants"
+                        icon="fa-search"
+                        invisible="state not in ('confirmed', 'progress', 'to_close')"/>
+            </xpath>
+            <xpath expr="//div[@name='bom_div']" position="after">
+                <field name="component_lots_checked" readonly="1" invisible="state == 'draft'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

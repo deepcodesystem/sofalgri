@@ -5,12 +5,44 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-10-29 · OF : n° de palette S et étiquette palette produit fini
+- Demande : sur l'OF, une étiquette colis avec un numéro de palette, comme pour la réception.
+- Fait : `mrp_production_storage` 18.0.1.1.0 : champ « N° de palette » (`result_package_id`, colis vides ; vide → palette créée par la séquence native S001… avec le type du conditionnement, à défaut « Palettes de Livraison ») ; bouton « Étiquette palette » (exige le lot produit, crée la palette si besoin) ; à « Produire », palette créée si absente et reportée avec le frigo sur les lignes du produit fini (`_post_inventory`). Nouvelle étiquette A5 paysage sur `mrp.production`, même présentation que la réception : n° de palette et lot avec codes-barres, produit, variété, calibre, conditionnement, marque, date, nb colis, poids par colis, frigo, poids net. Bouton ancré sur l'en-tête (le bouton `action_confirm` est renommé par `mrp_component_lot_check`).
+- Bases : aucune requête (champs `calibre` / `product_variety` lus dans le dépôt).
+- Modules/modèles : `mrp_production_storage` · `mrp.production`, rapport `report_production_pallet`.
+- Commit : branche `feat/of-verification-lots` (non committé, non testé dans Odoo).
+
+## 2026-10-29 · OF : champs conditionnement et frigo introuvables
+- Demande : les champs conditionnement et frigo n'apparaissent pas sur le formulaire de l'OF (module installé en TEST).
+- Cause : dans Odoo 18, `bom_id` est dans une `div class="o_row"` (`bom_div`) ; les champs insérés après lui se retrouvaient sur la même ligne, sans libellé. Même défaut pour « Lots composants vérifiés ».
+- Fait : insertion après `//div[@name='bom_div']` dans les deux modules ; `mrp_production_storage` et `mrp_component_lot_check` en 18.0.1.0.1.
+- Bases : lecture seule TEST (modules installés, vue formulaire OF).
+- Commit : `7fc5f0b` sur `feat/of-verification-lots` (poussé). Validé par l'utilisateur (« édition beaucoup plus simple »).
+
+## 2026-10-29 · OF : conditionnement et frigo sur l'OF (suppression du transfert de stockage)
+- Demande : se passer du transfert « Stocker les produits finis » créé après chaque OF, qui sert seulement à saisir le conditionnement, sa quantité et le frigo.
+- Constat (TEST) : entrepôt en fabrication 3 étapes ; l'étape de prélèvement n'est déjà plus utilisée (« Fabrication » prend dans `Zone de réception`) ; le transfert SFP (`Post-fabrication` → `Frigo 0X`) est validé ~1 min après l'OF, avec seulement conditionnement (ex. « CARTON 4KG GOLD FRUTAS », 220) et frigo. Conditionnements définis par variante (4 kg carton, 10 kg plastique, type « Palettes de Livraison »).
+- Fait : nouveau module `mrp_production_storage` 18.0.1.0.0 : champs « Conditionnement », « Quantité de conditionnement » (calculée kg ÷ conditionnement, modifiable ; si modifiée sur un OF confirmé, ajuste la quantité à produire) et « Frigo de stockage » (emplacements internes sous `ST/Stock`) sur l'OF, suivis dans le fil ; reportés sur le mouvement du produit fini (frigo seulement s'il n'est pas chaîné à un transfert de stockage) ; « Produire » exige conditionnement et frigo pour les produits ayant des conditionnements.
+- Configuration à faire ensuite (TEST puis PROD, par l'utilisateur ou avec accord) : valider les transferts SFP en attente, passer l'entrepôt en fabrication **1 étape**, puis vérifier que l'opération « Fabrication » garde `Zone de réception` comme emplacement source.
+- Bases : lecture seule TEST (types d'opération, transfert SFP, conditionnements, vue OF).
+- Modules/modèles : `mrp_production_storage` · `mrp.production`.
+- Commit : `10e84fe` sur `feat/of-verification-lots` (poussé). Installé en TEST par l'utilisateur.
+
+## 2026-10-29 · Vérification des lots composants à la confirmation des OF
+- Demande : à la confirmation d'un OF de calibrage, afficher le lot du vrac « Avocats pour export » utilisé et pouvoir le changer : les opérateurs ne vérifient pas le lot, la traçabilité est impossible.
+- Constat (TEST) : l'OF consomme directement depuis `ST/Stock/Zone de réception` (pas de prélèvement) ; à la confirmation, Odoo réserve automatiquement palettes et lots (les plus anciens d'abord) ; l'OF est créé, confirmé et produit en moins d'une minute (ex. WH/MOF/03664 : palettes `001` et `014`, lots 500LA… et 5019A…).
+- Fait : nouveau module `mrp_component_lot_check` 18.0.1.0.0. Le bouton « Confirmer » confirme puis ouvre le popup « Vérifier les lots des composants » : une ligne par palette réservée (composant, palette, lot, quantité), modifiable ; choisir une palette remplit le lot ; lignes ajoutables et supprimables. « Valider les lots » met à jour les réservations, coche « Lots composants vérifiés » et écrit le détail dans le fil de l'OF. « Produire » rouvre le popup tant que les lots ne sont pas validés, puis enchaîne la production. Bouton « Lots composants » pour rouvrir le popup.
+- Bases : lecture seule TEST (OF, mouvements et lignes de composants, vue formulaire OF).
+- Modules/modèles : `mrp_component_lot_check` · `mrp.production`, `mrp.component.lot.wizard(.line)`.
+- Commit : `df2b0ad` sur `feat/of-verification-lots` (poussé). **Validé en TEST** par l'utilisateur.
+- À surveiller : un OF terminé par un autre module (ex. production en masse) sur un seul OF non vérifié serait arrêté par le popup ; contexte `skip_component_lot_check` prévu pour le contourner.
+
 ## 2026-10-29 · Nouveau design de l'étiquette palette
 - Demande : refaire l'étiquette palette (« Étiquette de colis ») avec un design plus professionnel, avant la PR.
 - Fait : `picking_custom_addons` 18.0.4.10.0 : modèle refait en A5 paysage (cadre, en-tête société + station + GGN + badge « Réception », n° de palette et n° de lot en grand avec codes-barres Code128, produit / variété / date, fournisseur / référence / emplacement, bandeau de pesée nb colis · brut · tare · **net** en négatif, pied avec caisse, palette, date et auteur de l'impression). Mise en page en tableaux (wkhtmltopdf). Champs de `sofalgri_package_reports` (variété, station, GGN) affichés seulement s'ils existent. Format papier propre au module (`paperformat_pallet_label`, marges 6 mm) : supprime la dépendance circulaire vers `sofalgri_package_reports.paperformat_a5_label`. Nom du PDF : « Palette - <n° de palette> ».
 - Bases : aucune requête.
 - Modules/modèles : `picking_custom_addons` · rapport `report_package_template`, `report.paperformat`.
-- Commit : branche `feat/lot-reception-avant-validation` (non committé, non testé dans Odoo).
+- Commit : `c283bf5` sur `feat/lot-reception-avant-validation`. PR deepcodesystem/sofalgri#5 (lot à l'impression, assistant palette, numérotation E/S, étiquette) **fusionnée** dans `18.0` (`f81976a`) ; modules mis à jour par l'utilisateur.
 
 ## 2026-10-29 · Numérotation automatique des palettes (E entrée / S sortie)
 - Demande : numéroter automatiquement les palettes, en distinguant les palettes de réception (E001…) et de sortie (S001…) ; les palettes de sortie sont créées en fin de calibrage (OF). Format choisi : 3 chiffres, compteur continu.

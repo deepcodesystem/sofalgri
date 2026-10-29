@@ -22,11 +22,11 @@ _Dernière mise à jour : 29/10/2026_
 | Module | Rôle | Version | Dépend de | Installé |
 |---|---|---|---|---|
 | `custom_lot_sequences` | Numéros de lot personnalisés (réceptions, OF) | 18.0.2.2.0 (branche `feat/lot-reception-avant-validation`) | stock, mrp, picking_custom_addons | ✅ |
-| `mrp_component_lot_check` | OF : popup de vérification des palettes / lots composants à la confirmation, obligatoire avant « Produire » | 18.0.1.0.1 (branche `feat/of-verification-lots`) | mrp | ✅ TEST |
-| `mrp_production_storage` | OF : conditionnement, quantité, frigo et n° de palette S saisis sur l'OF, étiquette palette produit fini (avec fabrication en 1 étape, remplace le transfert SFP) | 18.0.1.1.0 (branche `feat/of-verification-lots`) | mrp | ✅ TEST |
+| `mrp_component_lot_check` | OF : popup de vérification des palettes / lots composants à la confirmation, obligatoire avant « Produire » | 18.0.1.0.1 (`18.0`) | mrp | ✅ |
+| `mrp_production_storage` | OF : conditionnement, quantité, frigo et n° de palette S saisis sur l'OF, étiquette palette produit fini (avec fabrication en 1 étape, remplace le transfert SFP) | 18.0.1.1.0 (`18.0`) | mrp | ✅ |
 | `delivery_carrier_custom` | Personnalisations des modes de livraison | 18.0.1.0.0 | delivery, stock_delivery | ✅ |
 | `package_packaging` | Affiche le conditionnement produit dans les colis | 18.0.1.0.0 | stock, product | ❌ |
-| `picking_custom_addons` | Personnalisations des transferts de stock | 18.0.4.5.0 (`18.0`, non déployé en PROD) ; 18.0.4.10.0 sur `feat/lot-reception-avant-validation` | stock, product | ✅ |
+| `picking_custom_addons` | Personnalisations des transferts de stock | 18.0.4.5.0 (`18.0`, non déployé en PROD) ; 18.0.4.10.0 (`18.0`) ; 18.0.4.11.0 sur `fix/fifo-ordre-palettes` | stock, product | ✅ |
 | `product_packaging_unit_price` | Prix unitaire par conditionnement (ventes et factures) | 18.0.6.3.0 | base, stock, sale_stock, sale_management, account | ✅ |
 | `purchase_order_workflow` | Achat : facture fournisseur et paiement en espèces automatiques | 1.0 | purchase, account | ✅ |
 | `sale_advance_payment` | Acomptes sur commandes de vente | 18.0.1.1.0 | sale_management, account | ✅ |
@@ -72,7 +72,7 @@ Dépendances inter-modules à respecter :
 | | `stock.move` | `total_net_weight`, `total_tare` (sommes des lignes) |
 | | `stock.quant.package` | `crate_quantity`, `tare`, `packaging_datetime` (remplace `pack_date` dans le formulaire) ; `active` (archivage des colis hors stock interne, v18.0.4.4.1, fusionné dans `18.0` : PR #2) |
 | | `stock.lot` | `active` (archivage des lots hors stock interne, v18.0.4.5.0, fusionné dans `18.0` : PR #3) |
-| | `stock.quant` | `crate_quantity` (related colis), `tare` |
+| | `stock.quant` | `crate_quantity` (related colis), `tare` ; FIFO départagé par n° de palette (`in_date, package_id, id`, 18.0.4.11.0) |
 | | rapport | « Étiquette de colis » (`stock.move.line`, A5) ; affiche `lot_id` ou à défaut `lot_name` (18.0.4.6.0) |
 | | `stock.pallet.wizard` | (18.0.4.7.0) assistant « Ajouter une palette » (bouton en haut des réceptions) : n° de palette (colis de destination ; vide → palette E001, E002… créée automatiquement, type « Palettes de réception »), pesée, tare, poids net ; crée la ligne de la palette et imprime son étiquette avec le lot |
 | `product_packaging_unit_price` | `product.packaging` | `unit_price_package`, `standard_price_package` (= prix produit × qté, modifiables), `description_sale` |

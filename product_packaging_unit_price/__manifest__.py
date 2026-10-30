@@ -1,6 +1,6 @@
 {
     'name': "Product Unit Price py Packaging",
-    'version': '18.0.6.8.1',
+    'version': '18.0.6.9.0',
     'summary': """
         Manage sales and invoices with a unit price per packaging.
     """,

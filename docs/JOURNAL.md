@@ -5,13 +5,22 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-10-30 · Facture : poids brut total calculé
+- Demande : le « Poids Brut Total » du pied de facture était écrit en dur (`24 250,00`) ; le calculer.
+- Choix de l'utilisateur : poids net + tares (colis vides + palettes), tares saisies par l'utilisateur.
+- Fait : `product_packaging_unit_price` 18.0.6.5.0 : champ « Poids du colis vide (kg) » (`empty_weight`) sur le conditionnement (formulaire et liste) ; champ « Poids d'une palette (kg) » (`pallet_weight`) sur la société (formulaire, après le n° de TVA) ; pied de facture : poids brut = poids net total + Σ(nb colis × poids du colis vide) + nb palettes (calcul 220 / 100 existant) × poids d'une palette.
+- À faire après mise à jour : renseigner le poids du colis vide de chaque conditionnement et le poids d'une palette (sinon le poids brut = poids net).
+- Bases : lecture seule TEST (vue formulaire société).
+- Modules/modèles : `product_packaging_unit_price` · `product.packaging`, `res.company`, rapport facture.
+- Commit : branche `fix/facture-colonne-emballage` (non committé, non testé dans Odoo).
+
 ## 2026-10-30 · Facture : colonne « Emballage » vide
 - Demande : à l'impression de la facture, la colonne Emballage des lignes est vide.
 - Cause (TEST, facture F2026/068) : les lignes ont bien un conditionnement (ex. « PLASTIQUE 420G 10KG GOLD FRUTAS ») mais le rapport n'affichait que sa « Description de vente » (`description_sale`), vide sur la plupart des conditionnements (seuls « CARTON 4KG » / « PLASTIQUE 10KG » du modèle 84 l'ont).
 - Fait : `product_packaging_unit_price` 18.0.6.4.0 : colonne Emballage = description de vente, à défaut nom du conditionnement. Au passage : la cellule Calibre n'est affichée que si l'en-tête l'est (colonnes décalées sur une facture sans calibre), et la ligne de totaux s'adapte.
 - Bases : lecture seule TEST (facture F2026/068 et ses lignes).
 - Modules/modèles : `product_packaging_unit_price` · rapport facture (`report_invoice_document_inherit_packaging_replace`).
-- Commit : branche `fix/facture-colonne-emballage` (non committé, non testé dans Odoo).
+- Commit : `e1cf98c` sur `fix/facture-colonne-emballage` (poussé). Validé par l'utilisateur.
 
 ## 2026-10-30 · OF : même numéro de lot pour tous les calibres de la journée
 - Demande : avant, un même numéro de lot servait à plusieurs calibres ; maintenant il faut un lot par calibre.

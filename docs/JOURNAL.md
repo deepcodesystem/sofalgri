@@ -5,13 +5,24 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-10-30 · Facture pro forma depuis la commande de vente
+- Demande : mettre en place la facture pro forma, sur le modèle `proformat.pdf` (identique au modèle de la facture transitaire, avec la colonne PRIX UNITAIRE). Choix de l'utilisateur : même mise en page, imprimée depuis la commande de vente ; prix unitaire et montants **fictifs** (saisis), pas les prix réels.
+- Fait : `product_packaging_unit_price` 18.0.6.8.0 :
+  - rapport « Facture pro forma » (menu Imprimer de la commande de vente), titre « FACTURE PROFORMA N° : <commande> », une ligne par produit avec un **prix unitaire fictif** : champ « Prix unitaire pro forma » (`proforma_unit_price`) sur la commande, montant = prix fictif × poids net, total et somme en lettres déduits ; les prix réels ne sont jamais imprimés ; impression refusée si le prix fictif est vide (18.0.6.8.1 : contrôle dans `ir.actions.report._render`, avant le rendu, pour afficher un simple avertissement au lieu d'une erreur serveur QWeb) ; date de la commande, ville de l'entrepôt de la commande, incoterm et lieu, matricule, adresse de livraison, banque de la société, conditions de paiement ;
+  - mise en page commune `report_export_document_body` utilisée par la facture transitaire (sans prix unitaire) et la pro forma ; calculs communs dans `models/export_report.py` (`group_export_lines`, `shipping_summary`), utilisés par `account.move` et `sale.order` ;
+  - champ `gross_weight` « Poids brut total (kg) » sur la commande (défaut 24 250, sous le matricule), reporté sur la facture à la facturation.
+- Bases : aucune requête.
+- Modules/modèles : `product_packaging_unit_price` · `sale.order`, `account.move`, rapports facture transitaire et pro forma.
+- Commit : `e30983b` sur `feat/facture-proforma` (poussé) ; correctif de l'avertissement en 18.0.6.8.1.
+- Déploiement : nouveaux champs stockés sur `sale.order` (`gross_weight`, `proforma_unit_price`) → mise à jour en ligne de commande sur **les deux bases** avant redémarrage.
+
 ## 2026-10-30 · Facture : poids brut en saisie libre (défaut 24 250 kg)
 - Demande : le poids brut des factures client doit être saisi librement, avec 24 250 kg par défaut (au lieu du calcul net + tares).
 - Fait : `product_packaging_unit_price` 18.0.6.7.0 : champ `gross_weight` « Poids brut total (kg) » sur `account.move` (défaut 24 250, non copié), dans le formulaire de la facture client sous le matricule ; imprimé tel quel sur la facture client et la facture transitaire (le calcul par tares est retiré des deux rapports). Le champ « Poids du colis vide » des conditionnements n'est plus utilisé (conservé).
 - À noter : à l'installation, les factures existantes reçoivent la valeur par défaut 24 250.
 - Bases : aucune requête.
 - Modules/modèles : `product_packaging_unit_price` · `account.move`, rapports facture et facture transitaire.
-- Commit : `6acf633` sur `feat/poids-brut-saisi`. **Validé en TEST** par l'utilisateur.
+- Commit : `6acf633` sur `feat/poids-brut-saisi`. **Validé en TEST** ; PR deepcodesystem/sofalgri#16 **fusionnée** dans `18.0` (`1c5e020`).
 - Déploiement : nouveau champ stocké sur `account.move` → mise à jour en ligne de commande sur **les deux bases** avant redémarrage.
 
 ## 2026-10-30 · Liste des OF : colonnes « Vrac consommé » (avec total) et « Frigo »
@@ -20,7 +31,7 @@ Les entrées les plus récentes en haut.
 - Fait : `mrp_component_lot_check` 18.0.1.2.0 : champ calculé stocké `component_lot_qty` « Vrac consommé » sur `mrp.production` (somme des quantités des mouvements de composants suivis par lot, hors annulés ; prévu/réservé tant que l'OF n'est pas terminé), agrégé en somme ; colonne ajoutée après l'unité dans la liste des OF (`mrp.mrp_production_tree_view`), avec total, triable et groupable. Calculé pour tous les OF existants à la mise à jour.
 - Bases : lecture seule TEST (vue liste des OF).
 - Modules/modèles : `mrp_component_lot_check`, `mrp_production_storage` · `mrp.production` (liste).
-- Commit : `fd3460b` et `22c2ffe` sur `feat/vrac-consomme-liste-of`. **Validé en TEST** ; PR deepcodesystem/sofalgri#15.
+- Commit : `fd3460b` et `22c2ffe` sur `feat/vrac-consomme-liste-of`. **Validé en TEST** ; PR deepcodesystem/sofalgri#15 **fusionnée** dans `18.0` (`ed9c6c9`).
 - Déploiement : nouveau champ stocké sur `mrp.production` → mise à jour en ligne de commande sur **les deux bases** avant redémarrage.
 
 ## 2026-10-30 · OF : poids réel de vrac obligatoire dans le popup des lots

@@ -22,12 +22,12 @@ _Dernière mise à jour : 29/10/2026 (déploiement PROD des PR #5 à #7)_
 | Module | Rôle | Version | Dépend de | Installé |
 |---|---|---|---|---|
 | `custom_lot_sequences` | Numéros de lot personnalisés (réceptions, OF) | 18.0.2.2.0 (`18.0`, PROD) ; 18.0.2.3.0 sur `feat/lot-du-jour-of` | stock, mrp, picking_custom_addons | ✅ |
-| `mrp_component_lot_check` | OF : popup de vérification des palettes / lots composants à la confirmation, obligatoire avant « Produire » | 18.0.1.1.0 (`18.0`, PROD) ; 18.0.1.2.0 sur `feat/vrac-consomme-liste-of` | mrp | ✅ |
+| `mrp_component_lot_check` | OF : popup de vérification des palettes / lots composants à la confirmation, obligatoire avant « Produire » | 18.0.1.2.0 (`18.0`) | mrp | ✅ |
 | `mrp_production_storage` | OF : conditionnement, quantité, frigo et n° de palette S saisis sur l'OF, étiquette palette produit fini (avec fabrication en 1 étape, remplace le transfert SFP) | 18.0.1.1.0 (`18.0`, PROD) ; 18.0.1.2.1 (`18.0`) | mrp | ✅ |
 | `delivery_carrier_custom` | Personnalisations des modes de livraison | 18.0.1.0.0 | delivery, stock_delivery | ✅ |
 | `package_packaging` | Affiche le conditionnement produit dans les colis | 18.0.1.0.0 | stock, product | ❌ |
 | `picking_custom_addons` | Personnalisations des transferts de stock | 18.0.4.11.0 (`18.0`, PROD) | stock, product | ✅ |
-| `product_packaging_unit_price` | Prix unitaire par conditionnement (ventes et factures), facture transitaire | 18.0.6.6.0 (`18.0`) ; 18.0.6.7.0 sur `feat/poids-brut-saisi` | base, stock, sale_stock, sale_management, account | ✅ |
+| `product_packaging_unit_price` | Prix unitaire par conditionnement (ventes et factures), facture transitaire, facture pro forma | 18.0.6.7.0 (`18.0`) ; 18.0.6.8.1 sur `feat/facture-proforma` | base, stock, sale_stock, sale_management, account | ✅ |
 | `purchase_order_workflow` | Achat : facture fournisseur et paiement en espèces automatiques | 1.0 | purchase, account | ✅ |
 | `sale_advance_payment` | Acomptes sur commandes de vente | 18.0.1.1.0 | sale_management, account | ✅ |
 | `sale_order_template_custom` | Champs manquants sur les modèles de devis | 18.0.0.1 | sale_management | ✅ |
@@ -80,6 +80,8 @@ Dépendances inter-modules à respecter :
 | | `res.company` | (18.0.6.5.0) `pallet_weight` « Poids d'une palette » |
 | | `sale.order.line`, `account.move.line` | `price_unit_package` ↔ `price_unit` synchronisés par onchange ; conditionnement propagé à la facture |
 | | `sale.order`, `account.move` | `delivery_truck_number` (matricule camion, propagé à la facture) ; (18.0.6.6.0) méthodes de la facture transitaire `_get_forwarder_lines`, `_get_shipping_summary`, `_get_forwarder_city`, `_get_amount_untaxed_words_fr` |
+| | `sale.order` | (18.0.6.8.0) `gross_weight` (défaut 24 250, reporté sur la facture), `proforma_unit_price` (prix unitaire fictif de la pro forma) ; méthodes de la pro forma `_get_export_lines`, `_get_shipping_summary`, `_get_export_city`, `_get_amount_untaxed_words_fr` (calculs communs `models/export_report.py`) |
+| | rapport | (18.0.6.8.0) « Facture pro forma » (menu Imprimer de la commande) : même mise en page que la facture transitaire (`report_export_document_body`), **prix unitaire et montants fictifs** (prix pro forma × poids net) |
 | | rapport | (18.0.6.6.0) « Facture transitaire » (menu Imprimer de la facture) : une ligne par produit (plage de calibres, colis, emballages, poids net, montant), **sans prix unitaire** ; somme en lettres, GGN, poids, palettes, incoterm, matricule, destination, banque |
 | | `res.partner` / `res.partner.bank` | `eori_number`, `tax_code`, `btw_identification`, `gln` / `code_swift`, `iban` |
 | | rapport | **Remplace le tableau et le pied de la facture** : calibre, nb colis, emballage (description de vente du conditionnement, à défaut son nom, 18.0.6.4.0), poids net, prix/colis, nb palettes (220 colis/palette, 100 si emballage contient « PLASTIQUE »), poids brut saisi sur la facture (`gross_weight`, défaut 24 250 kg, 18.0.6.7.0 ; calcul par tares retiré), GGN |

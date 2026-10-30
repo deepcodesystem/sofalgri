@@ -11,7 +11,7 @@ Les entrées les plus récentes en haut.
 - Fait : `custom_lot_sequences` 18.0.2.3.0 : « Générer » reprend le nom du dernier lot produit créé aujourd'hui (fuseau de l'utilisateur) sur un autre OF du même type d'opération : crée le lot de ce nom pour l'article, ou reprend celui qui existe déjà pour ce calibre ; sans lot du jour, comportement natif (séquence). Bouton « Nouveau lot » à côté (contexte `new_day_lot`) pour démarrer une nouvelle session avec le numéro suivant.
 - Bases : lecture seule TEST (lots `0044S01032026` et du 30/10, vue OF).
 - Modules/modèles : `custom_lot_sequences` · `mrp.production`.
-- Commit : branche `feat/lot-du-jour-of` (non committé, non testé dans Odoo).
+- Commit : `c1d2496` sur `feat/lot-du-jour-of`. **Validé en TEST** par l'utilisateur (calibre 22 : lot `0001S30102026` repris du calibre 16, WH/MOF/03917).
 
 ## 2026-10-29 · OF : conditionnement choisi selon la nomenclature
 - Demande : sélectionner automatiquement le conditionnement de l'OF selon la nomenclature choisie (caisse carton 4 kg ou caisse plastique 10 kg).

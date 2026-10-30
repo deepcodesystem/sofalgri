@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields, api, _
-from odoo.exceptions import UserError
+from odoo import models, fields, api
 
 from .export_report import group_export_lines, shipping_summary
 
@@ -31,8 +30,7 @@ class SaleOrder(models.Model):
     def _get_export_lines(self):
         """ Lignes regroupées avec le prix FICTIF : montant = prix pro forma × poids net. """
         self.ensure_one()
-        if not self.proforma_unit_price:
-            raise UserError(_("Renseignez le « Prix unitaire pro forma » de la commande %s avant d'imprimer la facture pro forma.", self.name))
+        # Prix fictif obligatoire : contrôlé avant le rendu (ir_actions_report.py)
         lines = group_export_lines(self._get_product_order_lines(), 'product_uom_qty', 'product_uom')
         for line in lines:
             line['unit_price'] = self.proforma_unit_price

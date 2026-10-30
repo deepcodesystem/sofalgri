@@ -7,6 +7,13 @@ class AccountMove(models.Model):
     _inherit = 'account.move'
 
     delivery_truck_number = fields.Char(string='Matricule', help='Mettez le matricule de Camion de Livraison')
+    gross_weight = fields.Float(
+        string='Poids brut total (kg)',
+        digits='Stock Weight',
+        default=24250.0,
+        copy=False,
+        help="Poids brut imprimé sur la facture client et la facture transitaire (saisie libre).",
+    )
 
     # --- Facture transitaire : méthodes de rapport (aucun champ stocké) ---
 
@@ -60,7 +67,7 @@ class AccountMove(models.Model):
     def _get_shipping_summary(self):
         """ Colis, palettes et poids, mêmes règles que le pied de la facture client :
         220 colis par palette, 100 si l'emballage contient « PLASTIQUE » ;
-        poids brut = net + colis × poids du colis vide + palettes × poids du type de colis. """
+        poids brut = saisie libre de la facture (gross_weight). """
         self.ensure_one()
         lines = self._get_product_invoice_lines()
         packages_220 = packages_100 = 0.0
@@ -71,14 +78,11 @@ class AccountMove(models.Model):
                 packages_220 += line.product_packaging_qty
         pallets = (int((packages_220 + 219) // 220) if packages_220 > 0 else 0) \
             + (int((packages_100 + 99) // 100) if packages_100 > 0 else 0)
-        net_weight = sum(lines.mapped('quantity'))
-        crates_tare = sum(l.product_packaging_qty * l.product_packaging_id.empty_weight for l in lines)
-        pallet_weight = lines.product_packaging_id.package_type_id[:1].base_weight
         return {
             'packages': sum(lines.mapped('product_packaging_qty')),
             'pallets': pallets,
-            'net_weight': net_weight,
-            'gross_weight': net_weight + crates_tare + pallets * pallet_weight,
+            'net_weight': sum(lines.mapped('quantity')),
+            'gross_weight': self.gross_weight,
         }
 
     def _get_forwarder_city(self):

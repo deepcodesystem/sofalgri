@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'OF : conditionnement et frigo de stockage',
-    'version': '18.0.1.2.1',
+    'version': '18.0.1.2.2',
     'category': 'Manufacturing',
     'summary': "Conditionnement, quantité et frigo saisis sur l'OF (fabrication en 1 étape)",
     'description': """

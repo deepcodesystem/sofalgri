@@ -19,4 +19,16 @@
             </xpath>
         </field>
     </record>
+
+    <!-- Liste des OF : poids de vrac consommé, avec total -->
+    <record id="mrp_production_tree_view_inherit_component_lot_qty" model="ir.ui.view">
+        <field name="name">mrp.production.list.inherit.component.lot.qty</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_uom_id']" position="after">
+                <field name="component_lot_qty" sum="Total vrac" optional="show"/>
+            </xpath>
+        </field>
+    </record>
 </odoo>

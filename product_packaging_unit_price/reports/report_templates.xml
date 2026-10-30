@@ -124,36 +124,8 @@
 
                 <!-- COLONNE DE GAUCHE : Vos informations personnalisées -->
                 <div class="col-7">
-                    <!-- ===== DÉBUT DE LA NOUVELLE LOGIQUE DE CALCUL DES PALETTES ===== -->
-
-                    <!-- 1. Initialisation des compteurs pour chaque type de packaging -->
-                    <t t-set="total_packages_220" t-value="0"/>
-                    <t t-set="total_packages_100" t-value="0"/>
-
-                    <!-- 2. On parcourt les lignes pour trier les colis par type -->
-                    <t t-foreach="o.invoice_line_ids.filtered(lambda line: line.display_type == 'product')" t-as="line">
-                        <!--
-                            CONDITION À ADAPTER:
-                            Ici, nous identifions l'emballage "100 par palette".
-                            J'utilise un exemple basé sur le nom "PLASTIQUE".
-                            Vous DEVEZ adapter cette condition à votre cas réel.
-                        -->
-                        <t t-if="line.product_packaging_id and 'PLASTIQUE' in line.product_packaging_id.name.upper()">
-                            <t t-set="total_packages_100" t-value="total_packages_100 + line.product_packaging_qty"/>
-                        </t>
-                        <t t-else="">
-                            <!-- Tous les autres emballages sont considérés comme 220 par palette -->
-                            <t t-set="total_packages_220" t-value="total_packages_220 + line.product_packaging_qty"/>
-                        </t>
-                    </t>
-
-                    <!-- 3. Calcul des palettes pour chaque catégorie -->
-                    <t t-set="palettes_220" t-value="int((total_packages_220 + 219) // 220) if total_packages_220 > 0 else 0"/>
-                    <t t-set="palettes_100" t-value="int((total_packages_100 + 99) // 100) if total_packages_100 > 0 else 0"/>
-
-                    <!-- 4. Calcul du total final -->
-                    <t t-set="total_palettes" t-value="palettes_220 + palettes_100"/>
-                    <!-- ===== FIN DE LA NOUVELLE LOGIQUE ===== -->
+                    <!-- Palettes : « Colis par palette » des conditionnements (calcul commun, models/export_report.py) -->
+                    <t t-set="total_palettes" t-value="o._get_shipping_summary()['pallets']"/>
 
                     <div name="GGN" class="mb-4">
                         Produits certifiés GLOBAL GAP + GGN : <strong><span t-field="o.company_id.number_ggn"/></strong>

@@ -37,6 +37,14 @@ class ProductPackaging(models.Model):
         help = 'Mettez la description qui sera affiché sur la facture.'
     )
 
+    # Saisie des commandes en palettes et nombre de palettes des factures
+    pallet_packaging_qty = fields.Integer(
+        string='Colis par palette',
+        help="Nombre de colis de ce conditionnement sur une palette (ex. 220 cartons 4 kg, 100 caisses "
+             "plastique 10 kg). Sert à calculer les colis depuis le nombre de palettes de la commande "
+             "et le nombre de palettes des factures.",
+    )
+
     # Tare d'un colis pour le poids brut de la facture
     empty_weight = fields.Float(
         string='Poids du colis vide (kg)',

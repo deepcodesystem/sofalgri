@@ -7,7 +7,11 @@
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='order_line']/list/field[@name='product_packaging_qty']" position="before">
+            <!-- Saisie dans l'ordre : palettes, type de colis, nb de colis, prix par colis, puis kg et prix au kg -->
+            <xpath expr="//field[@name='order_line']/list/field[@name='name']" position="after">
+                <field name="pallet_qty" optional="show"/>
+                <xpath expr="//field[@name='order_line']/list/field[@name='product_packaging_id']" position="move"/>
+                <xpath expr="//field[@name='order_line']/list/field[@name='product_packaging_qty']" position="move"/>
                 <field name="price_unit_package" optional="show"/>
             </xpath>
         </field>

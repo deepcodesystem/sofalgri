@@ -2,10 +2,19 @@
 """ Calculs communs aux documents d'export (facture transitaire, facture pro forma) :
 lignes regroupées par produit et nombre de palettes. Les lignes passées sont des lignes
 de facture ou de commande ; les noms des champs quantité / unité sont donnés en paramètre. """
+import math
 
 
 def packaging_label(packaging):
     return packaging.description_sale or packaging.name or ''
+
+
+def colis_per_pallet(packaging):
+    """ Colis par palette du conditionnement ; à défaut, ancienne règle : 100 pour les caisses
+    plastique, 220 pour les autres. """
+    if packaging.pallet_packaging_qty:
+        return packaging.pallet_packaging_qty
+    return 100 if 'PLASTIQUE' in (packaging.name or '').upper() else 220
 
 
 def group_export_lines(lines, qty_field, uom_field):
@@ -50,16 +59,13 @@ def group_export_lines(lines, qty_field, uom_field):
 
 
 def shipping_summary(lines, qty_field, gross_weight):
-    """ Colis, palettes et poids, mêmes règles que le pied de la facture client :
-    220 colis par palette, 100 si l'emballage contient « PLASTIQUE » ; poids brut saisi. """
-    packages_220 = packages_100 = 0.0
+    """ Colis, palettes et poids. Palettes : colis regroupés par nombre de colis par palette
+    du conditionnement, chaque groupe arrondi à la palette supérieure ; poids brut saisi. """
+    packages_by_pallet_size = {}
     for line in lines:
-        if line.product_packaging_id and 'PLASTIQUE' in (line.product_packaging_id.name or '').upper():
-            packages_100 += line.product_packaging_qty
-        else:
-            packages_220 += line.product_packaging_qty
-    pallets = (int((packages_220 + 219) // 220) if packages_220 > 0 else 0) \
-        + (int((packages_100 + 99) // 100) if packages_100 > 0 else 0)
+        size = colis_per_pallet(line.product_packaging_id)
+        packages_by_pallet_size[size] = packages_by_pallet_size.get(size, 0.0) + line.product_packaging_qty
+    pallets = sum(math.ceil(packages / size) for size, packages in packages_by_pallet_size.items() if packages > 0)
     return {
         'packages': sum(lines.mapped('product_packaging_qty')),
         'pallets': pallets,

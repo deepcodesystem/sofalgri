@@ -16,6 +16,7 @@
                 </xpath>
                 <xpath expr="//field[@name='package_type_id']" position="after">
                     <field name="description_sale"/>
+                    <field name="pallet_packaging_qty"/>
                     <field name="empty_weight"/>
                 </xpath>
             </field>
@@ -30,6 +31,7 @@
                     <field name="standard_price_package"/>
                     <field name="unit_price_package"/>
                     <field name="currency_id"/>
+                    <field name="pallet_packaging_qty" optional="show"/>
                     <field name="empty_weight" optional="show"/>
                 </xpath>
             </field>

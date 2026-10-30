@@ -8,12 +8,12 @@ Les entrées les plus récentes en haut.
 ## 2026-10-30 · Facture pro forma depuis la commande de vente
 - Demande : mettre en place la facture pro forma, sur le modèle `proformat.pdf` (identique au modèle de la facture transitaire, avec la colonne PRIX UNITAIRE). Choix de l'utilisateur : même mise en page, imprimée depuis la commande de vente ; prix unitaire et montants **fictifs** (saisis), pas les prix réels.
 - Fait : `product_packaging_unit_price` 18.0.6.8.0 :
-  - rapport « Facture pro forma » (menu Imprimer de la commande de vente), titre « FACTURE PROFORMA N° : <commande> », une ligne par produit avec un **prix unitaire fictif** : champ « Prix unitaire pro forma » (`proforma_unit_price`) sur la commande, montant = prix fictif × poids net, total et somme en lettres déduits ; les prix réels ne sont jamais imprimés ; impression refusée si le prix fictif est vide ; date de la commande, ville de l'entrepôt de la commande, incoterm et lieu, matricule, adresse de livraison, banque de la société, conditions de paiement ;
+  - rapport « Facture pro forma » (menu Imprimer de la commande de vente), titre « FACTURE PROFORMA N° : <commande> », une ligne par produit avec un **prix unitaire fictif** : champ « Prix unitaire pro forma » (`proforma_unit_price`) sur la commande, montant = prix fictif × poids net, total et somme en lettres déduits ; les prix réels ne sont jamais imprimés ; impression refusée si le prix fictif est vide (18.0.6.8.1 : contrôle dans `ir.actions.report._render`, avant le rendu, pour afficher un simple avertissement au lieu d'une erreur serveur QWeb) ; date de la commande, ville de l'entrepôt de la commande, incoterm et lieu, matricule, adresse de livraison, banque de la société, conditions de paiement ;
   - mise en page commune `report_export_document_body` utilisée par la facture transitaire (sans prix unitaire) et la pro forma ; calculs communs dans `models/export_report.py` (`group_export_lines`, `shipping_summary`), utilisés par `account.move` et `sale.order` ;
   - champ `gross_weight` « Poids brut total (kg) » sur la commande (défaut 24 250, sous le matricule), reporté sur la facture à la facturation.
 - Bases : aucune requête.
 - Modules/modèles : `product_packaging_unit_price` · `sale.order`, `account.move`, rapports facture transitaire et pro forma.
-- Commit : branche `feat/facture-proforma` (non committé, non testé dans Odoo).
+- Commit : `e30983b` sur `feat/facture-proforma` (poussé) ; correctif de l'avertissement en 18.0.6.8.1.
 - Déploiement : nouveaux champs stockés sur `sale.order` (`gross_weight`, `proforma_unit_price`) → mise à jour en ligne de commande sur **les deux bases** avant redémarrage.
 
 ## 2026-10-30 · Facture : poids brut en saisie libre (défaut 24 250 kg)

@@ -27,7 +27,7 @@ _Dernière mise à jour : 29/10/2026 (déploiement PROD des PR #5 à #7)_
 | `delivery_carrier_custom` | Personnalisations des modes de livraison | 18.0.1.0.0 | delivery, stock_delivery | ✅ |
 | `package_packaging` | Affiche le conditionnement produit dans les colis | 18.0.1.0.0 | stock, product | ❌ |
 | `picking_custom_addons` | Personnalisations des transferts de stock | 18.0.4.11.0 (`18.0`, PROD) | stock, product | ✅ |
-| `product_packaging_unit_price` | Prix unitaire par conditionnement (ventes et factures), facture transitaire, facture pro forma | 18.0.6.7.0 (`18.0`) ; 18.0.6.8.0 sur `feat/facture-proforma` | base, stock, sale_stock, sale_management, account | ✅ |
+| `product_packaging_unit_price` | Prix unitaire par conditionnement (ventes et factures), facture transitaire, facture pro forma | 18.0.6.7.0 (`18.0`) ; 18.0.6.8.1 sur `feat/facture-proforma` | base, stock, sale_stock, sale_management, account | ✅ |
 | `purchase_order_workflow` | Achat : facture fournisseur et paiement en espèces automatiques | 1.0 | purchase, account | ✅ |
 | `sale_advance_payment` | Acomptes sur commandes de vente | 18.0.1.1.0 | sale_management, account | ✅ |
 | `sale_order_template_custom` | Champs manquants sur les modèles de devis | 18.0.0.1 | sale_management | ✅ |

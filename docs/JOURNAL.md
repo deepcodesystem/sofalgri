@@ -10,11 +10,12 @@ Les entrées les plus récentes en haut.
 - Choix de l'utilisateur : colis par palette sur le conditionnement (220 carton 4 kg, 100 plastique 10 kg) ; palettes entières ; une saisie manuelle des colis ne recalcule pas les palettes ; factures calculées avec la même donnée.
 - Fait : `product_packaging_unit_price` 18.0.6.10.0 :
   - `product.packaging.pallet_packaging_qty` « Colis par palette » (formulaire et liste), rempli à la migration (`migrations/18.0.6.10.0/post-migrate.py` : 100 si le nom contient « PLASTIQUE », sinon 220, seulement si vide) ;
-  - `sale.order.line.pallet_qty` « Palettes » (colonne avant les colis) : `onchange` palettes / conditionnement → colis = palettes × colis par palette ; les kg suivent par le calcul natif ;
+  - `sale.order.line.pallet_qty` « Palettes » : `onchange` palettes / conditionnement → colis = palettes × colis par palette ; les kg suivent par le calcul natif ;
   - nombre de palettes des factures (client, transitaire, pro forma) : `colis_per_pallet` (donnée du conditionnement, à défaut l'ancienne règle) dans `export_report.shipping_summary`, colis regroupés par taille de palette et arrondis au supérieur ; calcul inline « PLASTIQUE » retiré de la facture client.
 - Bases : lecture seule TEST (ligne de commande C-00210 : CARTON 4KG, 220 colis, 880 kg, 14,50 €/colis).
 - Modules/modèles : `product_packaging_unit_price` · `product.packaging`, `sale.order.line`, rapports factures.
-- Commit : branche `feat/commande-palettes` (non committé, non testé dans Odoo).
+- Commit : `40a45f2` sur `feat/commande-palettes`. Validé en TEST par l'utilisateur.
+- Affichage (18.0.6.10.1) : colonnes des lignes de commande réordonnées juste après la description : Palettes → Conditionnement (type de colis) → Nb colis → Prix/colis, puis quantité en kg et prix au kg (`position="move"` sur les champs natifs `product_packaging_id` / `product_packaging_qty`).
 - Déploiement : nouveaux champs stockés sur `product.packaging` et `sale.order.line` → mise à jour en ligne de commande sur **les deux bases** avant redémarrage (exécute aussi la migration).
 - À vérifier au test : Odoo peut proposer un autre conditionnement quand les kg changent (calcul natif `_compute_product_packaging_id`) ; contrôler que le conditionnement choisi reste en place.
 

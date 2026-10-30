@@ -5,6 +5,15 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-10-30 · Facture : poids brut en saisie libre (défaut 24 250 kg)
+- Demande : le poids brut des factures client doit être saisi librement, avec 24 250 kg par défaut (au lieu du calcul net + tares).
+- Fait : `product_packaging_unit_price` 18.0.6.7.0 : champ `gross_weight` « Poids brut total (kg) » sur `account.move` (défaut 24 250, non copié), dans le formulaire de la facture client sous le matricule ; imprimé tel quel sur la facture client et la facture transitaire (le calcul par tares est retiré des deux rapports). Le champ « Poids du colis vide » des conditionnements n'est plus utilisé (conservé).
+- À noter : à l'installation, les factures existantes reçoivent la valeur par défaut 24 250.
+- Bases : aucune requête.
+- Modules/modèles : `product_packaging_unit_price` · `account.move`, rapports facture et facture transitaire.
+- Commit : branche `feat/poids-brut-saisi` (non committé, non testé dans Odoo).
+- Déploiement : nouveau champ stocké sur `account.move` → mise à jour en ligne de commande sur **les deux bases** avant redémarrage.
+
 ## 2026-10-30 · OF : poids réel de vrac obligatoire dans le popup des lots
 - Demande : l'opérateur a laissé la quantité de vrac de la nomenclature (880 kg) au lieu du poids réel (897 kg calibre 24, 904 kg calibre 22) ; corriger et éviter que ça se reproduise.
 - Constat (PROD, lecture seule) : WH/MOF/03914 (calibre 24) = E001 771 + E002 109 ; WH/MOF/03915 (calibre 22) = E002 704 + E003 176 ; lot `001FE29102026` ; E001 et E002 vides, E003 632 kg entièrement réservés par un autre OF. Correction indiquée à l'utilisateur (en PROD, par lui) : déverrouiller chaque OF, +17 kg et +24 kg sur E003, reverrouiller ; puis vérifier les palettes de l'OF qui réservait E003.

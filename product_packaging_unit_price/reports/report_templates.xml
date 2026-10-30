@@ -137,13 +137,17 @@
                     <t t-set="total_palettes" t-value="palettes_220 + palettes_100"/>
                     <!-- ===== FIN DE LA NOUVELLE LOGIQUE ===== -->
 
+                    <!-- Poids brut = poids net + tare des colis (poids du colis vide) + tare des palettes -->
+                    <t t-set="crates_tare" t-value="sum(l.product_packaging_qty * l.product_packaging_id.empty_weight for l in o.invoice_line_ids.filtered(lambda l: l.display_type == 'product'))"/>
+                    <t t-set="total_gross_weight" t-value="current_total_qty + crates_tare + total_palettes * o.company_id.pallet_weight"/>
+
 
                     <div name="GGN" class="mb-4">
                         Produits certifiés GLOBAL GAP + GGN : <strong><span t-field="o.company_id.number_ggn"/></strong>
                     </div>
 
                     <div name="shipping_information" class="mb-4">
-                        Poids Brut Total: <strong>24 250,00</strong><br/>
+                        Poids Brut Total: <strong><span t-esc="total_gross_weight" t-options='{"widget": "float", "precision": 2}'/></strong><br/>
                         Poids Net Total: <strong><span t-esc="current_total_qty" t-options='{"widget": "float", "precision": 2}'/></strong><br/>
                         Nombre de pallettes total: <strong><span t-esc="int(total_palettes)" t-options='{"widget": "float", "precision": 0}'/></strong><br/>
                         Nombre de colis total: <strong><span t-esc="int(current_total_package)" t-options='{"widget": "float", "precision": 0}'/></strong>

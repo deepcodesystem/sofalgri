@@ -16,6 +16,7 @@
                 </xpath>
                 <xpath expr="//field[@name='package_type_id']" position="after">
                     <field name="description_sale"/>
+                    <field name="empty_weight"/>
                 </xpath>
             </field>
         </record>
@@ -29,6 +30,19 @@
                     <field name="standard_price_package"/>
                     <field name="unit_price_package"/>
                     <field name="currency_id"/>
+                    <field name="empty_weight" optional="show"/>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Poids d'une palette vide, pour le poids brut de la facture -->
+        <record id="view_company_form_pallet_weight" model="ir.ui.view">
+            <field name="name">res.company.form.pallet.weight</field>
+            <field name="model">res.company</field>
+            <field name="inherit_id" ref="base.view_company_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='vat']" position="after">
+                    <field name="pallet_weight"/>
                 </xpath>
             </field>
         </record>

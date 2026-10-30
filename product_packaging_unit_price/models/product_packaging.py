@@ -37,6 +37,14 @@ class ProductPackaging(models.Model):
         help = 'Mettez la description qui sera affiché sur la facture.'
     )
 
+    # Tare d'un colis pour le poids brut de la facture
+    empty_weight = fields.Float(
+        string='Poids du colis vide (kg)',
+        digits='Stock Weight',
+        help="Poids de l'emballage vide (carton, caisse). Poids brut de la facture = "
+             "poids net + nb colis × poids du colis vide + nb palettes × poids d'une palette.",
+    )
+
     @api.depends('qty', 'product_id.list_price', 'product_id.standard_price')
     def _compute_packaging_prices(self):
         """

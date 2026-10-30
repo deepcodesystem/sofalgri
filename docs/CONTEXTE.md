@@ -27,7 +27,7 @@ _Dernière mise à jour : 29/10/2026 (déploiement PROD des PR #5 à #7)_
 | `delivery_carrier_custom` | Personnalisations des modes de livraison | 18.0.1.0.0 | delivery, stock_delivery | ✅ |
 | `package_packaging` | Affiche le conditionnement produit dans les colis | 18.0.1.0.0 | stock, product | ❌ |
 | `picking_custom_addons` | Personnalisations des transferts de stock | 18.0.4.11.0 (`18.0`, PROD) | stock, product | ✅ |
-| `product_packaging_unit_price` | Prix unitaire par conditionnement (ventes et factures), facture transitaire | 18.0.6.6.0 (`18.0`) | base, stock, sale_stock, sale_management, account | ✅ |
+| `product_packaging_unit_price` | Prix unitaire par conditionnement (ventes et factures), facture transitaire | 18.0.6.6.0 (`18.0`) ; 18.0.6.7.0 sur `feat/poids-brut-saisi` | base, stock, sale_stock, sale_management, account | ✅ |
 | `purchase_order_workflow` | Achat : facture fournisseur et paiement en espèces automatiques | 1.0 | purchase, account | ✅ |
 | `sale_advance_payment` | Acomptes sur commandes de vente | 18.0.1.1.0 | sale_management, account | ✅ |
 | `sale_order_template_custom` | Champs manquants sur les modèles de devis | 18.0.0.1 | sale_management | ✅ |
@@ -82,7 +82,7 @@ Dépendances inter-modules à respecter :
 | | `sale.order`, `account.move` | `delivery_truck_number` (matricule camion, propagé à la facture) ; (18.0.6.6.0) méthodes de la facture transitaire `_get_forwarder_lines`, `_get_shipping_summary`, `_get_forwarder_city`, `_get_amount_untaxed_words_fr` |
 | | rapport | (18.0.6.6.0) « Facture transitaire » (menu Imprimer de la facture) : une ligne par produit (plage de calibres, colis, emballages, poids net, montant), **sans prix unitaire** ; somme en lettres, GGN, poids, palettes, incoterm, matricule, destination, banque |
 | | `res.partner` / `res.partner.bank` | `eori_number`, `tax_code`, `btw_identification`, `gln` / `code_swift`, `iban` |
-| | rapport | **Remplace le tableau et le pied de la facture** : calibre, nb colis, emballage (description de vente du conditionnement, à défaut son nom, 18.0.6.4.0), poids net, prix/colis, nb palettes (220 colis/palette, 100 si emballage contient « PLASTIQUE »), poids brut calculé (net + colis × poids vide + palettes × « Poids » du type de colis, 18.0.6.5.1), GGN |
+| | rapport | **Remplace le tableau et le pied de la facture** : calibre, nb colis, emballage (description de vente du conditionnement, à défaut son nom, 18.0.6.4.0), poids net, prix/colis, nb palettes (220 colis/palette, 100 si emballage contient « PLASTIQUE »), poids brut saisi sur la facture (`gross_weight`, défaut 24 250 kg, 18.0.6.7.0 ; calcul par tares retiré), GGN |
 | `mrp_component_lot_check` | `mrp.production` | `component_lots_checked` ; (18.0.1.2.0) `component_lot_qty` « Vrac consommé » (stocké, somme, colonne de la liste des OF avec total) ; bouton « Confirmer » → `action_confirm_check_lots` (confirme puis ouvre le popup) ; `button_mark_done` rouvre le popup tant que non vérifié (contournable par le contexte `skip_component_lot_check`) |
 | | `mrp.component.lot.wizard` | Popup : lignes composant / palette / lot / quantité ; valide en modifiant les lignes réservées et trace le détail dans le fil de l'OF ; (18.0.1.1.0) « Poids réel consommé » obligatoire (écart reporté sur la dernière palette, total contrôlé, vrac en consommation manuelle) |
 | `mrp_production_storage` | `mrp.bom` | (18.0.1.2.0) `packaging_unit_qty` « Poids par colis » (4 / 10) |

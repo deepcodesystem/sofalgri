@@ -40,6 +40,7 @@
              </xpath>
             <xpath expr="//field[@name='fiscal_position_id']" position="after">
                 <field name="delivery_truck_number"/>
+                <field name="gross_weight" invisible="move_type not in ('out_invoice', 'out_refund')"/>
             </xpath>
         </field>
     </record>

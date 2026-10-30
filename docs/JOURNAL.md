@@ -5,12 +5,25 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-10-30 · Commande de vente : saisie en palettes
+- Demande : simplifier la saisie des commandes en indiquant le nombre de palettes, d'où le nombre de colis (ex. 2 palettes de cartons 4 kg → 440 colis), puis les kg.
+- Choix de l'utilisateur : colis par palette sur le conditionnement (220 carton 4 kg, 100 plastique 10 kg) ; palettes entières ; une saisie manuelle des colis ne recalcule pas les palettes ; factures calculées avec la même donnée.
+- Fait : `product_packaging_unit_price` 18.0.6.10.0 :
+  - `product.packaging.pallet_packaging_qty` « Colis par palette » (formulaire et liste), rempli à la migration (`migrations/18.0.6.10.0/post-migrate.py` : 100 si le nom contient « PLASTIQUE », sinon 220, seulement si vide) ;
+  - `sale.order.line.pallet_qty` « Palettes » (colonne avant les colis) : `onchange` palettes / conditionnement → colis = palettes × colis par palette ; les kg suivent par le calcul natif ;
+  - nombre de palettes des factures (client, transitaire, pro forma) : `colis_per_pallet` (donnée du conditionnement, à défaut l'ancienne règle) dans `export_report.shipping_summary`, colis regroupés par taille de palette et arrondis au supérieur ; calcul inline « PLASTIQUE » retiré de la facture client.
+- Bases : lecture seule TEST (ligne de commande C-00210 : CARTON 4KG, 220 colis, 880 kg, 14,50 €/colis).
+- Modules/modèles : `product_packaging_unit_price` · `product.packaging`, `sale.order.line`, rapports factures.
+- Commit : branche `feat/commande-palettes` (non committé, non testé dans Odoo).
+- Déploiement : nouveaux champs stockés sur `product.packaging` et `sale.order.line` → mise à jour en ligne de commande sur **les deux bases** avant redémarrage (exécute aussi la migration).
+- À vérifier au test : Odoo peut proposer un autre conditionnement quand les kg changent (calcul natif `_compute_product_packaging_id`) ; contrôler que le conditionnement choisi reste en place.
+
 ## 2026-10-30 · Note interne du client sur les factures (client, transitaire, pro forma)
 - Demande : une information propre à un client, saisie en note interne sur sa fiche, doit apparaître juste sous le client et son adresse sur la facture client, la facture transitaire et la pro forma.
 - Fait : `product_packaging_unit_price` 18.0.6.9.0 : sous-template `report_partner_note` (note interne `comment` du client, à défaut celle de sa société ; rien si vide, via `is_html_empty`) ; appelé dans les trois variantes du bloc adresse de la facture client (`address_not_same_as_shipping`, `address_same_as_shipping`, `no_shipping`) et sous le bloc client de la mise en page commune transitaire / pro forma. Mise en forme de la note conservée (HTML).
 - Bases : lecture seule TEST (vue `account.report_invoice_document`).
 - Modules/modèles : `product_packaging_unit_price` · rapports facture, facture transitaire, pro forma.
-- Commit : branche `feat/note-client-factures` (non committé, non testé dans Odoo).
+- Commit : `a736859` sur `feat/note-client-factures`. **Validé en TEST** ; PR deepcodesystem/sofalgri#18 **fusionnée** dans `18.0` (`21989cc`).
 - Déploiement : aucun champ ajouté, mise à jour normale du module.
 
 ## 2026-10-30 · Facture pro forma depuis la commande de vente

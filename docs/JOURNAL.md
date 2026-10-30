@@ -5,13 +5,22 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-10-30 · Liste des OF : colonnes « Vrac consommé » (avec total) et « Frigo »
+- Demande (client) : afficher dans la liste des OF la quantité du composant (vrac « Avocats pour export »), puis aussi le frigo. Choix de l'utilisateur : avec total en bas de liste (champ stocké).
+- Frigo : `mrp_production_storage` 18.0.1.2.2 : colonne « Frigo de stockage » (`storage_location_id`, champ existant, lecture seule car la liste est en édition multiple) dans la liste des OF.
+- Fait : `mrp_component_lot_check` 18.0.1.2.0 : champ calculé stocké `component_lot_qty` « Vrac consommé » sur `mrp.production` (somme des quantités des mouvements de composants suivis par lot, hors annulés ; prévu/réservé tant que l'OF n'est pas terminé), agrégé en somme ; colonne ajoutée après l'unité dans la liste des OF (`mrp.mrp_production_tree_view`), avec total, triable et groupable. Calculé pour tous les OF existants à la mise à jour.
+- Bases : lecture seule TEST (vue liste des OF).
+- Modules/modèles : `mrp_component_lot_check` · `mrp.production`.
+- Commit : branche `feat/vrac-consomme-liste-of` (non committé, non testé dans Odoo).
+- Déploiement : nouveau champ stocké sur `mrp.production` → mise à jour en ligne de commande sur **les deux bases** avant redémarrage.
+
 ## 2026-10-30 · OF : poids réel de vrac obligatoire dans le popup des lots
 - Demande : l'opérateur a laissé la quantité de vrac de la nomenclature (880 kg) au lieu du poids réel (897 kg calibre 24, 904 kg calibre 22) ; corriger et éviter que ça se reproduise.
 - Constat (PROD, lecture seule) : WH/MOF/03914 (calibre 24) = E001 771 + E002 109 ; WH/MOF/03915 (calibre 22) = E002 704 + E003 176 ; lot `001FE29102026` ; E001 et E002 vides, E003 632 kg entièrement réservés par un autre OF. Correction indiquée à l'utilisateur (en PROD, par lui) : déverrouiller chaque OF, +17 kg et +24 kg sur E003, reverrouiller ; puis vérifier les palettes de l'OF qui réservait E003.
 - Fait : `mrp_component_lot_check` 18.0.1.1.0 : dans le popup « Vérifier les lots des composants », champ « Poids réel consommé » obligatoire (OF avec un seul composant suivi par lot), « Poids prévu (nomenclature) » affiché ; la saisie reporte l'écart sur la dernière palette ; la validation refuse si le total des palettes diffère du poids réel ; les mouvements du vrac passent en consommation manuelle (`picked`, `manual_consumption`) pour qu'Odoo ne les recalcule pas d'après la nomenclature ; poids réel et prévu tracés dans le fil de l'OF.
 - Bases : lecture seule PROD (mouvements et lignes des OF 03914 / 03915, quants des palettes E001–E003).
 - Modules/modèles : `mrp_component_lot_check` · `mrp.component.lot.wizard`.
-- Commit : branche `feat/poids-reel-vrac` (non committé, non testé dans Odoo).
+- Commit : `9a40a8b` sur `feat/poids-reel-vrac`. **Validé en TEST** ; PR deepcodesystem/sofalgri#14 **fusionnée** dans `18.0` (`b38c520`) ; module mis à jour sur les deux bases par l'utilisateur.
 - Déploiement : nouveau champ stocké sur le modèle du popup → règle du serveur partagé (mise à jour en ligne de commande sur les deux bases avant redémarrage).
 
 ## 2026-10-30 · Étiquette palette de sortie : pied supprimé

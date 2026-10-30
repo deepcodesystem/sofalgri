@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Note interne de la fiche client (à défaut celle de la société du contact),
+         imprimée sous le client et son adresse. Variable attendue : partner. -->
+    <template id="report_partner_note">
+        <t t-set="partner_note" t-value="partner.comment if not is_html_empty(partner.comment) else partner.commercial_partner_id.comment"/>
+        <div t-if="not is_html_empty(partner_note)" class="mt-2" t-out="partner_note"/>
+    </template>
+
     <!-- ======================================================= -->
     <!--     REMPLACEMENT COMPLET DU TABLEAU DE LA FACTURE       -->
     <!-- ======================================================= -->
@@ -26,6 +33,17 @@
                 <strong>Matricule</strong>
                 <div t-field="o.delivery_truck_number" class="m-0"/>
             </div>
+        </xpath>
+
+        <!-- Note interne du client sous son adresse (trois variantes du bloc adresse natif) -->
+        <xpath expr="//div[@name='address_not_same_as_shipping']/t[@t-set='address']" position="inside">
+            <t t-call="product_packaging_unit_price.report_partner_note"><t t-set="partner" t-value="o.partner_id"/></t>
+        </xpath>
+        <xpath expr="//div[@name='address_same_as_shipping']/t[@t-set='address']" position="inside">
+            <t t-call="product_packaging_unit_price.report_partner_note"><t t-set="partner" t-value="o.partner_id"/></t>
+        </xpath>
+        <xpath expr="//div[@name='no_shipping']/t[@t-set='address']" position="inside">
+            <t t-call="product_packaging_unit_price.report_partner_note"><t t-set="partner" t-value="o.partner_id"/></t>
         </xpath>
 
         <!-- ======================================================= -->

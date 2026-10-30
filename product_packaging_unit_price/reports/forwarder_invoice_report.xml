@@ -51,6 +51,7 @@
                         <t t-if="partner.tax_code">Tax-Code : <t t-out="partner.tax_code"/><br/></t>
                         <t t-if="partner.btw_identification">Btw-identificatienummer NL : <t t-out="partner.btw_identification"/><br/></t>
                         <t t-if="partner.gln">GLN : <t t-out="partner.gln"/></t>
+                        <t t-call="product_packaging_unit_price.report_partner_note"/>
                     </td>
                 </tr>
             </table>

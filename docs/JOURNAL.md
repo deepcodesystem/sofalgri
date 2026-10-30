@@ -5,6 +5,14 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-10-30 · Note interne du client sur les factures (client, transitaire, pro forma)
+- Demande : une information propre à un client, saisie en note interne sur sa fiche, doit apparaître juste sous le client et son adresse sur la facture client, la facture transitaire et la pro forma.
+- Fait : `product_packaging_unit_price` 18.0.6.9.0 : sous-template `report_partner_note` (note interne `comment` du client, à défaut celle de sa société ; rien si vide, via `is_html_empty`) ; appelé dans les trois variantes du bloc adresse de la facture client (`address_not_same_as_shipping`, `address_same_as_shipping`, `no_shipping`) et sous le bloc client de la mise en page commune transitaire / pro forma. Mise en forme de la note conservée (HTML).
+- Bases : lecture seule TEST (vue `account.report_invoice_document`).
+- Modules/modèles : `product_packaging_unit_price` · rapports facture, facture transitaire, pro forma.
+- Commit : branche `feat/note-client-factures` (non committé, non testé dans Odoo).
+- Déploiement : aucun champ ajouté, mise à jour normale du module.
+
 ## 2026-10-30 · Facture pro forma depuis la commande de vente
 - Demande : mettre en place la facture pro forma, sur le modèle `proformat.pdf` (identique au modèle de la facture transitaire, avec la colonne PRIX UNITAIRE). Choix de l'utilisateur : même mise en page, imprimée depuis la commande de vente ; prix unitaire et montants **fictifs** (saisis), pas les prix réels.
 - Fait : `product_packaging_unit_price` 18.0.6.8.0 :
@@ -13,7 +21,7 @@ Les entrées les plus récentes en haut.
   - champ `gross_weight` « Poids brut total (kg) » sur la commande (défaut 24 250, sous le matricule), reporté sur la facture à la facturation.
 - Bases : aucune requête.
 - Modules/modèles : `product_packaging_unit_price` · `sale.order`, `account.move`, rapports facture transitaire et pro forma.
-- Commit : `e30983b` sur `feat/facture-proforma` (poussé) ; correctif de l'avertissement en 18.0.6.8.1.
+- Commit : `e30983b` et `56d0d4d` sur `feat/facture-proforma`. **Validé en TEST** ; PR deepcodesystem/sofalgri#17 **fusionnée** dans `18.0` (`943f1f9`) ; bases mises à jour par l'utilisateur.
 - Déploiement : nouveaux champs stockés sur `sale.order` (`gross_weight`, `proforma_unit_price`) → mise à jour en ligne de commande sur **les deux bases** avant redémarrage.
 
 ## 2026-10-30 · Facture : poids brut en saisie libre (défaut 24 250 kg)

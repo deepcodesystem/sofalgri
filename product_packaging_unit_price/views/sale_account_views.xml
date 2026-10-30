@@ -21,6 +21,8 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='incoterm_location']" position="after">
                 <field name="delivery_truck_number"/>
+                <field name="gross_weight"/>
+                <field name="proforma_unit_price"/>
             </xpath>
         </field>
     </record>

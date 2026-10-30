@@ -1,10 +1,61 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError
+
+from .export_report import group_export_lines, shipping_summary
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
     delivery_truck_number = fields.Char(string='Matricule', help='Mettez le matricule de Camion de Livraison')
+    gross_weight = fields.Float(
+        string='Poids brut total (kg)',
+        digits='Stock Weight',
+        default=24250.0,
+        copy=False,
+        help="Poids brut imprimé sur la facture pro forma, reporté sur la facture (saisie libre).",
+    )
+    proforma_unit_price = fields.Float(
+        string='Prix unitaire pro forma',
+        digits='Product Price',
+        copy=False,
+        help="Prix unitaire fictif (par unité de vente, ex. €/kg) imprimé sur la facture pro forma ; "
+             "le montant et le total de la pro forma en sont déduits. Les prix réels ne sont pas imprimés.",
+    )
+
+    # --- Facture pro forma : méthodes de rapport (calculs communs dans export_report.py) ---
+
+    def _get_product_order_lines(self):
+        return self.order_line.filtered(lambda l: not l.display_type and not l.is_downpayment)
+
+    def _get_export_lines(self):
+        """ Lignes regroupées avec le prix FICTIF : montant = prix pro forma × poids net. """
+        self.ensure_one()
+        if not self.proforma_unit_price:
+            raise UserError(_("Renseignez le « Prix unitaire pro forma » de la commande %s avant d'imprimer la facture pro forma.", self.name))
+        lines = group_export_lines(self._get_product_order_lines(), 'product_uom_qty', 'product_uom')
+        for line in lines:
+            line['unit_price'] = self.proforma_unit_price
+            line['amount'] = self.currency_id.round(self.proforma_unit_price * line['quantity'])
+        return lines
+
+    def _get_proforma_amount(self):
+        self.ensure_one()
+        return sum(line['amount'] for line in self._get_export_lines())
+
+    def _get_proforma_amount_words_fr(self):
+        return self.currency_id.with_context(lang='fr_FR').amount_to_text(self._get_proforma_amount())
+
+    def _get_shipping_summary(self):
+        self.ensure_one()
+        return shipping_summary(self._get_product_order_lines(), 'product_uom_qty', self.gross_weight)
+
+    def _get_export_city(self):
+        """ Ville de l'entrepôt d'expédition (« A Larache, le … »). """
+        self.ensure_one()
+        warehouse = self.warehouse_id \
+            or self.env['stock.warehouse'].search([('company_id', '=', self.company_id.id)], limit=1)
+        return warehouse.partner_id.city or self.company_id.city or ''
 
     def _prepare_invoice(self):
         """
@@ -18,6 +69,7 @@ class SaleOrder(models.Model):
         #    dans le modèle account.move.
         if self.delivery_truck_number:
             invoice_vals['delivery_truck_number'] = self.delivery_truck_number
+        invoice_vals['gross_weight'] = self.gross_weight
 
         # 3. Retourner le dictionnaire modifié
         return invoice_vals

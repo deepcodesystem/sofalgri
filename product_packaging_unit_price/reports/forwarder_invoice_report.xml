@@ -11,112 +11,147 @@
         <field name="binding_type">report</field>
     </record>
 
-    <!-- Facture destinée au transitaire : une ligne par produit, SANS prix unitaire (confidentialité).
-         Mise en page en tableaux : wkhtmltopdf ne gère pas correctement flexbox. -->
+    <record id="action_report_proforma_invoice" model="ir.actions.report">
+        <field name="name">Facture pro forma</field>
+        <field name="model">sale.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">product_packaging_unit_price.report_proforma_invoice</field>
+        <field name="report_file">product_packaging_unit_price.report_proforma_invoice</field>
+        <field name="print_report_name">'Facture pro forma - %s' % (object.name or '').replace('/', '-')</field>
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Mise en page commune des documents d'export (facture transitaire, facture pro forma).
+         Variables attendues : doc_title, doc_date, city, partner, lines, summary, currency, amount_untaxed,
+         amount_words, company, incoterm, incoterm_location, truck, shipping_partner, bank, payment_label,
+         show_unit_price. Mise en page en tableaux : wkhtmltopdf ne gère pas correctement flexbox. -->
+    <template id="report_export_document_body">
+        <style>
+            .fwd { font-size: 12px; color: #000; }
+            .fwd-table { width: 100%; border-collapse: collapse; margin: 6px 0 10px 0; }
+            .fwd-table th, .fwd-table td { border: 1px solid #000; padding: 4px 6px; vertical-align: middle; }
+            .fwd-table th { text-align: center; font-weight: bold; background-color: #f2f2f2; }
+            .fwd-total td { font-weight: bold; }
+            .fwd-block { margin-top: 10px; }
+            .fwd-label { text-decoration: underline; }
+        </style>
+        <div class="page fwd">
+            <!-- Client (à droite) -->
+            <table style="width: 100%;">
+                <tr>
+                    <td style="width: 50%;"/>
+                    <td class="text-end">
+                        <strong t-out="partner.name"/><br/>
+                        <t t-if="partner.street"><t t-out="partner.street"/><br/></t>
+                        <t t-if="partner.street2"><t t-out="partner.street2"/><br/></t>
+                        <t t-if="partner.zip or partner.city"><t t-out="' '.join(p for p in [partner.zip, partner.city] if p)"/><t t-if="partner.country_id">, <t t-out="partner.country_id.name"/></t><br/></t>
+                        <t t-if="partner.vat">UST-ID / VAT-ID : <t t-out="partner.vat"/><br/></t>
+                        <t t-if="partner.eori_number">EORI-Number : <t t-out="partner.eori_number"/><br/></t>
+                        <t t-if="partner.tax_code">Tax-Code : <t t-out="partner.tax_code"/><br/></t>
+                        <t t-if="partner.btw_identification">Btw-identificatienummer NL : <t t-out="partner.btw_identification"/><br/></t>
+                        <t t-if="partner.gln">GLN : <t t-out="partner.gln"/></t>
+                    </td>
+                </tr>
+            </table>
+
+            <p class="fwd-block">
+                A <t t-out="city"/>, le <t t-out="doc_date and doc_date.strftime('%d/%m/%Y') or ''"/>
+            </p>
+            <h5 class="text-center" style="margin: 14px 0 8px 0;"><strong t-out="doc_title"/></h5>
+
+            <table class="fwd-table">
+                <thead>
+                    <tr>
+                        <th>DÉSIGNATION</th>
+                        <th>CALIBRE</th>
+                        <th>NOMBRE DE COLIS</th>
+                        <th>TYPE D'EMBALLAGE</th>
+                        <th>POIDS NET</th>
+                        <th t-if="show_unit_price">PRIX UNITAIRE (<t t-out="currency.name"/>)</th>
+                        <th>PRIX (<t t-out="currency.name"/>)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="lines" t-as="line">
+                        <td t-out="line['designation']"/>
+                        <td class="text-center" t-out="line['calibre']"/>
+                        <td class="text-center" t-out="line['packaging_qty']" t-options="{'widget': 'float', 'precision': 0}"/>
+                        <td class="text-center" t-out="line['packaging']"/>
+                        <td class="text-center"><t t-out="line['quantity']" t-options="{'widget': 'float', 'precision': 2}"/> <t t-out="line['uom']"/></td>
+                        <td t-if="show_unit_price" class="text-end" t-out="line['unit_price']" t-options="{'widget': 'float', 'precision': 4}"/>
+                        <td class="text-end" t-out="line['amount']" t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                    </tr>
+                    <tr class="fwd-total">
+                        <td>TOTAL</td>
+                        <td/>
+                        <td class="text-center" t-out="summary['packages']" t-options="{'widget': 'float', 'precision': 0}"/>
+                        <td/>
+                        <td class="text-center" t-out="summary['net_weight']" t-options="{'widget': 'float', 'precision': 2}"/>
+                        <td t-if="show_unit_price"/>
+                        <td class="text-end" t-out="amount_untaxed" t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p><strong>La présente facture a été arrêtée à la somme de : <t t-out="amount_words"/> Hors Taxes</strong></p>
+
+            <p t-if="'number_ggn' in company._fields and company.number_ggn" class="fwd-block">
+                <strong>Produits certifiés GLOBAL GAP + GGN : <t t-out="company.number_ggn"/></strong>
+            </p>
+
+            <p class="fwd-block">
+                <strong>Poids brut total : <t t-out="summary['gross_weight']" t-options="{'widget': 'float', 'precision': 2}"/> Kgs</strong><br/>
+                <strong>Poids net total : <t t-out="summary['net_weight']" t-options="{'widget': 'float', 'precision': 2}"/> Kgs</strong><br/>
+                <strong>Nombre de palettes total : <t t-out="summary['pallets']"/></strong><br/>
+                <strong>Nombre de colis total : <t t-out="summary['packages']" t-options="{'widget': 'float', 'precision': 0}"/></strong>
+            </p>
+
+            <p class="fwd-block">
+                <t t-if="incoterm"><strong>INCOTERM <t t-out="incoterm.code"/> <t t-out="incoterm_location or ''"/></strong><br/></t>
+                <t t-if="truck"><strong>MATRICULE : <t t-out="truck"/></strong><br/></t>
+            </p>
+
+            <div t-if="shipping_partner" class="fwd-block">
+                <strong class="fwd-label">LIEU DE DESTINATION :</strong>
+                <div t-out="shipping_partner" t-options="{'widget': 'contact', 'fields': ['name', 'address'], 'no_marker': True}" style="font-weight: bold;"/>
+            </div>
+
+            <p class="fwd-block">
+                <span class="fwd-label">Règlement à l'ordre de :</span> <strong><em t-out="company.name"/></strong><br/>
+                <t t-if="payment_label"><span class="fwd-label">Modalité de paiement :</span> <strong><em t-out="payment_label"/></strong><br/></t>
+                <t t-if="bank">
+                    <span class="fwd-label">Coordonnées bancaires :</span><br/>
+                    <strong>RIB : <t t-out="bank.acc_number"/></strong><br/>
+                    <strong t-if="bank.code_swift">BIC – Code SWIFT : <t t-out="bank.code_swift"/><br/></strong>
+                    <strong t-if="bank.iban">IBAN : <t t-out="bank.iban"/></strong>
+                </t>
+            </p>
+        </div>
+    </template>
+
+    <!-- Facture transitaire : depuis la facture, SANS prix unitaire (confidentialité) -->
     <template id="report_forwarder_invoice_document">
         <t t-call="web.external_layout">
-            <t t-set="lines" t-value="o._get_forwarder_lines()"/>
-            <t t-set="summary" t-value="o._get_shipping_summary()"/>
-            <t t-set="partner" t-value="o.partner_id"/>
-            <style>
-                .fwd { font-size: 12px; color: #000; }
-                .fwd-table { width: 100%; border-collapse: collapse; margin: 6px 0 10px 0; }
-                .fwd-table th, .fwd-table td { border: 1px solid #000; padding: 4px 6px; vertical-align: middle; }
-                .fwd-table th { text-align: center; font-weight: bold; background-color: #f2f2f2; }
-                .fwd-total td { font-weight: bold; }
-                .fwd-block { margin-top: 10px; }
-                .fwd-label { text-decoration: underline; }
-            </style>
-            <div class="page fwd">
-                <!-- Client (à droite) -->
-                <table style="width: 100%;">
-                    <tr>
-                        <td style="width: 50%;"/>
-                        <td class="text-end">
-                            <strong t-out="partner.name"/><br/>
-                            <t t-if="partner.street"><t t-out="partner.street"/><br/></t>
-                            <t t-if="partner.street2"><t t-out="partner.street2"/><br/></t>
-                            <t t-if="partner.zip or partner.city"><t t-out="' '.join(p for p in [partner.zip, partner.city] if p)"/><t t-if="partner.country_id">, <t t-out="partner.country_id.name"/></t><br/></t>
-                            <t t-if="partner.vat">UST-ID / VAT-ID : <t t-out="partner.vat"/><br/></t>
-                            <t t-if="partner.eori_number">EORI-Number : <t t-out="partner.eori_number"/><br/></t>
-                            <t t-if="partner.tax_code">Tax-Code : <t t-out="partner.tax_code"/><br/></t>
-                            <t t-if="partner.btw_identification">Btw-identificatienummer NL : <t t-out="partner.btw_identification"/><br/></t>
-                            <t t-if="partner.gln">GLN : <t t-out="partner.gln"/></t>
-                        </td>
-                    </tr>
-                </table>
-
-                <p class="fwd-block">
-                    A <t t-out="o._get_forwarder_city()"/>, le <t t-out="o.invoice_date and o.invoice_date.strftime('%d/%m/%Y') or ''"/>
-                </p>
-                <h5 class="text-center" style="margin: 14px 0 8px 0;"><strong>FACTURE N° : <t t-out="o.name"/></strong></h5>
-
-                <!-- Marchandise : pas de colonne prix unitaire -->
-                <table class="fwd-table">
-                    <thead>
-                        <tr>
-                            <th>DÉSIGNATION</th>
-                            <th>CALIBRE</th>
-                            <th>NOMBRE DE COLIS</th>
-                            <th>TYPE D'EMBALLAGE</th>
-                            <th>POIDS NET</th>
-                            <th>PRIX (<t t-out="o.currency_id.name"/>)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr t-foreach="lines" t-as="line">
-                            <td t-out="line['designation']"/>
-                            <td class="text-center" t-out="line['calibre']"/>
-                            <td class="text-center" t-out="line['packaging_qty']" t-options="{'widget': 'float', 'precision': 0}"/>
-                            <td class="text-center" t-out="line['packaging']"/>
-                            <td class="text-center"><t t-out="line['quantity']" t-options="{'widget': 'float', 'precision': 2}"/> <t t-out="line['uom']"/></td>
-                            <td class="text-end" t-out="line['amount']" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
-                        </tr>
-                        <tr class="fwd-total">
-                            <td>TOTAL</td>
-                            <td/>
-                            <td class="text-center" t-out="summary['packages']" t-options="{'widget': 'float', 'precision': 0}"/>
-                            <td/>
-                            <td class="text-center" t-out="summary['net_weight']" t-options="{'widget': 'float', 'precision': 2}"/>
-                            <td class="text-end" t-out="o.amount_untaxed" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <p><strong>La présente facture a été arrêtée à la somme de : <t t-out="o._get_amount_untaxed_words_fr()"/> Hors Taxes</strong></p>
-
-                <p t-if="'number_ggn' in o.company_id._fields and o.company_id.number_ggn" class="fwd-block">
-                    <strong>Produits certifiés GLOBAL GAP + GGN : <t t-out="o.company_id.number_ggn"/></strong>
-                </p>
-
-                <p class="fwd-block">
-                    <strong>Poids brut total : <t t-out="summary['gross_weight']" t-options="{'widget': 'float', 'precision': 2}"/> Kgs</strong><br/>
-                    <strong>Poids net total : <t t-out="summary['net_weight']" t-options="{'widget': 'float', 'precision': 2}"/> Kgs</strong><br/>
-                    <strong>Nombre de palettes total : <t t-out="summary['pallets']"/></strong><br/>
-                    <strong>Nombre de colis total : <t t-out="summary['packages']" t-options="{'widget': 'float', 'precision': 0}"/></strong>
-                </p>
-
-                <p class="fwd-block">
-                    <t t-if="o.invoice_incoterm_id"><strong>INCOTERM <t t-out="o.invoice_incoterm_id.code"/> <t t-out="o.incoterm_location or ''"/></strong><br/></t>
-                    <t t-if="o.delivery_truck_number"><strong>MATRICULE : <t t-out="o.delivery_truck_number"/></strong><br/></t>
-                </p>
-
-                <div t-if="o.partner_shipping_id" class="fwd-block">
-                    <strong class="fwd-label">LIEU DE DESTINATION :</strong>
-                    <div t-field="o.partner_shipping_id" t-options="{'widget': 'contact', 'fields': ['name', 'address'], 'no_marker': True}" style="font-weight: bold;"/>
-                </div>
-
-                <p class="fwd-block">
-                    <span class="fwd-label">Règlement à l'ordre de :</span> <strong><em t-out="o.company_id.name"/></strong><br/>
-                    <t t-if="o.preferred_payment_method_line_id"><span class="fwd-label">Modalité de paiement :</span> <strong><em t-out="o.preferred_payment_method_line_id.name"/></strong><br/></t>
-                    <t t-if="o.partner_bank_id">
-                        <span class="fwd-label">Coordonnées bancaires :</span><br/>
-                        <strong>RIB : <t t-out="o.partner_bank_id.acc_number"/></strong><br/>
-                        <strong t-if="o.partner_bank_id.code_swift">BIC – Code SWIFT : <t t-out="o.partner_bank_id.code_swift"/><br/></strong>
-                        <strong t-if="o.partner_bank_id.iban">IBAN : <t t-out="o.partner_bank_id.iban"/></strong>
-                    </t>
-                </p>
-            </div>
+            <t t-call="product_packaging_unit_price.report_export_document_body">
+                <t t-set="doc_title" t-value="'FACTURE N° : %s' % (o.name or '')"/>
+                <t t-set="doc_date" t-value="o.invoice_date"/>
+                <t t-set="city" t-value="o._get_forwarder_city()"/>
+                <t t-set="partner" t-value="o.partner_id"/>
+                <t t-set="lines" t-value="o._get_forwarder_lines()"/>
+                <t t-set="summary" t-value="o._get_shipping_summary()"/>
+                <t t-set="currency" t-value="o.currency_id"/>
+                <t t-set="amount_untaxed" t-value="o.amount_untaxed"/>
+                <t t-set="amount_words" t-value="o._get_amount_untaxed_words_fr()"/>
+                <t t-set="company" t-value="o.company_id"/>
+                <t t-set="incoterm" t-value="o.invoice_incoterm_id"/>
+                <t t-set="incoterm_location" t-value="o.incoterm_location"/>
+                <t t-set="truck" t-value="o.delivery_truck_number"/>
+                <t t-set="shipping_partner" t-value="o.partner_shipping_id"/>
+                <t t-set="bank" t-value="o.partner_bank_id"/>
+                <t t-set="payment_label" t-value="o.preferred_payment_method_line_id.name"/>
+                <t t-set="show_unit_price" t-value="False"/>
+            </t>
         </t>
     </template>
 
@@ -124,6 +159,41 @@
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
                 <t t-call="product_packaging_unit_price.report_forwarder_invoice_document"/>
+            </t>
+        </t>
+    </template>
+
+    <!-- Facture pro forma : depuis la commande de vente, avec un prix unitaire FICTIF saisi sur la commande
+         (« Prix unitaire pro forma ») ; montant et total en sont déduits, les prix réels ne sont pas imprimés -->
+
+    <template id="report_proforma_invoice_document">
+        <t t-call="web.external_layout">
+            <t t-call="product_packaging_unit_price.report_export_document_body">
+                <t t-set="doc_title" t-value="'FACTURE PROFORMA N° : %s' % (o.name or '')"/>
+                <t t-set="doc_date" t-value="o.date_order"/>
+                <t t-set="city" t-value="o._get_export_city()"/>
+                <t t-set="partner" t-value="o.partner_id"/>
+                <t t-set="lines" t-value="o._get_export_lines()"/>
+                <t t-set="summary" t-value="o._get_shipping_summary()"/>
+                <t t-set="currency" t-value="o.currency_id"/>
+                <t t-set="amount_untaxed" t-value="sum(line['amount'] for line in lines)"/>
+                <t t-set="amount_words" t-value="o._get_proforma_amount_words_fr()"/>
+                <t t-set="company" t-value="o.company_id"/>
+                <t t-set="incoterm" t-value="o.incoterm"/>
+                <t t-set="incoterm_location" t-value="o.incoterm_location"/>
+                <t t-set="truck" t-value="o.delivery_truck_number"/>
+                <t t-set="shipping_partner" t-value="o.partner_shipping_id"/>
+                <t t-set="bank" t-value="o.company_id.partner_id.bank_ids[:1]"/>
+                <t t-set="payment_label" t-value="o.payment_term_id.name"/>
+                <t t-set="show_unit_price" t-value="True"/>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_proforma_invoice">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="product_packaging_unit_price.report_proforma_invoice_document"/>
             </t>
         </t>
     </template>

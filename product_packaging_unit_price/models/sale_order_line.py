@@ -86,6 +86,16 @@ class SaleOrderLine(models.Model):
              "conditionnement), puis la quantité en kg.",
     )
 
+    def _compute_product_packaging_id(self):
+        """ Le conditionnement n'est plus suggéré par Odoo d'après les kg (il basculait sur la caisse
+        plastique 10 kg dès que les kg étaient un multiple de 10) : on garde celui choisi par
+        l'utilisateur, et on le vide seulement s'il n'appartient pas au produit. """
+        for line in self:
+            if line.product_packaging_id.product_id != line.product_id:
+                line.product_packaging_id = False
+            else:
+                line.product_packaging_id = line.product_packaging_id
+
     @api.onchange('pallet_qty', 'product_packaging_id')
     def _onchange_pallet_qty(self):
         """ Palettes → colis ; les kg suivent par le calcul natif (colis × contenance du conditionnement).

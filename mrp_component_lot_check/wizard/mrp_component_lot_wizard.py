@@ -3,6 +3,7 @@ from markupsafe import Markup, escape
 
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
+from odoo.tools import float_compare, float_is_zero
 
 
 class MrpComponentLotWizard(models.TransientModel):
@@ -14,6 +15,19 @@ class MrpComponentLotWizard(models.TransientModel):
     allowed_move_ids = fields.Many2many('stock.move', compute='_compute_allowed_move_ids')
     default_move_id = fields.Many2one('stock.move', compute='_compute_allowed_move_ids')
     line_ids = fields.One2many('mrp.component.lot.wizard.line', 'wizard_id', string="Palettes consommées")
+
+    # Poids réel du vrac : saisie obligatoire quand l'OF n'a qu'un composant suivi par lot
+    tracked_move_count = fields.Integer(compute='_compute_allowed_move_ids')
+    expected_qty = fields.Float(
+        string="Poids prévu (nomenclature)",
+        compute='_compute_allowed_move_ids',
+        digits='Product Unit of Measure',
+    )
+    actual_qty = fields.Float(
+        string="Poids réel consommé",
+        digits='Product Unit of Measure',
+        help="Poids réellement mis au calibrage. L'écart avec la nomenclature est reporté sur la dernière palette.",
+    )
 
     @api.model
     def default_get(self, fields_list):
@@ -39,11 +53,35 @@ class MrpComponentLotWizard(models.TransientModel):
             moves = wizard.production_id._get_lot_tracked_raw_moves()
             wizard.allowed_move_ids = moves
             wizard.default_move_id = moves[:1]
+            wizard.tracked_move_count = len(moves)
+            wizard.expected_qty = sum(moves.mapped('product_uom_qty'))
+
+    @api.onchange('actual_qty')
+    def _onchange_actual_qty(self):
+        """ L'écart entre le poids réel et le total des palettes est reporté sur la dernière palette
+        (l'opérateur peut ensuite répartir autrement). """
+        if self.tracked_move_count != 1 or not self.actual_qty or not self.line_ids:
+            return
+        last_line = self.line_ids[-1]
+        diff = self.actual_qty - sum(self.line_ids.mapped('quantity'))
+        if last_line.quantity + diff > 0:
+            last_line.quantity += diff
 
     def action_validate(self):
         self.ensure_one()
         production = self.production_id
         moves = production._get_lot_tracked_raw_moves()
+
+        if len(moves) == 1:
+            rounding = moves.product_uom.rounding
+            if float_is_zero(self.actual_qty, precision_rounding=rounding):
+                raise UserError(_("Saisissez le poids réel de %s consommé (prévu : %s %s).",
+                                  moves.product_id.display_name, '%g' % self.expected_qty, moves.product_uom.name))
+            total = sum(self.line_ids.mapped('quantity'))
+            if float_compare(total, self.actual_qty, precision_rounding=rounding) != 0:
+                raise UserError(_("Le total des palettes (%(total)s) ne correspond pas au poids réel (%(actual)s) : "
+                                  "ajustez la quantité des palettes.",
+                                  total='%g' % total, actual='%g' % self.actual_qty))
 
         for line in self.line_ids:
             if not line.lot_id:
@@ -79,6 +117,8 @@ class MrpComponentLotWizard(models.TransientModel):
                 })
                 self.env['stock.move.line'].create(vals)
         moves._recompute_state()
+        # Quantités saisies = consommation réelle : Odoo ne doit plus les recalculer d'après la nomenclature
+        moves.write({'picked': True, 'manual_consumption': True})
 
         production.component_lots_checked = True
         production.message_post(body=self._get_check_message())
@@ -98,7 +138,11 @@ class MrpComponentLotWizard(models.TransientModel):
             )
             for line in self.line_ids
         )
-        return Markup("%s<ul>%s</ul>") % (escape(_("Lots des composants vérifiés :")), items)
+        weight = Markup()
+        if self.tracked_move_count == 1 and self.actual_qty:
+            weight = Markup("<p>%s</p>") % _("Poids réel consommé : %(actual)s (nomenclature : %(expected)s).",
+                                             actual='%g' % self.actual_qty, expected='%g' % self.expected_qty)
+        return Markup("%s<ul>%s</ul>%s") % (escape(_("Lots des composants vérifiés :")), items, weight)
 
 
 class MrpComponentLotWizardLine(models.TransientModel):

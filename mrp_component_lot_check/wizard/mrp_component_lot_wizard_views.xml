@@ -7,14 +7,20 @@
             <form string="Vérifier les lots des composants">
                 <field name="allowed_move_ids" invisible="1"/>
                 <field name="default_move_id" invisible="1"/>
+                <field name="tracked_move_count" invisible="1"/>
                 <div class="alert alert-warning" role="alert">
-                    Vérifiez que les palettes ci-dessous sont bien celles mises au calibrage.
-                    Changez la palette si besoin : le lot se met à jour automatiquement.
+                    Saisissez le poids réel de vrac mis au calibrage, puis vérifiez que les palettes ci-dessous
+                    sont bien celles utilisées. Changez la palette si besoin : le lot se met à jour automatiquement.
                 </div>
                 <group>
                     <group>
                         <field name="production_id"/>
                         <field name="product_id"/>
+                    </group>
+                    <group invisible="tracked_move_count != 1">
+                        <field name="expected_qty"/>
+                        <field name="actual_qty" class="fs-4 fw-bold" default_focus="1"
+                               required="tracked_move_count == 1"/>
                     </group>
                 </group>
                 <field name="line_ids" context="{'default_move_id': default_move_id}">

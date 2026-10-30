@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields, _
+from odoo import models, fields, api, _
 
 
 class MrpProduction(models.Model):
@@ -10,6 +10,22 @@ class MrpProduction(models.Model):
         copy=False,
         help="Les palettes et lots des composants suivis par lot ont été vérifiés par l'opérateur.",
     )
+    # Stocké pour le total, le tri et les regroupements dans la liste des OF
+    component_lot_qty = fields.Float(
+        string="Vrac consommé",
+        compute='_compute_component_lot_qty',
+        store=True,
+        aggregator='sum',
+        digits='Product Unit of Measure',
+        help="Quantité des composants suivis par lot (vrac) consommée ou prévue sur l'OF.",
+    )
+
+    @api.depends('move_raw_ids.quantity', 'move_raw_ids.state', 'move_raw_ids.product_id.tracking')
+    def _compute_component_lot_qty(self):
+        for production in self:
+            production.component_lot_qty = sum(production.move_raw_ids.filtered(
+                lambda m: m.product_id.tracking == 'lot' and m.state != 'cancel'
+            ).mapped('quantity'))
 
     def _get_lot_tracked_raw_moves(self):
         return self.move_raw_ids.filtered(

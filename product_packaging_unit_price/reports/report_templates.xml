@@ -137,9 +137,12 @@
                     <t t-set="total_palettes" t-value="palettes_220 + palettes_100"/>
                     <!-- ===== FIN DE LA NOUVELLE LOGIQUE ===== -->
 
-                    <!-- Poids brut = poids net + tare des colis (poids du colis vide) + tare des palettes -->
-                    <t t-set="crates_tare" t-value="sum(l.product_packaging_qty * l.product_packaging_id.empty_weight for l in o.invoice_line_ids.filtered(lambda l: l.display_type == 'product'))"/>
-                    <t t-set="total_gross_weight" t-value="current_total_qty + crates_tare + total_palettes * o.company_id.pallet_weight"/>
+                    <!-- Poids brut = poids net + tare des colis (poids du colis vide)
+                         + tare des palettes (champ natif « Poids » du type de colis du conditionnement) -->
+                    <t t-set="product_lines" t-value="o.invoice_line_ids.filtered(lambda l: l.display_type == 'product')"/>
+                    <t t-set="crates_tare" t-value="sum(l.product_packaging_qty * l.product_packaging_id.empty_weight for l in product_lines)"/>
+                    <t t-set="pallet_weight" t-value="product_lines.product_packaging_id.package_type_id[:1].base_weight"/>
+                    <t t-set="total_gross_weight" t-value="current_total_qty + crates_tare + total_palettes * pallet_weight"/>
 
 
                     <div name="GGN" class="mb-4">

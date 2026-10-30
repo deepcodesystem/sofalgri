@@ -9,6 +9,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='order_line']/list/field[@name='product_packaging_qty']" position="before">
                 <field name="price_unit_package" optional="show"/>
+                <field name="pallet_qty" optional="show"/>
             </xpath>
         </field>
     </record>

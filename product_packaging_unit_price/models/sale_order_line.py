@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api
 
-from .export_report import group_export_lines, shipping_summary
+from .export_report import colis_per_pallet, group_export_lines, shipping_summary
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
@@ -80,7 +80,18 @@ class SaleOrderLine(models.Model):
         string='Prix Unitaire/Colis',
         digits='Product Price',
     )
+    pallet_qty = fields.Integer(
+        string='Palettes',
+        help="Nombre de palettes : le nombre de colis en est déduit (palettes × colis par palette du "
+             "conditionnement), puis la quantité en kg.",
+    )
 
+    @api.onchange('pallet_qty', 'product_packaging_id')
+    def _onchange_pallet_qty(self):
+        """ Palettes → colis ; les kg suivent par le calcul natif (colis × contenance du conditionnement).
+        Une saisie manuelle des colis ne recalcule pas les palettes. """
+        if self.pallet_qty and self.product_packaging_id:
+            self.product_packaging_qty = self.pallet_qty * colis_per_pallet(self.product_packaging_id)
 
     # ... (vos méthodes @api.onchange restent inchangées, elles sont correctes) ...
     @api.onchange('product_packaging_id')

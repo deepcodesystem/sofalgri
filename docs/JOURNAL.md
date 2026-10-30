@@ -17,7 +17,7 @@ Les entrées les plus récentes en haut.
 - Commit : `40a45f2` sur `feat/commande-palettes`. Validé en TEST par l'utilisateur.
 - Affichage (18.0.6.10.1) : colonnes des lignes de commande réordonnées juste après la description : Palettes → Conditionnement (type de colis) → Nb colis → Prix/colis, puis quantité en kg et prix au kg (`position="move"` sur les champs natifs `product_packaging_id` / `product_packaging_qty`).
 - Déploiement : nouveaux champs stockés sur `product.packaging` et `sale.order.line` → mise à jour en ligne de commande sur **les deux bases** avant redémarrage (exécute aussi la migration).
-- À vérifier au test : Odoo peut proposer un autre conditionnement quand les kg changent (calcul natif `_compute_product_packaging_id`) ; contrôler que le conditionnement choisi reste en place.
+- Correctif (18.0.6.10.2) : en saisissant les palettes, le conditionnement basculait sur la caisse plastique 10 kg et ne pouvait plus être changé : le calcul natif `sale.order.line._compute_product_packaging_id` suggère le plus gros conditionnement qui divise les kg (1 760 kg = 176 × 10 kg), puis l'onchange recalculait les colis sur cette base. Surcharge : le conditionnement choisi est conservé (vidé seulement s'il n'appartient pas au produit), plus de suggestion automatique.
 
 ## 2026-10-30 · Note interne du client sur les factures (client, transitaire, pro forma)
 - Demande : une information propre à un client, saisie en note interne sur sa fiche, doit apparaître juste sous le client et son adresse sur la facture client, la facture transitaire et la pro forma.

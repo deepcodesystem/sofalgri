@@ -5,6 +5,13 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-10-30 · Étiquette palette de sortie : pied supprimé
+- Demande : retirer du bas de l'étiquette palette des OF la référence de l'OF (« OF WH/MOF/03914 ») et « Imprimé le … par <utilisateur> ».
+- Fait : `mrp_production_storage` 18.0.1.2.1 : pied de l'étiquette `report_production_pallet` supprimé (et son style). L'étiquette de réception (`picking_custom_addons`) garde son pied (caisse, palette, impression).
+- Bases : aucune requête.
+- Modules/modèles : `mrp_production_storage` · rapport `report_production_pallet`.
+- Commit : branche `fix/etiquette-palette-sans-pied` (non committé, non testé dans Odoo).
+
 ## 2026-10-30 · Facture transitaire (sans prix unitaire)
 - Demande : mettre en place une facture destinée au transitaire, sur le modèle `Facture N 802025 WESTFALIA FRUIT GMBH TR.pdf`, sans prix unitaire (confidentialité).
 - Modèle : une ligne regroupée « Fruit Avocat HASS » / « CAL 12-32 » / colis / « CAISSES EN CARTON 4 KGS & CAISSES EN PLASTIQUE 10 KGS » / poids net / prix moyen / montant ; somme en lettres ; GGN ; poids brut et net, palettes, colis ; incoterm, matricule, lieu de destination ; règlement et banque.
@@ -12,7 +19,7 @@ Les entrées les plus récentes en haut.
 - Fait : `product_packaging_unit_price` 18.0.6.6.0 : rapport « Facture transitaire » (menu Imprimer de la facture, layout externe de la société), sans colonne prix unitaire ; méthodes `account.move` sans champ stocké : `_get_forwarder_lines` (regroupement par désignation = description de vente + variété, plage de calibres « CAL min-max », colis, emballages distincts joints par « & », poids net, montant), `_get_shipping_summary` (colis, palettes 220 / 100, poids net et brut, mêmes règles que la facture client), `_get_forwarder_city`, `_get_amount_untaxed_words_fr`. Facture client inchangée.
 - Bases : lecture seule TEST (entrepôt et son adresse, variantes calibrées : `calibre` numérique, `product_variety` « HASS », description de vente « AVOCAT »).
 - Modules/modèles : `product_packaging_unit_price` · `account.move`, rapport `report_forwarder_invoice`.
-- Commit : branche `feat/facture-transitaire` (non committé, non testé dans Odoo).
+- Commit : `696cdc6` sur `feat/facture-transitaire`. **Validé en TEST** ; PR deepcodesystem/sofalgri#12 **fusionnée** dans `18.0` (`7e57456`).
 - Déploiement : aucun nouveau champ stocké, mise à jour normale du module (pas de risque pour la PROD au redémarrage).
 
 ## 2026-10-30 · Incident : PROD en erreur après bascule du serveur sur la branche

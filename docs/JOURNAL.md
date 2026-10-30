@@ -5,6 +5,14 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-10-30 · OF : même numéro de lot pour tous les calibres de la journée
+- Demande : avant, un même numéro de lot servait à plusieurs calibres ; maintenant il faut un lot par calibre.
+- Constat (TEST) : un lot est toujours propre à un article ; avant, le numéro de session était **saisi à la main** pour chaque calibre (ex. `0044S01032026` existe 5 fois : calibres 16, 18, 30, 32, LIDL 20, créés par Btissam le 01/03). Le 30/10, le bouton « Générer » a été utilisé : il tire un nouveau numéro de la séquence `stock.lot.serial` à chaque clic (`0001S30102026` cal. 16, `0002S30102026` cal. 16 resté vide, `0003S30102026` cal. 14). Aucun code cassé.
+- Fait : `custom_lot_sequences` 18.0.2.3.0 : « Générer » reprend le nom du dernier lot produit créé aujourd'hui (fuseau de l'utilisateur) sur un autre OF du même type d'opération : crée le lot de ce nom pour l'article, ou reprend celui qui existe déjà pour ce calibre ; sans lot du jour, comportement natif (séquence). Bouton « Nouveau lot » à côté (contexte `new_day_lot`) pour démarrer une nouvelle session avec le numéro suivant.
+- Bases : lecture seule TEST (lots `0044S01032026` et du 30/10, vue OF).
+- Modules/modèles : `custom_lot_sequences` · `mrp.production`.
+- Commit : branche `feat/lot-du-jour-of` (non committé, non testé dans Odoo).
+
 ## 2026-10-29 · OF : conditionnement choisi selon la nomenclature
 - Demande : sélectionner automatiquement le conditionnement de l'OF selon la nomenclature choisie (caisse carton 4 kg ou caisse plastique 10 kg).
 - Constat (TEST) : chaque variante calibrée a un conditionnement de 4 kg (« CARTON 4KG … ») et un de 10 kg (« PLASTIQUE … 10KG … »), parfois des conditionnements parasites à 1 kg (« 2640 », « 3436 », « pl ») ; nomenclatures 4 kg (880 kg) : ids 7, 8, 12, 16, et 15 « déchets ferme » ; 10 kg (1000 kg) : ids 9, 10, 13, 17 ; « Déchets usines » (11) sans conditionnement.

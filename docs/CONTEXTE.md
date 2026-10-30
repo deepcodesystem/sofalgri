@@ -8,7 +8,7 @@ _Dernière mise à jour : 29/10/2026 (déploiement PROD des PR #5 à #7)_
 |---|---|
 | Version | Odoo 18.0 (Community probablement : compta via Odoo Mates + OCA, à confirmer) |
 | Hébergement | VPS (hostname `sofalgri`) |
-| Addons custom (serveur) | `/opt/GetapERP/extra-addons/GetapPRO/sofalgri` |
+| Addons custom (serveur) | `/opt/GetapERP/extra-addons/GetapPRO/sofalgri` — **partagé par PROD et TEST (même service Odoo)** : un nouveau champ stocké casse la PROD tant que le module n'y est pas mis à jour |
 | Dépôt Git | github.com/deepcodesystem/sofalgri |
 | Bases | **PROD** : `sofalgri`  ·  **TEST** : `sofalgri-test` |
 | Accès Claude | MCP Odoo (module `odoo_mcp_manager`, Cybrosys) : accès aux **données** via l'ORM, pas au serveur ni aux fichiers |
@@ -27,7 +27,7 @@ _Dernière mise à jour : 29/10/2026 (déploiement PROD des PR #5 à #7)_
 | `delivery_carrier_custom` | Personnalisations des modes de livraison | 18.0.1.0.0 | delivery, stock_delivery | ✅ |
 | `package_packaging` | Affiche le conditionnement produit dans les colis | 18.0.1.0.0 | stock, product | ❌ |
 | `picking_custom_addons` | Personnalisations des transferts de stock | 18.0.4.11.0 (`18.0`, PROD) | stock, product | ✅ |
-| `product_packaging_unit_price` | Prix unitaire par conditionnement (ventes et factures) | 18.0.6.3.0 ; 18.0.6.5.0 sur `fix/facture-colonne-emballage` | base, stock, sale_stock, sale_management, account | ✅ |
+| `product_packaging_unit_price` | Prix unitaire par conditionnement (ventes et factures) | 18.0.6.3.0 ; 18.0.6.5.1 sur `fix/facture-colonne-emballage` | base, stock, sale_stock, sale_management, account | ✅ |
 | `purchase_order_workflow` | Achat : facture fournisseur et paiement en espèces automatiques | 1.0 | purchase, account | ✅ |
 | `sale_advance_payment` | Acomptes sur commandes de vente | 18.0.1.1.0 | sale_management, account | ✅ |
 | `sale_order_template_custom` | Champs manquants sur les modèles de devis | 18.0.0.1 | sale_management | ✅ |
@@ -81,7 +81,7 @@ Dépendances inter-modules à respecter :
 | | `sale.order.line`, `account.move.line` | `price_unit_package` ↔ `price_unit` synchronisés par onchange ; conditionnement propagé à la facture |
 | | `sale.order`, `account.move` | `delivery_truck_number` (matricule camion, propagé à la facture) |
 | | `res.partner` / `res.partner.bank` | `eori_number`, `tax_code`, `btw_identification`, `gln` / `code_swift`, `iban` |
-| | rapport | **Remplace le tableau et le pied de la facture** : calibre, nb colis, emballage (description de vente du conditionnement, à défaut son nom, 18.0.6.4.0), poids net, prix/colis, nb palettes (220 colis/palette, 100 si emballage contient « PLASTIQUE »), poids brut calculé (net + colis × poids vide + palettes × poids palette, 18.0.6.5.0), GGN |
+| | rapport | **Remplace le tableau et le pied de la facture** : calibre, nb colis, emballage (description de vente du conditionnement, à défaut son nom, 18.0.6.4.0), poids net, prix/colis, nb palettes (220 colis/palette, 100 si emballage contient « PLASTIQUE »), poids brut calculé (net + colis × poids vide + palettes × « Poids » du type de colis, 18.0.6.5.1), GGN |
 | `mrp_component_lot_check` | `mrp.production` | `component_lots_checked` ; bouton « Confirmer » → `action_confirm_check_lots` (confirme puis ouvre le popup) ; `button_mark_done` rouvre le popup tant que non vérifié (contournable par le contexte `skip_component_lot_check`) |
 | | `mrp.component.lot.wizard` | Popup : lignes composant / palette / lot / quantité ; valide en modifiant les lignes réservées et trace le détail dans le fil de l'OF |
 | `mrp_production_storage` | `mrp.bom` | (18.0.1.2.0) `packaging_unit_qty` « Poids par colis » (4 / 10) |

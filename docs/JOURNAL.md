@@ -5,11 +5,18 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-10-30 · Incident : PROD en erreur après bascule du serveur sur la branche
+- Symptôme : mise à jour de `product_packaging_unit_price` 18.0.6.5.0 en TEST impossible (`column res_company.pallet_weight does not exist`) ; la **PROD était aussi en erreur** (même message, vérifié par lecture MCP).
+- Cause : TEST et PROD partagent le **même service Odoo et le même dossier d'addons**. Après `git pull` de la branche et redémarrage, les deux bases chargent un code qui déclare des colonnes encore absentes ; `res.company` étant lue partout (et par le bouton de mise à jour lui-même), tout échoue.
+- Rétablissement (utilisateur) : serveur remis sur `18.0`, redémarrage ; PROD vérifiée OK (lecture `res.company`).
+- Correction : `product_packaging_unit_price` 18.0.6.5.1 : suppression du champ société ; poids d'une palette = champ natif « Poids » (`base_weight`) du type de colis du conditionnement (« Palettes de Livraison »).
+- **Règle de déploiement (serveur partagé)** : toute branche qui ajoute un champ stocké sur un modèle utilisé en PROD (ici `product.packaging.empty_weight`) doit être suivie, **avant le redémarrage**, d'une mise à jour en ligne de commande du module sur **les deux bases** (`-u <module> --stop-after-init`). À terme : un service Odoo séparé pour TEST.
+
 ## 2026-10-30 · Facture : poids brut total calculé
 - Demande : le « Poids Brut Total » du pied de facture était écrit en dur (`24 250,00`) ; le calculer.
 - Choix de l'utilisateur : poids net + tares (colis vides + palettes), tares saisies par l'utilisateur.
-- Fait : `product_packaging_unit_price` 18.0.6.5.0 : champ « Poids du colis vide (kg) » (`empty_weight`) sur le conditionnement (formulaire et liste) ; champ « Poids d'une palette (kg) » (`pallet_weight`) sur la société (formulaire, après le n° de TVA) ; pied de facture : poids brut = poids net total + Σ(nb colis × poids du colis vide) + nb palettes (calcul 220 / 100 existant) × poids d'une palette.
-- À faire après mise à jour : renseigner le poids du colis vide de chaque conditionnement et le poids d'une palette (sinon le poids brut = poids net).
+- Fait : `product_packaging_unit_price` 18.0.6.5.0 : champ « Poids du colis vide (kg) » (`empty_weight`) sur le conditionnement (formulaire et liste) ; pied de facture : poids brut = poids net total + Σ(nb colis × poids du colis vide) + nb palettes (calcul 220 / 100 existant) × poids d'une palette. (Version 18.0.6.5.0 : poids palette sur la société, retiré en 18.0.6.5.1 au profit du « Poids » natif du type de colis, voir l'incident.)
+- À faire après mise à jour : renseigner le poids du colis vide de chaque conditionnement et le « Poids » du type de colis « Palettes de Livraison » (sinon le poids brut = poids net).
 - Bases : lecture seule TEST (vue formulaire société).
 - Modules/modèles : `product_packaging_unit_price` · `product.packaging`, `res.company`, rapport facture.
 - Commit : branche `fix/facture-colonne-emballage` (non committé, non testé dans Odoo).

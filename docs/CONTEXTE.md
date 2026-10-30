@@ -21,7 +21,7 @@ _Dernière mise à jour : 29/10/2026 (déploiement PROD des PR #5 à #7)_
 
 | Module | Rôle | Version | Dépend de | Installé |
 |---|---|---|---|---|
-| `custom_lot_sequences` | Numéros de lot personnalisés (réceptions, OF) | 18.0.2.2.0 (`18.0`, PROD) | stock, mrp, picking_custom_addons | ✅ |
+| `custom_lot_sequences` | Numéros de lot personnalisés (réceptions, OF) | 18.0.2.2.0 (`18.0`, PROD) ; 18.0.2.3.0 sur `feat/lot-du-jour-of` | stock, mrp, picking_custom_addons | ✅ |
 | `mrp_component_lot_check` | OF : popup de vérification des palettes / lots composants à la confirmation, obligatoire avant « Produire » | 18.0.1.0.1 (`18.0`, PROD) | mrp | ✅ |
 | `mrp_production_storage` | OF : conditionnement, quantité, frigo et n° de palette S saisis sur l'OF, étiquette palette produit fini (avec fabrication en 1 étape, remplace le transfert SFP) | 18.0.1.1.0 (`18.0`, PROD) ; 18.0.1.2.0 sur `feat/conditionnement-auto-nomenclature` | mrp | ✅ |
 | `delivery_carrier_custom` | Personnalisations des modes de livraison | 18.0.1.0.0 | delivery, stock_delivery | ✅ |
@@ -66,6 +66,7 @@ Dépendances inter-modules à respecter :
 | Module | Modèle | Champs / comportement ajoutés |
 |---|---|---|
 | `custom_lot_sequences` | `stock.picking` | `_assign_receipt_lot_names` : sur une **réception**, un lot par produit `<séquence lot.receipt.sequence><partner.ref><JJMMAAAA>` (réutilise le lot déjà attribué à une autre palette du même produit) ; bloque si le fournisseur n'a pas de **Réf**. Appelée par `button_validate` et (18.0.2.2.0) à l'impression de l'étiquette palette |
+| | `mrp.production` | (18.0.2.3.0) « Générer » reprend le lot du jour (dernier lot produit créé aujourd'hui sur un autre OF) : même numéro pour tous les calibres ; bouton « Nouveau lot » (contexte `new_day_lot`) pour une nouvelle session |
 | | `stock.move.line` | (18.0.2.2.0) `action_print_package_report` : attribue le `lot_name` avant d'imprimer, pour que l'étiquette porte le lot avant validation |
 | `delivery_carrier_custom` | `delivery.carrier`, `stock.picking` | `driver_id` (chauffeur, res.partner), `matricule` (véhicule) |
 | `picking_custom_addons` | `stock.move.line` | `net_weight` (libellé « Poids Brut »), `pallet_weight` (déf. 17), `crate_product_id` (article de catégorie **« Colis »**), `crate_weight` (related poids article), `crate_quantity`, `tare` = palette + nb caisses × poids caisse ; onchange : `quantity` = brut − tare ; à la validation, cumule poids/tare/nb caisses sur le colis de destination |

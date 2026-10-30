@@ -44,7 +44,6 @@
                 .spl-net { background-color: #000; color: #fff; }
                 .spl-net .spl-caption { color: #ddd; }
                 .spl-net .spl-weight { font-size: 30px; }
-                .spl-foot { font-size: 10px; color: #555; padding-top: 4px; }
             </style>
             <t t-foreach="docs" t-as="o">
                 <t t-set="lot_label" t-value="o.lot_producing_id.name or ''"/>
@@ -148,10 +147,6 @@
                             </td>
                         </tr>
                     </table>
-                    <div class="spl-foot">
-                        OF <t t-out="o.name"/>
-                        <span style="float: right;">Imprimé le <t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/> par <t t-out="user.name"/></span>
-                    </div>
                 </div>
             </t>
         </t>

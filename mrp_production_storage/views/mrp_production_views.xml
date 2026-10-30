@@ -26,4 +26,16 @@
             </xpath>
         </field>
     </record>
+
+    <!-- Liste des OF : frigo de stockage (lecture seule, la liste est en édition multiple) -->
+    <record id="mrp_production_tree_view_inherit_storage" model="ir.ui.view">
+        <field name="name">mrp.production.list.inherit.storage</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_uom_id']" position="after">
+                <field name="storage_location_id" readonly="1" optional="show"/>
+            </xpath>
+        </field>
+    </record>
 </odoo>

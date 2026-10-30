@@ -5,12 +5,21 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-10-30 · OF : poids réel de vrac obligatoire dans le popup des lots
+- Demande : l'opérateur a laissé la quantité de vrac de la nomenclature (880 kg) au lieu du poids réel (897 kg calibre 24, 904 kg calibre 22) ; corriger et éviter que ça se reproduise.
+- Constat (PROD, lecture seule) : WH/MOF/03914 (calibre 24) = E001 771 + E002 109 ; WH/MOF/03915 (calibre 22) = E002 704 + E003 176 ; lot `001FE29102026` ; E001 et E002 vides, E003 632 kg entièrement réservés par un autre OF. Correction indiquée à l'utilisateur (en PROD, par lui) : déverrouiller chaque OF, +17 kg et +24 kg sur E003, reverrouiller ; puis vérifier les palettes de l'OF qui réservait E003.
+- Fait : `mrp_component_lot_check` 18.0.1.1.0 : dans le popup « Vérifier les lots des composants », champ « Poids réel consommé » obligatoire (OF avec un seul composant suivi par lot), « Poids prévu (nomenclature) » affiché ; la saisie reporte l'écart sur la dernière palette ; la validation refuse si le total des palettes diffère du poids réel ; les mouvements du vrac passent en consommation manuelle (`picked`, `manual_consumption`) pour qu'Odoo ne les recalcule pas d'après la nomenclature ; poids réel et prévu tracés dans le fil de l'OF.
+- Bases : lecture seule PROD (mouvements et lignes des OF 03914 / 03915, quants des palettes E001–E003).
+- Modules/modèles : `mrp_component_lot_check` · `mrp.component.lot.wizard`.
+- Commit : branche `feat/poids-reel-vrac` (non committé, non testé dans Odoo).
+- Déploiement : nouveau champ stocké sur le modèle du popup → règle du serveur partagé (mise à jour en ligne de commande sur les deux bases avant redémarrage).
+
 ## 2026-10-30 · Étiquette palette de sortie : pied supprimé
 - Demande : retirer du bas de l'étiquette palette des OF la référence de l'OF (« OF WH/MOF/03914 ») et « Imprimé le … par <utilisateur> ».
 - Fait : `mrp_production_storage` 18.0.1.2.1 : pied de l'étiquette `report_production_pallet` supprimé (et son style). L'étiquette de réception (`picking_custom_addons`) garde son pied (caisse, palette, impression).
 - Bases : aucune requête.
 - Modules/modèles : `mrp_production_storage` · rapport `report_production_pallet`.
-- Commit : branche `fix/etiquette-palette-sans-pied` (non committé, non testé dans Odoo).
+- Commit : `9a59857` sur `fix/etiquette-palette-sans-pied`. **Validé en TEST** ; PR deepcodesystem/sofalgri#13 **fusionnée** dans `18.0` (`c5c44b2`).
 
 ## 2026-10-30 · Facture transitaire (sans prix unitaire)
 - Demande : mettre en place une facture destinée au transitaire, sur le modèle `Facture N 802025 WESTFALIA FRUIT GMBH TR.pdf`, sans prix unitaire (confidentialité).

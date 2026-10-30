@@ -64,9 +64,10 @@
                              <t t-set="current_total_package" t-value="current_total_package + line.product_packaging_qty"/>
                              <tr style="font-size:12px;">
                                 <td name="account_invoice_line_name"><span t-field="line.product_id.description_sale"/></td>
-                                <td class="text-center"><span t-field="line.product_id.calibre"/></td>
+                                <td t-if="display_calibre" class="text-center"><span t-field="line.product_id.calibre"/></td>
                                 <td class="text-center"><span t-field="line.product_packaging_qty" t-options='{"widget": "float", "precision": 0}'/></td>
-                                <td class="text-start"><span t-field="line.product_packaging_id.description_sale"/></td>
+                                <!-- Description de vente du conditionnement, à défaut son nom (souvent la seule information renseignée) -->
+                                <td class="text-start"><span t-out="line.product_packaging_id.description_sale or line.product_packaging_id.name or ''"/></td>
                                 <td class="text-center">
                                     <span t-field="line.quantity" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 2}"/>
                                     <span t-field="line.product_uom_id" groups="uom.group_uom"/>
@@ -82,7 +83,7 @@
                     </t>
                     <!-- Ligne pour les totaux de colonnes -->
                     <tr style="border-top: 1px solid black; font-weight: bold;">
-                        <td colspan="2"/>
+                        <td t-att-colspan="2 if display_calibre else 1"/>
                         <td class="text-center">
                             <span t-esc="int(current_total_package)" t-options='{"widget": "float", "precision": 0}'/>
                         </td>

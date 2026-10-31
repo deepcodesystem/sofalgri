@@ -5,13 +5,27 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-10-31 · Liste de colisage (packing list) depuis le bon de livraison
+- Demande : mettre en place la liste de colisage sur le modèle client `Packing List SOFALGRI EXPORT - TRUCK 13 - GEORGES HELFER - 7650-011.xlsx` (24 colonnes, une ligne par palette × calibre, palettes mixtes sur plusieurs lignes avec « Pallet quantity » sur la première).
+- Choix de l'utilisateur : depuis le bon de livraison ; Excel et PDF ; informations d'expédition saisies sur la livraison ; Packhouse / Grower Code sur l'entrepôt, Bio / Conventionnel sur l'article, pays = pays d'origine de l'article.
+- Fait : nouveau module `sofalgri_packing_list` 18.0.1.0.0 (dépend de `stock`, `sale_stock`, `account`, `delivery_carrier_custom`, `sofalgri_package_reports`) :
+  - `stock.picking` : onglet « Expédition » (livraisons) : référence camion, navire, n° conteneur (pré-rempli avec le matricule), ETD, ETA, port de destination, emplacements Temp Tale et absorbeur d'éthylène ; bouton « Liste de colisage (Excel) » ; rapport PDF « Liste de colisage » (menu Imprimer, A4 paysage, ligne de total colis / palettes) ;
+  - lignes communes `_get_packing_list_rows` : regroupement des lignes de mouvement par palette (`result_package_id` ou `package_id`) × article × conditionnement ; variété, conditionnement (description de vente ou nom), poids du colis, calibre, classe, pays d'origine, nb de colis (`product_packaging_qty`, à défaut kg ÷ contenance), GGN (article, à défaut société), date de conditionnement (date de production du lot) ; tri par calibre puis palette ; référence fournisseur = factures validées de la commande, à défaut la commande ; titre « PACKING LIST <société> - <référence camion> <client> » ;
+  - Excel généré avec `xlsxwriter` (fourni avec Odoo, pas de module OCA) : titre fusionné C2:X4, en-tête ligne 6, données à partir de la ligne 7, dates au format JJ/MM/AAAA ; téléchargé via une pièce jointe de la livraison ;
+  - `stock.warehouse` : `packhouse_name`, `grower_code` ; `product.template` : `cultivation_mode` (CONVENTIONAL par défaut).
+- Bases : lecture seule TEST (lignes de livraisons validées : palette, lot, conditionnement, nb de colis ; modules installés).
+- Modules/modèles : `sofalgri_packing_list` · `stock.picking`, `stock.warehouse`, `product.template`.
+- Commit : `7f4f0e4` sur `feat/liste-colisage` (poussé).
+- Correctif (18.0.1.0.1) : erreur à l'impression (`TypeError: 'function' object is not iterable`) : sur `product.product`, la sélection héritée de `cultivation_mode` n'est pas une liste ; libellés tirés d'une table fixe `CULTIVATION_LABELS`.
+- Déploiement : nouveau module, à installer (liste des applications à mettre à jour) ; non chargé dans une base où il n'est pas installé, donc sans risque pour la PROD pendant le test. Puis renseigner Packhouse (ex. ELAKHALPORT) et Grower Code (ex. SOFALGRI) sur l'entrepôt.
+
 ## 2026-10-31 · Réception vrac : stratégie de rangement ignorée par l'assistant palette
 - Demande : en PROD, les « AVOCAT HASS NON CALIBRÉ » réceptionnés vont dans `ST/Stock` et non dans `ST/Stock/Zone de réception`, malgré la stratégie de rangement.
 - Constat (PROD, lecture seule) : règle de rangement n° 6 correcte (Avocats pour export, `ST/Stock` → `Zone de réception`). Réceptions du 29/10 (ST/IN/00750 à 00754, lignes créées à la validation) : palettes en Zone de réception. Réceptions du 31/10 (ST/IN/00759 à 00762, palettes E058 à E097 saisies avec l'assistant « Ajouter une palette ») : palettes dans `ST/Stock`. Cause : l'assistant pré-remplit l'emplacement avec la destination de la réception (`ST/Stock`), l'impose sur la ligne (pas de rangement calculé) et le reprend pour les palettes suivantes. Ces palettes ne sont pas proposées aux OF (qui consomment dans Zone de réception) : transfert interne à faire par l'utilisateur.
 - Fait : `picking_custom_addons` 18.0.4.11.1 : emplacement par défaut de l'assistant = stratégie de rangement appliquée à la destination de la réception pour l'article (et au changement d'article, si l'emplacement n'a pas été choisi) ; à la création de la ligne, si l'emplacement est resté sur la destination de la réception, la stratégie de rangement est appliquée ; un autre emplacement choisi (ex. frigo) est respecté.
 - Bases : lecture seule PROD (règles de rangement, mouvements et lignes des réceptions du 29 au 31/10).
 - Modules/modèles : `picking_custom_addons` · `stock.pallet.wizard`.
-- Commit : `714fa6f` sur `fix/rangement-assistant-palette` (poussé) ; PR deepcodesystem/sofalgri#20 ouverte vers `18.0`. Non testé dans Odoo.
+- Commit : `714fa6f` sur `fix/rangement-assistant-palette` ; PR deepcodesystem/sofalgri#20 **fusionnée** dans `18.0` (`b9ed312`).
 - Déploiement : aucun champ ajouté, mise à jour normale du module.
 
 ## 2026-10-30 · Commande de vente : saisie en palettes
@@ -26,6 +40,7 @@ Les entrées les plus récentes en haut.
 - Commit : `40a45f2` sur `feat/commande-palettes`. Validé en TEST par l'utilisateur.
 - Affichage (18.0.6.10.1) : colonnes des lignes de commande réordonnées juste après la description : Palettes → Conditionnement (type de colis) → Nb colis → Prix/colis, puis quantité en kg et prix au kg (`position="move"` sur les champs natifs `product_packaging_id` / `product_packaging_qty`).
 - Déploiement : nouveaux champs stockés sur `product.packaging` et `sale.order.line` → mise à jour en ligne de commande sur **les deux bases** avant redémarrage (exécute aussi la migration).
+- PR deepcodesystem/sofalgri#19 **fusionnée** dans `18.0`.
 - Correctif (18.0.6.10.2) : en saisissant les palettes, le conditionnement basculait sur la caisse plastique 10 kg et ne pouvait plus être changé : le calcul natif `sale.order.line._compute_product_packaging_id` suggère le plus gros conditionnement qui divise les kg (1 760 kg = 176 × 10 kg), puis l'onchange recalculait les colis sur cette base. Surcharge : le conditionnement choisi est conservé (vidé seulement s'il n'appartient pas au produit), plus de suggestion automatique.
 
 ## 2026-10-30 · Note interne du client sur les factures (client, transitaire, pro forma)

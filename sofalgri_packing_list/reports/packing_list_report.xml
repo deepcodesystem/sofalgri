@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="paperformat_packing_list" model="report.paperformat">
+        <field name="name">Liste de colisage A4 paysage</field>
+        <field name="format">A4</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">10</field>
+        <field name="margin_bottom">10</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="action_report_packing_list" model="ir.actions.report">
+        <field name="name">Liste de colisage</field>
+        <field name="model">stock.picking</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">sofalgri_packing_list.report_packing_list</field>
+        <field name="report_file">sofalgri_packing_list.report_packing_list</field>
+        <field name="print_report_name">object._get_packing_list_title()</field>
+        <field name="binding_model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="paperformat_packing_list"/>
+    </record>
+
+    <!-- Mêmes colonnes et mêmes lignes que l'export Excel (stock.picking._get_packing_list_rows) -->
+    <template id="report_packing_list">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.basic_layout">
+                    <style>
+                        .pl { font-size: 7.5px; color: #000; }
+                        .pl-title { font-size: 15px; font-weight: bold; text-align: center; margin-bottom: 8px; }
+                        .pl-table { width: 100%; border-collapse: collapse; }
+                        .pl-table th, .pl-table td { border: 1px solid #000; padding: 2px 3px; vertical-align: middle; }
+                        .pl-table th { background-color: #D9E1F2; text-align: center; font-weight: bold; }
+                        .pl-total td { font-weight: bold; }
+                    </style>
+                    <t t-set="columns" t-value="o._get_packing_list_columns()"/>
+                    <t t-set="rows" t-value="o._get_packing_list_rows()"/>
+                    <div class="page pl">
+                        <div class="pl-title" t-out="o._get_packing_list_title()"/>
+                        <table class="pl-table">
+                            <thead>
+                                <tr><th t-foreach="columns" t-as="col" t-out="col[0]"/></tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="rows" t-as="row">
+                                    <t t-foreach="columns" t-as="col">
+                                        <t t-set="value" t-value="row[col[1]]"/>
+                                        <td t-if="col[1] in ('etd', 'eta', 'pack_date')" class="text-center" t-out="value and value.strftime('%d/%m/%Y') or ''"/>
+                                        <td t-elif="col[1] in ('weight', 'size', 'class', 'boxes', 'pallets')" class="text-center" t-out="value if value not in (False, None) else ''"/>
+                                        <td t-else="" t-out="value or ''"/>
+                                    </t>
+                                </tr>
+                                <tr class="pl-total">
+                                    <td t-foreach="columns" t-as="col" class="text-center">
+                                        <t t-if="col[1] == 'supplier'">TOTAL</t>
+                                        <t t-elif="col[1] == 'boxes'" t-out="sum(r['boxes'] for r in rows)"/>
+                                        <t t-elif="col[1] == 'pallets'" t-out="sum(r['pallets'] or 0 for r in rows)"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

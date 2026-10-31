@@ -24,10 +24,11 @@ _Dernière mise à jour : 29/10/2026 (déploiement PROD des PR #5 à #7)_
 | `custom_lot_sequences` | Numéros de lot personnalisés (réceptions, OF) | 18.0.2.2.0 (`18.0`, PROD) ; 18.0.2.3.0 sur `feat/lot-du-jour-of` | stock, mrp, picking_custom_addons | ✅ |
 | `mrp_component_lot_check` | OF : popup de vérification des palettes / lots composants à la confirmation, obligatoire avant « Produire » | 18.0.1.2.0 (`18.0`) | mrp | ✅ |
 | `mrp_production_storage` | OF : conditionnement, quantité, frigo et n° de palette S saisis sur l'OF, étiquette palette produit fini (avec fabrication en 1 étape, remplace le transfert SFP) | 18.0.1.1.0 (`18.0`, PROD) ; 18.0.1.2.1 (`18.0`) | mrp | ✅ |
+| `sofalgri_packing_list` | Liste de colisage (packing list) depuis le bon de livraison, Excel et PDF | 18.0.1.0.1 (branche `feat/liste-colisage`) | stock, sale_stock, account, delivery_carrier_custom, sofalgri_package_reports | ❌ (à installer) |
 | `delivery_carrier_custom` | Personnalisations des modes de livraison | 18.0.1.0.0 | delivery, stock_delivery | ✅ |
 | `package_packaging` | Affiche le conditionnement produit dans les colis | 18.0.1.0.0 | stock, product | ❌ |
-| `picking_custom_addons` | Personnalisations des transferts de stock | 18.0.4.11.0 (`18.0`, PROD) ; 18.0.4.11.1 sur `fix/rangement-assistant-palette` | stock, product | ✅ |
-| `product_packaging_unit_price` | Prix unitaire par conditionnement (ventes et factures), facture transitaire, facture pro forma | 18.0.6.9.0 (`18.0`) ; 18.0.6.10.2 sur `feat/commande-palettes` | base, stock, sale_stock, sale_management, account | ✅ |
+| `picking_custom_addons` | Personnalisations des transferts de stock | 18.0.4.11.1 (`18.0`) | stock, product | ✅ |
+| `product_packaging_unit_price` | Prix unitaire par conditionnement (ventes et factures), facture transitaire, facture pro forma | 18.0.6.10.2 (`18.0`) | base, stock, sale_stock, sale_management, account | ✅ |
 | `purchase_order_workflow` | Achat : facture fournisseur et paiement en espèces automatiques | 1.0 | purchase, account | ✅ |
 | `sale_advance_payment` | Acomptes sur commandes de vente | 18.0.1.1.0 | sale_management, account | ✅ |
 | `sale_order_template_custom` | Champs manquants sur les modèles de devis | 18.0.0.1 | sale_management | ✅ |
@@ -89,6 +90,8 @@ Dépendances inter-modules à respecter :
 | | `mrp.component.lot.wizard` | Popup : lignes composant / palette / lot / quantité ; valide en modifiant les lignes réservées et trace le détail dans le fil de l'OF ; (18.0.1.1.0) « Poids réel consommé » obligatoire (écart reporté sur la dernière palette, total contrôlé, vrac en consommation manuelle) |
 | `mrp_production_storage` | `mrp.bom` | (18.0.1.2.0) `packaging_unit_qty` « Poids par colis » (4 / 10) |
 | | `mrp.production` | `product_packaging_id` (18.0.1.2.0 : calculé d'après la nomenclature et l'article, modifiable), `product_packaging_qty` (calculée, modifiable → `qty_producing`), `storage_location_id`, `result_package_id` (palette S, créée si vide) ; reportés sur le mouvement / les lignes du produit fini ; bouton et rapport « Étiquette palette » (A5, sans pied depuis 18.0.1.2.1) ; frigo affiché dans la liste des OF (18.0.1.2.2) ; obligatoires à « Produire » si le produit a des conditionnements |
+| `sofalgri_packing_list` | `stock.picking` | onglet « Expédition » (référence camion, navire, conteneur pré-rempli avec le matricule, ETD, ETA, port, Temp Tale, absorbeur) ; `_get_packing_list_rows` (palette × calibre × conditionnement) ; bouton « Liste de colisage (Excel) » (`xlsxwriter`) et rapport PDF « Liste de colisage » |
+| | `stock.warehouse` / `product.template` | `packhouse_name`, `grower_code` / `cultivation_mode` (CONVENTIONAL / ORGANIC) |
 | `purchase_order_workflow` | `purchase.order` | `action_create_invoice` : date facture = date de confirmation, **facture validée** puis **paiement espèces** (1er journal `cash`) automatiquement |
 | `sale_advance_payment` | `sale.order`, `account.payment` | Acomptes clients (fork du module OCA/ForgeFlow) : `account_payment_ids`, `amount_residual`, `advance_payment_status` ; assistant `account.voucher.wizard.sale` |
 | `sale_order_template_custom` | `sale.order.template.line` | `product_packaging_id`, `product_packaging_qty`, reportés sur la ligne de devis |

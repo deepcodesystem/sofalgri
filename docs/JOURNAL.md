@@ -15,7 +15,8 @@ Les entrées les plus récentes en haut.
   - `stock.warehouse` : `packhouse_name`, `grower_code` ; `product.template` : `cultivation_mode` (CONVENTIONAL par défaut).
 - Bases : lecture seule TEST (lignes de livraisons validées : palette, lot, conditionnement, nb de colis ; modules installés).
 - Modules/modèles : `sofalgri_packing_list` · `stock.picking`, `stock.warehouse`, `product.template`.
-- Commit : branche `feat/liste-colisage` (non committé, non testé dans Odoo).
+- Commit : `7f4f0e4` sur `feat/liste-colisage` (poussé).
+- Correctif (18.0.1.0.1) : erreur à l'impression (`TypeError: 'function' object is not iterable`) : sur `product.product`, la sélection héritée de `cultivation_mode` n'est pas une liste ; libellés tirés d'une table fixe `CULTIVATION_LABELS`.
 - Déploiement : nouveau module, à installer (liste des applications à mettre à jour) ; non chargé dans une base où il n'est pas installé, donc sans risque pour la PROD pendant le test. Puis renseigner Packhouse (ex. ELAKHALPORT) et Grower Code (ex. SOFALGRI) sur l'entrepôt.
 
 ## 2026-10-31 · Réception vrac : stratégie de rangement ignorée par l'assistant palette

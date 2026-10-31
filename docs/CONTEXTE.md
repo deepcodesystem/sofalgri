@@ -26,7 +26,7 @@ _Dernière mise à jour : 29/10/2026 (déploiement PROD des PR #5 à #7)_
 | `mrp_production_storage` | OF : conditionnement, quantité, frigo et n° de palette S saisis sur l'OF, étiquette palette produit fini (avec fabrication en 1 étape, remplace le transfert SFP) | 18.0.1.1.0 (`18.0`, PROD) ; 18.0.1.2.1 (`18.0`) | mrp | ✅ |
 | `delivery_carrier_custom` | Personnalisations des modes de livraison | 18.0.1.0.0 | delivery, stock_delivery | ✅ |
 | `package_packaging` | Affiche le conditionnement produit dans les colis | 18.0.1.0.0 | stock, product | ❌ |
-| `picking_custom_addons` | Personnalisations des transferts de stock | 18.0.4.11.0 (`18.0`, PROD) | stock, product | ✅ |
+| `picking_custom_addons` | Personnalisations des transferts de stock | 18.0.4.11.0 (`18.0`, PROD) ; 18.0.4.11.1 sur `fix/rangement-assistant-palette` | stock, product | ✅ |
 | `product_packaging_unit_price` | Prix unitaire par conditionnement (ventes et factures), facture transitaire, facture pro forma | 18.0.6.9.0 (`18.0`) ; 18.0.6.10.2 sur `feat/commande-palettes` | base, stock, sale_stock, sale_management, account | ✅ |
 | `purchase_order_workflow` | Achat : facture fournisseur et paiement en espèces automatiques | 1.0 | purchase, account | ✅ |
 | `sale_advance_payment` | Acomptes sur commandes de vente | 18.0.1.1.0 | sale_management, account | ✅ |
@@ -75,7 +75,7 @@ Dépendances inter-modules à respecter :
 | | `stock.lot` | `active` (archivage des lots hors stock interne, v18.0.4.5.0, fusionné dans `18.0` : PR #3) |
 | | `stock.quant` | `crate_quantity` (related colis), `tare` ; FIFO départagé par n° de palette (`in_date, package_id, id`, 18.0.4.11.0) |
 | | rapport | « Étiquette de colis » (`stock.move.line`, A5) ; affiche `lot_id` ou à défaut `lot_name` (18.0.4.6.0) |
-| | `stock.pallet.wizard` | (18.0.4.7.0) assistant « Ajouter une palette » (bouton en haut des réceptions) : n° de palette (colis de destination ; vide → palette E001, E002… créée automatiquement, type « Palettes de réception »), pesée, tare, poids net ; crée la ligne de la palette et imprime son étiquette avec le lot |
+| | `stock.pallet.wizard` | (18.0.4.7.0) assistant « Ajouter une palette » (bouton en haut des réceptions) : n° de palette (colis de destination ; vide → palette E001, E002… créée automatiquement, type « Palettes de réception »), pesée, tare, poids net ; crée la ligne de la palette et imprime son étiquette avec le lot ; (18.0.4.11.1) emplacement selon la stratégie de rangement (ex. vrac → Zone de réception) tant qu'un autre n'est pas choisi |
 | `product_packaging_unit_price` | `product.packaging` | `unit_price_package`, `standard_price_package` (= prix produit × qté, modifiables), `description_sale`, `empty_weight` « Poids du colis vide » (18.0.6.5.0, plus utilisé), `pallet_packaging_qty` « Colis par palette » (18.0.6.10.0, 220 / 100 à la migration) |
 | | `res.company` | (18.0.6.5.0) `pallet_weight` « Poids d'une palette » |
 | | `sale.order.line`, `account.move.line` | `price_unit_package` ↔ `price_unit` synchronisés par onchange ; conditionnement propagé à la facture ; (18.0.6.10.0) `sale.order.line.pallet_qty` « Palettes » → colis = palettes × colis par palette ; (18.0.6.10.2) `_compute_product_packaging_id` surchargé : plus de suggestion automatique du conditionnement d'après les kg |

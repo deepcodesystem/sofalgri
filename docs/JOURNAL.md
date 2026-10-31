@@ -5,6 +5,15 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-10-31 · Réception vrac : stratégie de rangement ignorée par l'assistant palette
+- Demande : en PROD, les « AVOCAT HASS NON CALIBRÉ » réceptionnés vont dans `ST/Stock` et non dans `ST/Stock/Zone de réception`, malgré la stratégie de rangement.
+- Constat (PROD, lecture seule) : règle de rangement n° 6 correcte (Avocats pour export, `ST/Stock` → `Zone de réception`). Réceptions du 29/10 (ST/IN/00750 à 00754, lignes créées à la validation) : palettes en Zone de réception. Réceptions du 31/10 (ST/IN/00759 à 00762, palettes E058 à E097 saisies avec l'assistant « Ajouter une palette ») : palettes dans `ST/Stock`. Cause : l'assistant pré-remplit l'emplacement avec la destination de la réception (`ST/Stock`), l'impose sur la ligne (pas de rangement calculé) et le reprend pour les palettes suivantes. Ces palettes ne sont pas proposées aux OF (qui consomment dans Zone de réception) : transfert interne à faire par l'utilisateur.
+- Fait : `picking_custom_addons` 18.0.4.11.1 : emplacement par défaut de l'assistant = stratégie de rangement appliquée à la destination de la réception pour l'article (et au changement d'article, si l'emplacement n'a pas été choisi) ; à la création de la ligne, si l'emplacement est resté sur la destination de la réception, la stratégie de rangement est appliquée ; un autre emplacement choisi (ex. frigo) est respecté.
+- Bases : lecture seule PROD (règles de rangement, mouvements et lignes des réceptions du 29 au 31/10).
+- Modules/modèles : `picking_custom_addons` · `stock.pallet.wizard`.
+- Commit : `714fa6f` sur `fix/rangement-assistant-palette` (poussé) ; PR deepcodesystem/sofalgri#20 ouverte vers `18.0`. Non testé dans Odoo.
+- Déploiement : aucun champ ajouté, mise à jour normale du module.
+
 ## 2026-10-30 · Commande de vente : saisie en palettes
 - Demande : simplifier la saisie des commandes en indiquant le nombre de palettes, d'où le nombre de colis (ex. 2 palettes de cartons 4 kg → 440 colis), puis les kg.
 - Choix de l'utilisateur : colis par palette sur le conditionnement (220 carton 4 kg, 100 plastique 10 kg) ; palettes entières ; une saisie manuelle des colis ne recalcule pas les palettes ; factures calculées avec la même donnée.

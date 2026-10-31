@@ -65,11 +65,27 @@ class StockPalletWizard(models.TransientModel):
                 'location_dest_id': last_line.location_dest_id.id,
             })
         else:
-            res['location_dest_id'] = picking.location_dest_id.id
+            res['location_dest_id'] = self._get_putaway_location(picking, products if len(products) == 1 else None).id
             crate = self.env['product.product'].search([('categ_id.name', '=', 'Colis')], limit=1)
             if crate:
                 res['crate_product_id'] = crate.id
         return res
+
+    @api.model
+    def _get_putaway_location(self, picking, product, quantity=0):
+        """ Emplacement donné par la stratégie de rangement à partir de la destination
+        de la réception (ex. Avocats pour export : ST/Stock → Zone de réception). """
+        location = picking.location_dest_id
+        if not product:
+            return location
+        return location._get_putaway_strategy(product, quantity=quantity)
+
+    @api.onchange('product_id')
+    def _onchange_product_id_putaway(self):
+        # Seulement si l'emplacement n'a pas été choisi (vide ou destination de la réception)
+        if self.product_id and self.picking_id and self.location_dest_id in (
+                self.env['stock.location'], self.picking_id.location_dest_id):
+            self.location_dest_id = self._get_putaway_location(self.picking_id, self.product_id)
 
     @api.depends('picking_id')
     def _compute_allowed_product_ids(self):
@@ -109,8 +125,14 @@ class StockPalletWizard(models.TransientModel):
         if not self.result_package_id:
             self.result_package_id = self._create_reception_package()
 
+        # Emplacement laissé sur la destination de la réception : on applique la
+        # stratégie de rangement, comme Odoo le fait pour une ligne créée à la validation
+        location = self.location_dest_id
+        if location == self.picking_id.location_dest_id:
+            location = self._get_putaway_location(self.picking_id, self.product_id, self.quantity)
+
         vals = {
-            'location_dest_id': self.location_dest_id.id,
+            'location_dest_id': location.id,
             'result_package_id': self.result_package_id.id,
             'quantity': self.quantity,
             'picked': True,

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_picking_form_inherit_packing_list" model="ir.ui.view">
+        <field name="name">stock.picking.form.inherit.packing.list</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_export_packing_list_xlsx" type="object" string="Liste de colisage (Excel)"
+                        icon="fa-file-excel-o"
+                        invisible="picking_type_code != 'outgoing' or state == 'cancel'"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Expédition" name="packing_list_shipping" invisible="picking_type_code != 'outgoing'">
+                    <group>
+                        <group>
+                            <field name="truck_reference"/>
+                            <field name="vessel_name"/>
+                            <field name="container_number"/>
+                            <field name="destination_port"/>
+                        </group>
+                        <group>
+                            <field name="etd"/>
+                            <field name="eta"/>
+                            <field name="temp_tale_location"/>
+                            <field name="ethylene_absorber_location"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

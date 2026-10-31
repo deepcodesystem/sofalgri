@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Liste de colisage (packing list)',
-    'version': '18.0.1.0.0',
+    'version': '18.0.1.0.1',
     'category': 'Inventory/Delivery',
     'summary': "Liste de colisage export depuis le bon de livraison (Excel et PDF)",
     'description': """

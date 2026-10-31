@@ -34,6 +34,8 @@ PACKING_LIST_COLUMNS = [
     ('Pack Date DD/MM/YYYY', 'pack_date'),
 ]
 DATE_KEYS = ('etd', 'eta', 'pack_date')
+# Libellés de product.template.cultivation_mode (sur la variante, la sélection héritée n'est pas une liste)
+CULTIVATION_LABELS = {'conventional': 'CONVENTIONAL', 'organic': 'ORGANIC'}
 
 
 class StockPicking(models.Model):
@@ -125,7 +127,7 @@ class StockPicking(models.Model):
                 'origin': ('country_of_origin' in product._fields and (product.country_of_origin.name or '').upper()) or '',
                 'boxes': round(group['boxes']),
                 'pallets': '',
-                'cultivation': dict(product._fields['cultivation_mode'].selection).get(product.cultivation_mode, ''),
+                'cultivation': CULTIVATION_LABELS.get(product.cultivation_mode, ''),
                 'pallet_id': group['package'].name or '',
                 'ggn': product.global_gap or company.number_ggn or '',
                 'pack_date': min(group['pack_dates']) if group['pack_dates'] else False,

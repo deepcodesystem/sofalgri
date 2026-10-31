@@ -11,7 +11,7 @@ Les entrées les plus récentes en haut.
 - Fait : `picking_custom_addons` 18.0.4.11.1 : emplacement par défaut de l'assistant = stratégie de rangement appliquée à la destination de la réception pour l'article (et au changement d'article, si l'emplacement n'a pas été choisi) ; à la création de la ligne, si l'emplacement est resté sur la destination de la réception, la stratégie de rangement est appliquée ; un autre emplacement choisi (ex. frigo) est respecté.
 - Bases : lecture seule PROD (règles de rangement, mouvements et lignes des réceptions du 29 au 31/10).
 - Modules/modèles : `picking_custom_addons` · `stock.pallet.wizard`.
-- Commit : `714fa6f` sur `fix/rangement-assistant-palette` (non poussé, non testé dans Odoo).
+- Commit : `714fa6f` sur `fix/rangement-assistant-palette` (poussé) ; PR deepcodesystem/sofalgri#20 ouverte vers `18.0`. Non testé dans Odoo.
 - Déploiement : aucun champ ajouté, mise à jour normale du module.
 
 ## 2026-10-30 · Commande de vente : saisie en palettes

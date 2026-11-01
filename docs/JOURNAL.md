@@ -15,7 +15,7 @@ Les entrées les plus récentes en haut.
 - À noter : l'étiquette n'est complète qu'une fois tous les OF de la palette créés : la réimprimer depuis le dernier OF. Son contenu vient des OF, pas du stock : elle ne reflète pas une sortie ultérieure.
 - Bases : lecture seule TEST (OF `WH/MOF/03914` à `03921`, ligne de production).
 - Modules/modèles : `mrp_production_storage`, `picking_custom_addons` · `mrp.production`, `stock.move.line`, rapport `report_production_pallet`.
-- Commit : `07e9cb3` et `5bda78e` sur `feat/palette-mixte-of` (poussé, non testé dans Odoo).
+- Commit : `07e9cb3` et `5bda78e` sur `feat/palette-mixte-of` (poussé). **Validé en TEST** par l'utilisateur.
 - Déploiement : aucun champ stocké ajouté, mise à jour normale des deux modules.
 
 ## 2026-10-31 · Liste de colisage (packing list) depuis le bon de livraison

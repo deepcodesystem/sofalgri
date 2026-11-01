@@ -12,8 +12,8 @@ Les entrées les plus récentes en haut.
 - Fait : nouveau module `sofalgri_report_signature` 18.0.1.0.0 : champ `report_signature_image` « Signature et cachet » sur `res.company` (onglet « Rapports » de la fiche société, image limitée à 1024 px) ; bloc `report_signature_block` en bas à droite, non coupé entre deux pages, sur la facture client et sur la mise en page commune transitaire / pro forma. Sans image, documents inchangés.
 - Bases : lecture seule TEST (champs de signature, modèle `account.report_invoice_document`, formulaire société).
 - Modules/modèles : `sofalgri_report_signature` · `res.company`, rapports facture, facture transitaire, pro forma.
-- Commit : `2932fde` sur `feat/signature-factures` (poussé, non testé dans Odoo).
-- Correctif (18.0.1.0.1) : sur la facture F2026/069 (test), la signature passait seule sur une page 2 vide. Facture client : signature dans la colonne droite du pied, sous les totaux. Transitaire et pro forma, par précaution : à droite des coordonnées bancaires. Commit `4854649` (poussé, rendu à valider en TEST).
+- Commit : `2932fde` sur `feat/signature-factures`. **Validé en TEST** par l'utilisateur ; PR deepcodesystem/sofalgri#24.
+- Correctif (18.0.1.0.1) : sur la facture F2026/069 (test), la signature passait seule sur une page 2 vide. Facture client : signature dans la colonne droite du pied, sous les totaux. Transitaire et pro forma, par précaution : à droite des coordonnées bancaires. Commit `4854649`.
 - Déploiement : nouveau module, à installer (liste des applications à mettre à jour) ; image stockée en pièce jointe, donc aucune colonne ajoutée sur `res_company`. Puis charger l'image sur la fiche société.
 
 ## 2026-11-01 · OF : alerte si le poids réel de vrac semble être le poids brut

@@ -5,6 +5,15 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-01 · OF : alerte si le poids réel de vrac semble être le poids brut
+- Demande : éviter que les opérateurs saisissent le poids brut au lieu du poids net dans le popup des lots.
+- Constat (PROD, lecture seule) : OF `WH/MOF/03946` à `03952` saisis en brut, corrigés à la main par l'utilisateur le 01/11 (−77 kg chacun, 539 kg au total). Les quantités ont bien été remises en stock : 123 kg ont comblé le négatif de E038 et E047, et 416 kg restent disponibles (E038 6, E042 à E046 77 chacune, E047 25). Date d'entrée de ces quants = date de la correction, donc proposés en dernier par le FIFO ; à consommer en les choisissant dans le popup si ces palettes sont physiquement vides. E003 reste à −24 kg depuis la correction du 30/10 (832 kg consommés pour 808 kg reçus), à solder par un ajustement d'inventaire. Corrections de stock laissées à l'utilisateur.
+- Fait : `mrp_component_lot_check` 18.0.1.3.0 : au-delà de 5 % d'écart avec la nomenclature (`WEIGHT_GAP_ALERT_PERCENT`, à la hausse ou à la baisse), bandeau rouge dans le popup et demande de confirmation à la validation (« bien le poids NET, sans caisses ni palette ? ») ; confirmation tracée dans le fil de l'OF. Non bloquant après confirmation. Mention « NET » ajoutée au message d'en-tête.
+- Bases : lecture seule PROD (quants du vrac en Zone de réception, lignes de consommation et de réception depuis le 29/10, messages des OF).
+- Modules/modèles : `mrp_component_lot_check` · `mrp.component.lot.wizard`.
+- Commit : `f554c83` sur `feat/alerte-poids-reel-of` (poussé, non testé dans Odoo).
+- Déploiement : aucun champ stocké ajouté, mise à jour normale du module.
+
 ## 2026-11-01 · OF : palette mixte (plusieurs calibres sur une palette)
 - Demande : produire une palette contenant plusieurs calibres avec un OF par calibre (ex. calibre 14 puis calibre 16) ; la palette du premier OF n'était plus proposée sur le deuxième.
 - Cause : le champ « N° de palette » de l'OF ne proposait que les colis vides (`quant_ids = False`).
@@ -15,7 +24,7 @@ Les entrées les plus récentes en haut.
 - À noter : l'étiquette n'est complète qu'une fois tous les OF de la palette créés : la réimprimer depuis le dernier OF. Son contenu vient des OF, pas du stock : elle ne reflète pas une sortie ultérieure.
 - Bases : lecture seule TEST (OF `WH/MOF/03914` à `03921`, ligne de production).
 - Modules/modèles : `mrp_production_storage`, `picking_custom_addons` · `mrp.production`, `stock.move.line`, rapport `report_production_pallet`.
-- Commit : `07e9cb3` et `5bda78e` sur `feat/palette-mixte-of` (poussé). **Validé en TEST** par l'utilisateur.
+- Commit : `07e9cb3` et `5bda78e` sur `feat/palette-mixte-of`. **Validé en TEST** par l'utilisateur ; PR deepcodesystem/sofalgri#22 **fusionnée** dans `18.0` (`a00f292`).
 - Déploiement : aucun champ stocké ajouté, mise à jour normale des deux modules.
 
 ## 2026-10-31 · Liste de colisage (packing list) depuis le bon de livraison

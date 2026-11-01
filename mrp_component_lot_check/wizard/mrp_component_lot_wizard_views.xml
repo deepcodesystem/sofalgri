@@ -9,8 +9,11 @@
                 <field name="default_move_id" invisible="1"/>
                 <field name="tracked_move_count" invisible="1"/>
                 <div class="alert alert-warning" role="alert">
-                    Saisissez le poids réel de vrac mis au calibrage, puis vérifiez que les palettes ci-dessous
+                    Saisissez le poids réel NET de vrac mis au calibrage, puis vérifiez que les palettes ci-dessous
                     sont bien celles utilisées. Changez la palette si besoin : le lot se met à jour automatiquement.
+                </div>
+                <div class="alert alert-danger fw-bold" role="alert" invisible="not weight_warning">
+                    <field name="weight_warning"/>
                 </div>
                 <group>
                     <group>
@@ -35,7 +38,11 @@
                     </list>
                 </field>
                 <footer>
-                    <button name="action_validate" type="object" string="Valider les lots" class="btn-primary" icon="fa-check"/>
+                    <button name="action_validate" type="object" string="Valider les lots" class="btn-primary" icon="fa-check"
+                            invisible="weight_warning"/>
+                    <button name="action_validate" type="object" string="Valider les lots" class="btn-primary" icon="fa-check"
+                            invisible="not weight_warning"
+                            confirm="Le poids réel est éloigné de la nomenclature. Confirmez-vous qu'il s'agit bien du poids NET du vrac, sans caisses ni palette ?"/>
                     <button string="Plus tard" special="cancel" class="btn-secondary"/>
                 </footer>
             </form>

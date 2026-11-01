@@ -5,6 +5,10 @@ from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 from odoo.tools import float_compare, float_is_zero
 
+# Au-delà de cet écart avec la nomenclature, le poids réel saisi est probablement le poids brut
+# (constaté : 880 à 906 kg pour 880 prévus en poids net, environ 960 kg en poids brut)
+WEIGHT_GAP_ALERT_PERCENT = 5.0
+
 
 class MrpComponentLotWizard(models.TransientModel):
     _name = 'mrp.component.lot.wizard'
@@ -26,8 +30,9 @@ class MrpComponentLotWizard(models.TransientModel):
     actual_qty = fields.Float(
         string="Poids réel consommé",
         digits='Product Unit of Measure',
-        help="Poids réellement mis au calibrage. L'écart avec la nomenclature est reporté sur la dernière palette.",
+        help="Poids net réellement mis au calibrage. L'écart avec la nomenclature est reporté sur la dernière palette.",
     )
+    weight_warning = fields.Char(compute='_compute_weight_warning')
 
     @api.model
     def default_get(self, fields_list):
@@ -55,6 +60,22 @@ class MrpComponentLotWizard(models.TransientModel):
             wizard.default_move_id = moves[:1]
             wizard.tracked_move_count = len(moves)
             wizard.expected_qty = sum(moves.mapped('product_uom_qty'))
+
+    @api.depends('actual_qty', 'expected_qty', 'tracked_move_count')
+    def _compute_weight_warning(self):
+        for wizard in self:
+            wizard.weight_warning = False
+            if wizard.tracked_move_count != 1 or not wizard.actual_qty or not wizard.expected_qty:
+                continue
+            gap = (wizard.actual_qty - wizard.expected_qty) / wizard.expected_qty * 100
+            if abs(gap) > WEIGHT_GAP_ALERT_PERCENT:
+                wizard.weight_warning = _(
+                    "Poids réel de %(actual)s pour %(expected)s prévus (%(gap)s). "
+                    "Vérifiez qu'il s'agit bien du poids NET, sans caisses ni palette.",
+                    actual='%g' % wizard.actual_qty,
+                    expected='%g' % wizard.expected_qty,
+                    gap='%+.1f %%' % gap,
+                )
 
     @api.onchange('actual_qty')
     def _onchange_actual_qty(self):
@@ -142,6 +163,8 @@ class MrpComponentLotWizard(models.TransientModel):
         if self.tracked_move_count == 1 and self.actual_qty:
             weight = Markup("<p>%s</p>") % _("Poids réel consommé : %(actual)s (nomenclature : %(expected)s).",
                                              actual='%g' % self.actual_qty, expected='%g' % self.expected_qty)
+            if self.weight_warning:
+                weight += Markup("<p><b>%s</b></p>") % _("Écart inhabituel confirmé par l'opérateur.")
         return Markup("%s<ul>%s</ul>%s") % (escape(_("Lots des composants vérifiés :")), items, weight)
 
 

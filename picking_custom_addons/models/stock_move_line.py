@@ -98,12 +98,15 @@ class StockMoveLine(models.Model):
             if line.result_package_id:
                 package = line.result_package_id
 
+                # La palette ne pèse qu'une fois, même avec plusieurs lignes sur le même colis (palette mixte)
+                line_tare = line.tare - line.pallet_weight if package.tare else line.tare
+
                 # Préparation des valeurs à écrire
                 vals_to_write = {
                     # On ACCUMULE le poids net du produit (net_weight)
                     'shipping_weight': package.shipping_weight + line.net_weight,
                     # On ACCUMULE le poids de la tare
-                    'tare': package.tare + line.tare,
+                    'tare': package.tare + line_tare,
                     'packaging_datetime': fields.Datetime.now(),
                 }
 

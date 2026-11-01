@@ -44,15 +44,20 @@
                 .spl-net { background-color: #000; color: #fff; }
                 .spl-net .spl-caption { color: #ddd; }
                 .spl-net .spl-weight { font-size: 30px; }
+                .spl-lines { width: 100%; border-collapse: collapse; }
+                .spl-lines th { padding: 3px 10px; border-bottom: 1px solid #000; font-size: 10px; font-weight: normal; letter-spacing: 1px; text-transform: uppercase; color: #555; }
+                .spl-lines td { padding: 3px 10px; border: none; border-bottom: 1px solid #000; font-size: 14px; font-weight: bold; }
             </style>
             <t t-foreach="docs" t-as="o">
-                <t t-set="lot_label" t-value="o.lot_producing_id.name or ''"/>
+                <t t-set="label" t-value="o._get_pallet_label_data()"/>
+                <t t-set="mixed" t-value="label['mixed']"/>
+                <t t-set="lot_label" t-value="label['lot_names'][0] if len(label['lot_names']) == 1 else ''"/>
                 <t t-set="pallet_label" t-value="o.result_package_id.name or ''"/>
                 <t t-set="product" t-value="o.product_id"/>
                 <t t-set="company" t-value="o.company_id"/>
                 <t t-set="warehouse" t-value="o.picking_type_id.warehouse_id"/>
                 <t t-set="packaging" t-value="o.product_packaging_id"/>
-                <t t-set="net_qty" t-value="o.qty_producing or o.product_qty"/>
+                <t t-set="net_qty" t-value="label['qty']"/>
                 <t t-set="uom" t-value="o.product_uom_id.name or 'kg'"/>
                 <!-- Champs d'autres modules (sofalgri_package_reports, product_brand), affichés s'ils existent -->
                 <t t-set="variety" t-value="'product_variety' in product._fields and product.product_variety"/>
@@ -77,7 +82,7 @@
                                 </div>
                             </td>
                             <td style="width: 26%; border-left: none; text-align: right;">
-                                <span class="spl-badge">Export</span>
+                                <span class="spl-badge" t-out="'Export - Mixte' if mixed else 'Export'"/>
                             </td>
                         </tr>
 
@@ -91,14 +96,49 @@
                             </td>
                             <td colspan="2" style="text-align: center;">
                                 <div class="spl-caption">N° de lot</div>
-                                <div class="spl-lot" t-out="lot_label or '-'"/>
+                                <div class="spl-lot" t-out="lot_label or ('Voir détail' if label['lot_names'] else '-')"/>
                                 <div t-if="lot_label" t-out="lot_label"
                                      t-options="{'widget': 'barcode', 'symbology': 'Code128', 'width': 600, 'height': 100, 'img_style': 'width: 75mm; height: 11mm;'}"/>
                             </td>
                         </tr>
 
                         <!-- Produit -->
-                        <tr>
+                        <tr t-if="mixed">
+                            <td colspan="2">
+                                <div class="spl-caption">Produit</div>
+                                <div class="spl-value" t-out="label['product_name']"/>
+                            </td>
+                            <td>
+                                <div class="spl-caption">Variété</div>
+                                <div class="spl-value" t-out="variety or '-'"/>
+                            </td>
+                            <td>
+                                <div class="spl-caption">Date</div>
+                                <div class="spl-value" t-field="o.date_start" t-options="{'widget': 'date'}"/>
+                            </td>
+                        </tr>
+                        <!-- Palette mixte : une ligne par calibre -->
+                        <tr t-if="mixed">
+                            <td colspan="4" style="padding: 0;">
+                                <table class="spl-lines">
+                                    <tr>
+                                        <th style="text-align: left;">Calibre</th>
+                                        <th style="text-align: left;">Lot</th>
+                                        <th style="text-align: left;">Conditionnement</th>
+                                        <th style="text-align: right;">Nb colis</th>
+                                        <th style="text-align: right;">Poids net</th>
+                                    </tr>
+                                    <tr t-foreach="label['lines']" t-as="line">
+                                        <td t-out="line['calibre'] or line['product'].display_name"/>
+                                        <td t-out="line['lot_name'] or '-'"/>
+                                        <td t-out="line['packaging'].name or '-'"/>
+                                        <td style="text-align: right;" t-out="'%g' % line['boxes']"/>
+                                        <td style="text-align: right;"><t t-out="'%g' % line['qty']"/> <t t-out="uom"/></td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr t-if="not mixed">
                             <td colspan="2">
                                 <div class="spl-caption">Produit</div>
                                 <div class="spl-value" t-out="product.display_name"/>
@@ -112,7 +152,7 @@
                                 <div class="spl-value" t-out="calibre or '-'"/>
                             </td>
                         </tr>
-                        <tr>
+                        <tr t-if="not mixed">
                             <td colspan="2">
                                 <div class="spl-caption">Conditionnement</div>
                                 <div class="spl-value" t-out="packaging.name or '-'"/>
@@ -130,10 +170,14 @@
                         <!-- Contenu de la palette -->
                         <tr class="spl-weights">
                             <td style="width: 22%;">
-                                <div class="spl-caption">Nb colis</div>
-                                <div class="spl-weight" t-out="'%g' % o.product_packaging_qty if packaging else '-'"/>
+                                <div class="spl-caption" t-out="'Total colis' if mixed else 'Nb colis'"/>
+                                <div class="spl-weight" t-out="'%g' % label['boxes'] if packaging else '-'"/>
                             </td>
-                            <td style="width: 26%;">
+                            <td t-if="mixed" style="width: 26%;">
+                                <div class="spl-caption">Calibres</div>
+                                <div class="spl-weight" t-out="label['calibres'] or '-'"/>
+                            </td>
+                            <td t-if="not mixed" style="width: 26%;">
                                 <div class="spl-caption">Poids par colis</div>
                                 <div class="spl-weight"><t t-out="'%g' % packaging.qty if packaging else '-'"/> <t t-if="packaging" t-out="product.uom_id.name"/></div>
                             </td>

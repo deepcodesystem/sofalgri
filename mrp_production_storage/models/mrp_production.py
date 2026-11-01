@@ -40,11 +40,12 @@ class MrpProduction(models.Model):
     result_package_id = fields.Many2one(
         'stock.quant.package',
         string="N° de palette",
-        domain="[('quant_ids', '=', False)]",
+        domain="['|', ('quant_ids', '=', False), '&', ('name', '=like', 'S%'), ('location_id', '=', storage_location_id)]",
         copy=False,
         tracking=True,
         help="Palette de sortie du produit fini. Laisser vide pour créer automatiquement "
-             "la palette suivante (S001, S002...) à l'impression de l'étiquette ou à la production.",
+             "la palette suivante (S001, S002...) à l'impression de l'étiquette ou à la production. "
+             "Palette mixte : choisir une palette S déjà présente dans le frigo de stockage.",
     )
 
     @api.depends('bom_id', 'product_id')
@@ -145,6 +146,48 @@ class MrpProduction(models.Model):
             self.result_package_id = self._create_pallet_package()
         return self.env.ref('mrp_production_storage.action_report_production_pallet').report_action(self)
 
+    def _get_pallet_label_data(self):
+        """ Contenu de la palette pour l'étiquette : tous les OF non annulés de cette palette,
+        une ligne par calibre, conditionnement et lot (palette mixte : plusieurs lignes). """
+        self.ensure_one()
+        productions = self
+        if self.result_package_id:
+            productions |= self.search([
+                ('result_package_id', '=', self.result_package_id.id),
+                ('state', '!=', 'cancel'),
+            ])
+        groups = {}
+        for production in productions:
+            product = production.product_id
+            packaging = production.product_packaging_id
+            lot = production.lot_producing_id
+            line = groups.setdefault((product.id, packaging.id, lot.id), {
+                # Champ de sofalgri_package_reports, affiché s'il existe
+                'calibre': 'calibre' in product._fields and product.calibre or '',
+                'product': product,
+                'packaging': packaging,
+                'lot_name': lot.name or '',
+                'boxes': 0.0,
+                'qty': 0.0,
+            })
+            line['boxes'] += production.product_packaging_qty
+            line['qty'] += production.qty_producing or production.product_qty
+
+        def sort_key(line):
+            calibre = str(line['calibre'])
+            return (int(calibre) if calibre.isdigit() else 999, calibre)
+        lines = sorted(groups.values(), key=sort_key)
+        lot_names = list(dict.fromkeys(line['lot_name'] for line in lines if line['lot_name']))
+        return {
+            'lines': lines,
+            'mixed': len(lines) > 1,
+            'lot_names': lot_names,
+            'calibres': ' + '.join(dict.fromkeys(str(line['calibre']) for line in lines if line['calibre'])),
+            'product_name': ', '.join(dict.fromkeys(line['product'].product_tmpl_id.name.strip() for line in lines)),
+            'boxes': sum(line['boxes'] for line in lines),
+            'qty': sum(line['qty'] for line in lines),
+        }
+
     def _post_inventory(self, cancel_backorder=False):
         # Les lignes du produit fini existent à ce stade : on y reporte palette et frigo avant validation
         self._apply_storage_to_finished_moves()
@@ -161,6 +204,14 @@ class MrpProduction(models.Model):
             if missing:
                 raise UserError(_("%(of)s : indiquez %(fields)s avant de produire.",
                                   of=production.name, fields=_(" et ").join(missing)))
+            # Palette mixte : tous les calibres d'une palette sont au même endroit
+            package_location = production.result_package_id.location_id
+            if package_location and package_location != production.storage_location_id:
+                raise UserError(_("%(of)s : la palette %(pallet)s se trouve dans %(location)s, "
+                                  "pas dans le frigo de stockage %(storage)s.",
+                                  of=production.name, pallet=production.result_package_id.name,
+                                  location=package_location.display_name,
+                                  storage=production.storage_location_id.display_name))
             if not production.result_package_id:
                 production.result_package_id = production._create_pallet_package()
         self._apply_storage_to_finished_moves()

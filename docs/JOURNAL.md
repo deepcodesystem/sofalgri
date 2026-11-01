@@ -5,6 +5,16 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-01 · Signature et cachet sur les factures
+- Demande : ajouter une signature aux factures préparées (client, transitaire, pro forma).
+- Choix de l'utilisateur : une image unique (signature + cachet) ; module dédié, réutilisable pour d'autres rapports.
+- Constat (TEST, lecture seule) : pas de champ de signature natif sur `account.move` ni `res.company`, ni dans le modèle natif de la facture. Le bloc natif `payment_term` (conditions, QR code) est retiré par le pied recréé de `product_packaging_unit_price` : ancrage sur `custom_footer`, dernier bloc de la page.
+- Fait : nouveau module `sofalgri_report_signature` 18.0.1.0.0 : champ `report_signature_image` « Signature et cachet » sur `res.company` (onglet « Rapports » de la fiche société, image limitée à 1024 px) ; bloc `report_signature_block` en bas à droite, non coupé entre deux pages, sur la facture client et sur la mise en page commune transitaire / pro forma. Sans image, documents inchangés.
+- Bases : lecture seule TEST (champs de signature, modèle `account.report_invoice_document`, formulaire société).
+- Modules/modèles : `sofalgri_report_signature` · `res.company`, rapports facture, facture transitaire, pro forma.
+- Commit : branche `feat/signature-factures` (non committé, non testé dans Odoo).
+- Déploiement : nouveau module, à installer (liste des applications à mettre à jour) ; image stockée en pièce jointe, donc aucune colonne ajoutée sur `res_company`. Puis charger l'image sur la fiche société.
+
 ## 2026-11-01 · OF : alerte si le poids réel de vrac semble être le poids brut
 - Demande : éviter que les opérateurs saisissent le poids brut au lieu du poids net dans le popup des lots.
 - Constat (PROD, lecture seule) : OF `WH/MOF/03946` à `03952` saisis en brut, corrigés à la main par l'utilisateur le 01/11 (−77 kg chacun, 539 kg au total). Les quantités ont bien été remises en stock : 123 kg ont comblé le négatif de E038 et E047, et 416 kg restent disponibles (E038 6, E042 à E046 77 chacune, E047 25). Date d'entrée de ces quants = date de la correction, donc proposés en dernier par le FIFO ; à consommer en les choisissant dans le popup si ces palettes sont physiquement vides. E003 reste à −24 kg depuis la correction du 30/10 (832 kg consommés pour 808 kg reçus), à solder par un ajustement d'inventaire. Corrections de stock laissées à l'utilisateur.

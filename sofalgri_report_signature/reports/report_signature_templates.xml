@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Signature et cachet de la société, en bas à droite. Variable attendue : company. -->
+    <template id="report_signature_block">
+        <div t-if="company.report_signature_image" name="report_signature" style="margin-top: 16px; text-align: right; page-break-inside: avoid;">
+            <img t-att-src="image_data_uri(company.report_signature_image)" alt="Signature et cachet" style="max-width: 260px; max-height: 130px;"/>
+        </div>
+    </template>
+
+    <!-- Facture client : après le pied recréé par product_packaging_unit_price, dernier bloc de la page -->
+    <template id="report_invoice_document_signature" inherit_id="product_packaging_unit_price.report_invoice_document_inherit_packaging_replace">
+        <xpath expr="//div[@name='custom_footer']" position="after">
+            <t t-call="sofalgri_report_signature.report_signature_block">
+                <t t-set="company" t-value="o.company_id"/>
+            </t>
+        </xpath>
+    </template>
+
+    <!-- Facture transitaire et facture pro forma : mise en page commune -->
+    <template id="report_export_document_body_signature" inherit_id="product_packaging_unit_price.report_export_document_body">
+        <xpath expr="//div[hasclass('fwd')]" position="inside">
+            <t t-call="sofalgri_report_signature.report_signature_block"/>
+        </xpath>
+    </template>
+</odoo>

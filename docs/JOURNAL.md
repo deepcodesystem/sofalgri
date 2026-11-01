@@ -5,6 +5,19 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-01 · OF : palette mixte (plusieurs calibres sur une palette)
+- Demande : produire une palette contenant plusieurs calibres avec un OF par calibre (ex. calibre 14 puis calibre 16) ; la palette du premier OF n'était plus proposée sur le deuxième.
+- Cause : le champ « N° de palette » de l'OF ne proposait que les colis vides (`quant_ids = False`).
+- Choix de l'utilisateur : une étiquette récapitulative de la palette, plutôt qu'une étiquette par calibre.
+- Fait :
+  - `mrp_production_storage` 18.0.1.3.0 : le champ propose les palettes vides et les palettes `S…` présentes dans le frigo de l'OF ; « Produire » refuse une palette située ailleurs que dans ce frigo ; l'étiquette palette reprend tous les OF non annulés de la palette (`_get_pallet_label_data`) : une ligne par calibre, conditionnement et lot, total colis, calibres, poids net total, badge « Export - Mixte ». Étiquette inchangée pour une palette à un seul calibre.
+  - `picking_custom_addons` 18.0.4.11.2 : le poids de la palette n'est compté qu'une fois dans la tare du colis, même avec plusieurs lignes sur le même colis.
+- À noter : l'étiquette n'est complète qu'une fois tous les OF de la palette créés : la réimprimer depuis le dernier OF. Son contenu vient des OF, pas du stock : elle ne reflète pas une sortie ultérieure.
+- Bases : lecture seule TEST (OF `WH/MOF/03914` à `03921`, ligne de production).
+- Modules/modèles : `mrp_production_storage`, `picking_custom_addons` · `mrp.production`, `stock.move.line`, rapport `report_production_pallet`.
+- Commit : `07e9cb3` et `5bda78e` sur `feat/palette-mixte-of` (poussé). **Validé en TEST** par l'utilisateur.
+- Déploiement : aucun champ stocké ajouté, mise à jour normale des deux modules.
+
 ## 2026-10-31 · Liste de colisage (packing list) depuis le bon de livraison
 - Demande : mettre en place la liste de colisage sur le modèle client `Packing List SOFALGRI EXPORT - TRUCK 13 - GEORGES HELFER - 7650-011.xlsx` (24 colonnes, une ligne par palette × calibre, palettes mixtes sur plusieurs lignes avec « Pallet quantity » sur la première).
 - Choix de l'utilisateur : depuis le bon de livraison ; Excel et PDF ; informations d'expédition saisies sur la livraison ; Packhouse / Grower Code sur l'entrepôt, Bio / Conventionnel sur l'article, pays = pays d'origine de l'article.

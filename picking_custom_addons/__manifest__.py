@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Picking Custom Addons',
-    'version': '18.0.4.11.1',
+    'version': '18.0.4.11.2',
     'category': 'Inventory',
     'summary': 'Module personalisé pour Sofalgri',
     'description': """

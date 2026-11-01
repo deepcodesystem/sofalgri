@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Rapports : signature et cachet',
-    'version': '18.0.1.0.0',
+    'version': '18.0.1.0.1',
     'category': 'Accounting',
     'summary': "Image de la signature et du cachet de la société, imprimée sur les factures",
     'description': """
-        L'image est chargée sur la fiche société (onglet « Rapports ») et imprimée en bas à droite
+        L'image est chargée sur la fiche société (onglet « Rapports ») et imprimée à droite, en fin
         de la facture client, de la facture transitaire et de la facture pro forma.
         Sans image, les documents restent inchangés.
     """,

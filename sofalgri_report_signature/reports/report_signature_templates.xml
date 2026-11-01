@@ -7,19 +7,21 @@
         </div>
     </template>
 
-    <!-- Facture client : après le pied recréé par product_packaging_unit_price, dernier bloc de la page -->
+    <!-- Facture client : dans la colonne droite du pied (sous les totaux), pour rester sur la même page -->
     <template id="report_invoice_document_signature" inherit_id="product_packaging_unit_price.report_invoice_document_inherit_packaging_replace">
-        <xpath expr="//div[@name='custom_footer']" position="after">
+        <xpath expr="//div[@name='custom_footer']/div[hasclass('col-5')]" position="inside">
             <t t-call="sofalgri_report_signature.report_signature_block">
                 <t t-set="company" t-value="o.company_id"/>
             </t>
         </xpath>
     </template>
 
-    <!-- Facture transitaire et facture pro forma : mise en page commune -->
+    <!-- Facture transitaire et facture pro forma (mise en page commune) : à droite des coordonnées bancaires -->
     <template id="report_export_document_body_signature" inherit_id="product_packaging_unit_price.report_export_document_body">
-        <xpath expr="//div[hasclass('fwd')]" position="inside">
-            <t t-call="sofalgri_report_signature.report_signature_block"/>
+        <xpath expr="//div[hasclass('fwd')]/p[last()]" position="before">
+            <div style="float: right;">
+                <t t-call="sofalgri_report_signature.report_signature_block"/>
+            </div>
         </xpath>
     </template>
 </odoo>

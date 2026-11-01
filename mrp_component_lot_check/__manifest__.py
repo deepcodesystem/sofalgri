@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Vérification des lots composants des OF',
-    'version': '18.0.1.2.0',
+    'version': '18.0.1.3.0',
     'category': 'Manufacturing',
     'summary': 'Popup de vérification des palettes et lots consommés par un ordre de fabrication',
     'description': """

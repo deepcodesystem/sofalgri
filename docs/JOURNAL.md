@@ -11,7 +11,7 @@ Les entrées les plus récentes en haut.
 - Fait : `mrp_component_lot_check` 18.0.1.3.0 : au-delà de 5 % d'écart avec la nomenclature (`WEIGHT_GAP_ALERT_PERCENT`, à la hausse ou à la baisse), bandeau rouge dans le popup et demande de confirmation à la validation (« bien le poids NET, sans caisses ni palette ? ») ; confirmation tracée dans le fil de l'OF. Non bloquant après confirmation. Mention « NET » ajoutée au message d'en-tête.
 - Bases : lecture seule PROD (quants du vrac en Zone de réception, lignes de consommation et de réception depuis le 29/10, messages des OF).
 - Modules/modèles : `mrp_component_lot_check` · `mrp.component.lot.wizard`.
-- Commit : `f554c83` sur `feat/alerte-poids-reel-of` (poussé, non testé dans Odoo).
+- Commit : `f554c83` sur `feat/alerte-poids-reel-of` ; PR deepcodesystem/sofalgri#23. **Validé en TEST** par l'utilisateur.
 - Déploiement : aucun champ stocké ajouté, mise à jour normale du module.
 
 ## 2026-11-01 · OF : palette mixte (plusieurs calibres sur une palette)

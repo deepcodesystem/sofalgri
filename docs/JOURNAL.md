@@ -5,6 +5,16 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-02 · OF en vrac : conditionnement non obligatoire
+- Demande : le produit « AVOCAT HASS CALIBRÉS - Petits Calibres » se vend en vrac ou en caisse de 10 kg ; un OF sur la nomenclature « EN VRAC » est refusé à « Produire » (`WH/MOF/04001`, TEST) car l'article a un conditionnement.
+- Fait : `mrp_production_storage` 18.0.1.4.2 : conditionnement facultatif à « Produire » si la nomenclature n'a pas de « Poids par colis » ; frigo toujours obligatoire. Sans nomenclature ou avec un poids par colis : contrôle inchangé. Étiquette palette et liste de colisage lues : tiret ou vide si pas de conditionnement, sans erreur.
+- À faire : la nomenclature « déchets ferme » (id 15, carton 4 kg, TEST et PROD) n'a pas de poids par colis et perdrait le contrôle : y saisir 4.
+- Limite : une palette S est toujours créée sur un OF en vrac. Non testé dans Odoo.
+- Bases : lecture seule TEST (`WH/MOF/04001`, nomenclatures) et PROD (nomenclatures sans poids par colis : ids 11, 15, 19).
+- Modules/modèles : `mrp_production_storage` · `mrp.production`, `mrp.bom`.
+- Commit : `b1708f5` sur `fix/of-vrac-sans-conditionnement` (poussé).
+- Déploiement : aucun champ stocké, mise à jour normale du module.
+
 ## 2026-11-02 · Groupe « Mes factures uniquement »
 - Demande : un groupe d'utilisateurs qui crée une facture à son nom, la valide et la paie, sans voir les autres factures, surtout clients.
 - Choix de l'utilisateur : factures clients et fournisseurs ; « à son nom » = créée par lui (`create_uid`, non modifiable) ; paiement en caisse et banque ; menu dédié.
@@ -15,7 +25,7 @@ Les entrées les plus récentes en haut.
 - Limites : un utilisateur de ce groupe ne voit pas une facture créée par un autre, même s'il doit la payer. Les contacts restent visibles (nécessaires pour facturer).
 - Bases : lecture seule TEST (groupes, règles d'accès, journaux, identifiants natifs).
 - Modules/modèles : `sofalgri_own_invoices` · `res.groups`, `ir.rule`, `ir.ui.menu`.
-- Commit : `ac6ba6c` sur `feat/groupe-mes-factures` (poussé). Installé en TEST par l'utilisateur ; PROD : non installé.
+- Commit : `ac6ba6c` ; PR deepcodesystem/sofalgri#30 **fusionnée** dans `18.0` (`6baeb94`). Installé en TEST et en PROD par l'utilisateur (PROD contrôlée en lecture : 18.0.1.0.0 le 02/11).
 - Déploiement : nouveau module, à installer (liste des applications à mettre à jour) ; aucun champ stocké ; non chargé dans une base où il n'est pas installé. Puis affecter le groupe sur la fiche de l'utilisateur.
 
 ## 2026-11-02 · Synthèse des exports

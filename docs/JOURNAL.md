@@ -5,6 +5,18 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-02 · Groupe « Mes factures uniquement »
+- Demande : un groupe d'utilisateurs qui crée une facture à son nom, la valide et la paie, sans voir les autres factures, surtout clients.
+- Choix de l'utilisateur : factures clients et fournisseurs ; « à son nom » = créée par lui (`create_uid`, non modifiable) ; paiement en caisse et banque ; menu dédié.
+- Constat (TEST) : le groupe Facturation (id 26) a une règle sur toutes les écritures (ids 111 et 112) et les règles de groupe s'additionnent : une règle de groupe ne peut pas restreindre. Aucun module installé ne couvre le besoin.
+- Fait : nouveau module `sofalgri_own_invoices` 18.0.1.0.0 (dépend de `account`) : groupe `group_own_invoices` (hérite de Facturation, catégorie « Sofalgri » sur la fiche utilisateur) ; règles **globales** qui testent ce groupe dans leur domaine, sur `account.move`, `account.move.line`, `account.payment`, `account.partial.reconcile`, et aucune ligne sur `account.invoice.report` ; menu « Mes factures » (factures clients, fournisseurs, paiements) ; menu Facturation natif masqué pour ce groupe (`_visible_menu_ids`).
+- À contrôler en TEST (non testé, Python absent du poste) : création, validation et paiement ; numéro de facture à la suite des autres (la séquence ne doit pas dépendre des factures visibles) ; **fiche d'un client, onglet Comptabilité : total à recevoir et facturé**, qui peuvent être calculés sans les règles d'accès et révéler des montants ; autres utilisateurs inchangés.
+- Limites : un utilisateur de ce groupe ne voit pas une facture créée par un autre, même s'il doit la payer. Les contacts restent visibles (nécessaires pour facturer).
+- Bases : lecture seule TEST (groupes, règles d'accès, journaux, identifiants natifs).
+- Modules/modèles : `sofalgri_own_invoices` · `res.groups`, `ir.rule`, `ir.ui.menu`.
+- Commit : `ac6ba6c` sur `feat/groupe-mes-factures` (poussé). Non installé, non testé.
+- Déploiement : nouveau module, à installer (liste des applications à mettre à jour) ; aucun champ stocké ; non chargé dans une base où il n'est pas installé. Puis affecter le groupe sur la fiche de l'utilisateur.
+
 ## 2026-11-02 · Synthèse des exports
 - Demande : tableau de suivi des exports sur le modèle Excel du client (une ligne par camion), avec choix d'une tranche de dates et début de saison défini (01/10/2026).
 - Choix de l'utilisateur : poids net = lignes de facture (le brut 24 250 reste une saisie) ; station = adresse de l'entrepôt (HIPECA) ; GPS = code du traceur, saisi ; colonne TY gardée telle quelle, sens inconnu ; statut et arrivée saisis sur la livraison, valeurs à préciser ; transporteur = celui du mode de livraison ; claim par avoirs ; cours issu des rapprochements pour l'instant ; trois paiements au plus.

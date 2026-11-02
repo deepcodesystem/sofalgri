@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_picking_form_inherit_export_summary" model="ir.ui.view">
+        <field name="name">stock.picking.form.inherit.export.summary</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="sofalgri_packing_list.view_picking_form_inherit_packing_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='packing_list_shipping']/group" position="after">
+                <group string="Suivi de l'export">
+                    <group>
+                        <field name="export_carrier_id"/>
+                        <field name="export_gps"/>
+                        <field name="export_type"/>
+                    </group>
+                    <group>
+                        <field name="export_status"/>
+                        <field name="export_arrival_date"/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

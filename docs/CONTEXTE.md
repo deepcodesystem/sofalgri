@@ -23,7 +23,7 @@ _Dernière mise à jour : 29/10/2026 (déploiement PROD des PR #5 à #7)_
 |---|---|---|---|---|
 | `custom_lot_sequences` | Numéros de lot personnalisés (réceptions, OF) | 18.0.2.2.0 (`18.0`, PROD) ; 18.0.2.3.0 sur `feat/lot-du-jour-of` | stock, mrp, picking_custom_addons | ✅ |
 | `mrp_component_lot_check` | OF : popup de vérification des palettes / lots composants à la confirmation, obligatoire avant « Produire » | 18.0.1.3.0 (`18.0`) ; 18.0.1.4.0 sur `feat/deconstruction-palette` | mrp | ✅ |
-| `mrp_production_storage` | OF : conditionnement, quantité, frigo et n° de palette S saisis sur l'OF, étiquette palette produit fini (avec fabrication en 1 étape, remplace le transfert SFP) | 18.0.1.3.0 (`18.0`) ; 18.0.1.4.0 sur `feat/deconstruction-palette` | mrp | ✅ |
+| `mrp_production_storage` | OF : conditionnement, quantité, frigo et n° de palette S saisis sur l'OF, étiquette palette produit fini (avec fabrication en 1 étape, remplace le transfert SFP) | 18.0.1.3.0 (`18.0`) ; 18.0.1.4.1 sur `feat/deconstruction-palette` | mrp | ✅ |
 | `sofalgri_packing_list` | Liste de colisage (packing list) depuis le bon de livraison, Excel et PDF | 18.0.1.0.1 (branche `feat/liste-colisage`) | stock, sale_stock, account, delivery_carrier_custom, sofalgri_package_reports | ❌ (à installer) |
 | `sofalgri_report_signature` | Signature et cachet de la société (image) sur la facture client, la transitaire et la pro forma | 18.0.1.0.1 (branche `feat/signature-factures`) | account, product_packaging_unit_price | ❌ (à installer) |
 | `delivery_carrier_custom` | Personnalisations des modes de livraison | 18.0.1.0.0 | delivery, stock_delivery | ✅ |

@@ -126,6 +126,9 @@ class MrpComponentLotWizard(models.TransientModel):
                     key: value for key, value in vals.items()
                     if (line.move_line_id[key].id if key != 'quantity' else line.move_line_id[key]) != value
                 }
+                # Lot ou palette changés : la ligne suit leur emplacement réel
+                if {'lot_id', 'package_id'} & set(changes):
+                    changes['location_id'] = line._get_source_location().id
                 if changes:
                     line.move_line_id.write(changes)
             else:
@@ -133,7 +136,7 @@ class MrpComponentLotWizard(models.TransientModel):
                     'move_id': line.move_id.id,
                     'product_id': line.product_id.id,
                     'product_uom_id': line.move_id.product_uom.id,
-                    'location_id': line.move_id.location_id.id,
+                    'location_id': line._get_source_location().id,
                     'location_dest_id': line.move_id.location_dest_id.id,
                 })
                 self.env['stock.move.line'].create(vals)
@@ -195,6 +198,23 @@ class MrpComponentLotWizardLine(models.TransientModel):
                "('quant_ids.quantity', '>', 0)]",
     )
     quantity = fields.Float(string="Quantité", digits='Product Unit of Measure')
+
+    def _get_source_location(self):
+        """ Emplacement réel du lot et de la palette : l'OF prend dans ST/Stock, mais le stock est dans
+        un sous-emplacement. Consommer sur ST/Stock y créerait un stock négatif. """
+        self.ensure_one()
+        quant = self.env['stock.quant'].search([
+            ('product_id', '=', self.product_id.id),
+            ('lot_id', '=', self.lot_id.id),
+            ('package_id', '=', self.package_id.id),
+            ('location_id', 'child_of', self.location_id.id),
+            ('quantity', '>', 0),
+        ], order='quantity desc', limit=1)
+        if not quant:
+            raise UserError(_("Le lot %(lot)s n'a pas de stock %(where)s : choisissez la palette qui le contient.",
+                              lot=self.lot_id.name,
+                              where=self.package_id.name or _("hors palette")))
+        return quant.location_id
 
     @api.onchange('package_id')
     def _onchange_package_id(self):

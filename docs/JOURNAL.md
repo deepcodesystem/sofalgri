@@ -5,6 +5,20 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-02 · Déconstruction par palette et emplacement réel dans le popup des lots
+- Demande : simplifier la déconstruction d'une palette pour la refaire sous une autre marque (voir la palette S040 : la quantité déconstruite restait sur la palette).
+- Causes : le natif propose l'emplacement de l'OF (`ST/Stock`) et sa ligne de déconstruction ne porte aucun colis. Dans le popup des lots, une ligne ajoutée prenait l'emplacement de l'OF (`ST/Stock`) au lieu de celui du stock : stock négatif dans `ST/Stock` (`004FE` en PROD, très probablement aussi les négatifs du 01/11 à 23:12, non relu).
+- Fait :
+  - `mrp_production_storage` 18.0.1.4.0 : champ « Palette » (`package_id`, stocké) sur `mrp.unbuild`, rempli d'après l'OF si la palette contient encore son lot ; le frigo suit la palette ; la ligne de déconstruction sort de cette palette (`_prepare_finished_move_line_vals`), palette mixte comprise ; refus si le disponible de la palette est insuffisant. Vide : comportement natif. Étiquette palette : la quantité déconstruite est retirée (`_get_pallet_label_data`).
+  - `mrp_component_lot_check` 18.0.1.4.0 : ligne ajoutée, ou dont le lot ou la palette change, placée sur l'emplacement réel du stock (`_get_source_location`) ; refus si ce lot n'a pas de stock sur cette palette ou hors palette.
+- Correctif (18.0.1.4.1) : quantité du popup de déconstruction préremplie avec le contenu de la palette (le natif proposait 1). Après un refus, le popup est figé et le brouillon reste : le fermer et supprimer le brouillon.
+- Test TEST (`WH/MOF/03945`, `UB/00152`) : palette S032 et Frigo 01 proposés, refus à 1 000 kg, 880 kg sortis de S032 sans stock négatif, vrac rendu en `Zone de réception` sans palette. Nouvel OF `WH/MOF/03989` : vrac consommé en `Zone de réception`, sans négatif. Palette mixte S072 (`UB/00153`) : seul le calibre 22 sorti. Étiquette de S072 confirmée par l'utilisateur. **Validé en TEST.**
+- Limite : le vrac rendu revient toujours sans palette, en `Zone de réception` par la stratégie de rangement.
+- Bases : lecture seule TEST (vues de `mrp.unbuild`, modules « unbuild » : aucun installé).
+- Modules/modèles : `mrp_production_storage`, `mrp_component_lot_check` · `mrp.unbuild`, `mrp.production`, `mrp.component.lot.wizard.line`.
+- Commit : `e5156e4`, `8a8803b` et `506bbd1` sur `feat/deconstruction-palette` ; PR deepcodesystem/sofalgri#26.
+- Déploiement : nouveau champ stocké sur `mrp.unbuild` → mise à jour en ligne de commande de `mrp_production_storage` sur **les deux bases** avant redémarrage ; `mrp_component_lot_check` : mise à jour normale.
+
 ## 2026-11-02 · Déconstruction d'un OF : palette S040 restée à 2 lignes
 - Demande : après la déconstruction de `WH/MOF/03953` et la production de `WH/MOF/03987` sur la même palette, S040 affiche 2 lignes : la quantité déconstruite y est restée.
 - Cause (PROD, lecture seule) : `UB/00149` a sorti les 880 kg du lot `0003S01112026` de `ST/Stock`, sans palette : −880 kg dans `ST/Stock`, S040 inchangée. Le vrac rendu (880 kg de `005FE29102026`) est revenu sans palette en `Zone de réception` ; le nouvel OF a consommé `004FE29102026` depuis `ST/Stock` (−880 kg). La déconstruction ne propose pas de palette (comportement natif supposé, code non vérifié).
@@ -14,7 +28,7 @@ Les entrées les plus récentes en haut.
 - Restent ouverts : autres stocks négatifs (vrac E038, E042 à E047 et E067 dans `ST/Stock`, E003 et E072 en `Zone de réception`, emballages dans `ST/Stock`, dont Chapeaux Palette −422) ; écritures de valorisation des corrections non contrôlées.
 - Bases : PROD (lecture seule pour Claude) ; TEST (écritures avec accord).
 - Modules/modèles : aucun code · `stock.quant`, `stock.move.line`, `mrp.unbuild`.
-- Commit : `ee2f838` sur `chore/journal-deconstruction-s040` (journal seul).
+- Commit : `ee2f838` sur `chore/journal-deconstruction-s040` (journal seul) ; PR deepcodesystem/sofalgri#25 **fusionnée** dans `18.0` (`0c92fd4`).
 
 ## 2026-11-01 · Signature et cachet sur les factures
 - Demande : ajouter une signature aux factures préparées (client, transitaire, pro forma).

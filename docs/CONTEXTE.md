@@ -26,6 +26,7 @@ _Dernière mise à jour : 29/10/2026 (déploiement PROD des PR #5 à #7)_
 | `mrp_production_storage` | OF : conditionnement, quantité, frigo et n° de palette S saisis sur l'OF, étiquette palette produit fini (avec fabrication en 1 étape, remplace le transfert SFP) | 18.0.1.3.0 (`18.0`) ; 18.0.1.4.1 sur `feat/deconstruction-palette` | mrp | ✅ |
 | `sofalgri_packing_list` | Liste de colisage (packing list) depuis le bon de livraison, Excel et PDF | 18.0.1.0.1 (branche `feat/liste-colisage`) | stock, sale_stock, account, delivery_carrier_custom, sofalgri_package_reports | ❌ (à installer) |
 | `sofalgri_report_signature` | Signature et cachet de la société (image) sur la facture client, la transitaire et la pro forma | 18.0.1.0.1 (branche `feat/signature-factures`) | account, product_packaging_unit_price | ❌ (à installer) |
+| `sofalgri_stock_calibre_report` | Vue des palettes en frigo par calibre et conditionnement, source d'un tableau de BI Dashboard | 18.0.1.0.0 (branche `feat/tableau-palettes-calibre`) | stock, sofalgri_package_reports | ❌ (à installer) |
 | `delivery_carrier_custom` | Personnalisations des modes de livraison | 18.0.1.0.0 | delivery, stock_delivery | ✅ |
 | `package_packaging` | Affiche le conditionnement produit dans les colis | 18.0.1.0.0 | stock, product | ❌ |
 | `picking_custom_addons` | Personnalisations des transferts de stock | 18.0.4.11.2 (`18.0`) | stock, product | ✅ |
@@ -52,7 +53,7 @@ Dépendances inter-modules à respecter :
 
 **RH et flotte** : `hr`, `hr_attendance`, `hr_holidays`, `hr_contract`, `hr_expense`, `hr_recruitment`, `hr_skills`, `fleet`, `stock_fleet`.
 
-**Technique et UX** : `odoo_mcp_manager`, `auto_database_backup`, `password_security`, `auth_totp`, `impersonate_login`, `web_responsive`, `web_refresher`, `web_notify`, `web_json_editor`, `spreadsheet_oca` + tableaux de bord OCA.
+**Technique et UX** : `synconics_bi_dashboard` (tableaux de bord, OPL-1, installé le 02/11/2026), `odoo_mcp_manager`, `auto_database_backup`, `password_security`, `auth_totp`, `impersonate_login`, `web_responsive`, `web_refresher`, `web_notify`, `web_json_editor`, `spreadsheet_oca` + tableaux de bord OCA.
 
 ## Points d'attention
 

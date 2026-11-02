@@ -5,6 +5,16 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-02 · BI Dashboard : tableau des palettes en frigo par calibre
+- Demande : mettre en place avec `synconics_bi_dashboard` (OPL-1, 18.0.1.0.3, installé en TEST et en PROD) les tableaux du client ; premier modèle voulu : palettes en frigo, calibres 12 à 32 en lignes, conditionnements en colonnes.
+- Constats : le module ne regroupe que sur des champs stockés de la source et sa liste groupée n'a qu'un regroupement (pas de tableau croisé) ; un graphique par article coupe le libellé avant la marque et le calibre (`dashboard.chart` : camembert id 1, liste id 2, créés pour essai dans « My Dashboard », TEST). Après le passage du graphique 1 en camembert, thème passé de « animated » à « frozen » et dernier modificateur « Public user », causes non établies.
+- Fait : nouveau module `sofalgri_stock_calibre_report` 18.0.1.0.0 : vue SQL `sofalgri.stock.calibre.report` (une ligne par calibre, palettes distinctes dans les emplacements internes `…/Frigo …`, par nom de conditionnement ; `PLASTIQUE…` de 10 kg regroupés ; autre conditionnement ou aucun dans « Autres »). Colonnes fixes : un nouveau conditionnement demande une modification. Lecture réservée au groupe Utilisateur stock.
+- Attendu en TEST (stock du 02/11) : calibre 16 : Lidl 2 ; 18 : Gold 1, Lidl 8 ; 20 : Gold 2, Lidl 9 ; 22 : Gold 9, Lidl 12 ; 24 : Gold 6, Lidl 1 ; 50 palettes au total.
+- Bases : TEST (écritures : graphiques d'essai, avec accord) ; PROD (lecture seule : quants des frigos, module installé). TEST recréée le 02/11 à 20 h 02.
+- Modules/modèles : `sofalgri_stock_calibre_report` · `sofalgri.stock.calibre.report`, `dashboard.chart`.
+- Commit : aucun, branche `feat/tableau-palettes-calibre`. Non installé, vue SQL et affichage non testés.
+- Déploiement : nouveau module, à installer (liste des applications à mettre à jour) ; non chargé dans une base où il n'est pas installé, donc sans risque pour la PROD pendant le test.
+
 ## 2026-11-02 · Analyse des stocks négatifs restants en PROD
 - Demande : trouver la cause des négatifs restants (vrac, emballages), proposer leur correction, contrôler la valorisation des corrections du 02/11. Sans écriture en PROD.
 - Vrac, `WH/MOF/03971` (01/11 à 23:12) : hypothèse confirmée, lignes ajoutées dans le popup avec l'emplacement de l'OF, corrigé par la PR deepcodesystem/sofalgri#26 (installée en PROD). E038, E042 à E047 (−416 kg dans `ST/Stock`) compensent exactement +416 kg en `Zone de réception` : transfert interne, sans impact de valeur. E067 (−468 kg) : les 777 kg restés en `Zone de réception` ont été consommés par `03972`, les OF suivants sont décalés et le stock des palettes en cours (E085, E086) est trop haut : ajustement après pesée. Traçabilité de `03972` à `03989` décalée d'environ 468 kg.

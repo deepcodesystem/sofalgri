@@ -5,6 +5,18 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-02 · Déconstruction par palette et emplacement réel dans le popup des lots
+- Demande : simplifier la déconstruction d'une palette pour la refaire sous une autre marque (voir la palette S040 : la quantité déconstruite restait sur la palette).
+- Causes : le natif propose l'emplacement de l'OF (`ST/Stock`) et sa ligne de déconstruction ne porte aucun colis. Dans le popup des lots, une ligne ajoutée prenait l'emplacement de l'OF (`ST/Stock`) au lieu de celui du stock : stock négatif dans `ST/Stock` (`004FE` en PROD, très probablement aussi les négatifs du 01/11 à 23:12, non relu).
+- Fait :
+  - `mrp_production_storage` 18.0.1.4.0 : champ « Palette » (`package_id`, stocké) sur `mrp.unbuild`, rempli d'après l'OF si la palette contient encore son lot ; le frigo suit la palette ; la ligne de déconstruction sort de cette palette (`_prepare_finished_move_line_vals`), palette mixte comprise ; refus si le disponible de la palette est insuffisant. Vide : comportement natif. Étiquette palette : la quantité déconstruite est retirée (`_get_pallet_label_data`).
+  - `mrp_component_lot_check` 18.0.1.4.0 : ligne ajoutée, ou dont le lot ou la palette change, placée sur l'emplacement réel du stock (`_get_source_location`) ; refus si ce lot n'a pas de stock sur cette palette ou hors palette.
+- Limite : le vrac rendu revient toujours sans palette, en `Zone de réception` par la stratégie de rangement.
+- Bases : lecture seule TEST (vues de `mrp.unbuild`, modules « unbuild » : aucun installé).
+- Modules/modèles : `mrp_production_storage`, `mrp_component_lot_check` · `mrp.unbuild`, `mrp.production`, `mrp.component.lot.wizard.line`.
+- Commit : `e5156e4` et `8a8803b` sur `feat/deconstruction-palette` (poussée), non testé dans Odoo (syntaxe Python non contrôlée sur ce poste).
+- Déploiement : nouveau champ stocké sur `mrp.unbuild` → mise à jour en ligne de commande de `mrp_production_storage` sur **les deux bases** avant redémarrage ; `mrp_component_lot_check` : mise à jour normale.
+
 ## 2026-11-01 · Signature et cachet sur les factures
 - Demande : ajouter une signature aux factures préparées (client, transitaire, pro forma).
 - Choix de l'utilisateur : une image unique (signature + cachet) ; module dédié, réutilisable pour d'autres rapports.

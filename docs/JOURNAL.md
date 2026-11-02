@@ -16,8 +16,19 @@ Les entrées les plus récentes en haut.
 - Limite : le vrac rendu revient toujours sans palette, en `Zone de réception` par la stratégie de rangement.
 - Bases : lecture seule TEST (vues de `mrp.unbuild`, modules « unbuild » : aucun installé).
 - Modules/modèles : `mrp_production_storage`, `mrp_component_lot_check` · `mrp.unbuild`, `mrp.production`, `mrp.component.lot.wizard.line`.
-- Commit : `e5156e4` et `8a8803b` sur `feat/deconstruction-palette` (poussée), non testé dans Odoo (syntaxe Python non contrôlée sur ce poste).
+- Commit : `e5156e4`, `8a8803b` et `506bbd1` sur `feat/deconstruction-palette` ; PR deepcodesystem/sofalgri#26.
 - Déploiement : nouveau champ stocké sur `mrp.unbuild` → mise à jour en ligne de commande de `mrp_production_storage` sur **les deux bases** avant redémarrage ; `mrp_component_lot_check` : mise à jour normale.
+
+## 2026-11-02 · Déconstruction d'un OF : palette S040 restée à 2 lignes
+- Demande : après la déconstruction de `WH/MOF/03953` et la production de `WH/MOF/03987` sur la même palette, S040 affiche 2 lignes : la quantité déconstruite y est restée.
+- Cause (PROD, lecture seule) : `UB/00149` a sorti les 880 kg du lot `0003S01112026` de `ST/Stock`, sans palette : −880 kg dans `ST/Stock`, S040 inchangée. Le vrac rendu (880 kg de `005FE29102026`) est revenu sans palette en `Zone de réception` ; le nouvel OF a consommé `004FE29102026` depuis `ST/Stock` (−880 kg). La déconstruction ne propose pas de palette (comportement natif supposé, code non vérifié).
+- Fait (TEST, où le cas existait déjà avec `UB/00150`) : transfert interne `ST/INT/00010` Frigo 01 / S040 → `ST/Stock`, sans palette de destination, et ligne de vrac de l'OF déplacée en `Zone de réception` (changement de lot essayé puis annulé). Écritures par le MCP ; une modification de ligne sans sa quantité a laissé 880 kg réservés sur S011, remis à 0 directement sur le quant.
+- Fait (PROD, par l'utilisateur) : mêmes corrections, vrac sur `005FE29102026`. Vérifié en lecture : S040 ne contient plus que le LIDL (880 kg), les quants `0003S01112026` et vrac concernés sont à 0, aucune réservation restante sur le calibre 24 en Frigo 01.
+- À noter : à « Marquer comme à faire », Odoo réserve d'office une autre palette (S011 en TEST) : la remplacer avant de valider. Pour déconstruire : sortir d'abord la quantité de la palette, puis déconstruire avec le frigo comme source.
+- Restent ouverts : autres stocks négatifs (vrac E038, E042 à E047 et E067 dans `ST/Stock`, E003 et E072 en `Zone de réception`, emballages dans `ST/Stock`, dont Chapeaux Palette −422) ; écritures de valorisation des corrections non contrôlées.
+- Bases : PROD (lecture seule pour Claude) ; TEST (écritures avec accord).
+- Modules/modèles : aucun code · `stock.quant`, `stock.move.line`, `mrp.unbuild`.
+- Commit : `ee2f838` sur `chore/journal-deconstruction-s040` (journal seul) ; PR deepcodesystem/sofalgri#25 **fusionnée** dans `18.0` (`0c92fd4`).
 
 ## 2026-11-01 · Signature et cachet sur les factures
 - Demande : ajouter une signature aux factures préparées (client, transitaire, pro forma).

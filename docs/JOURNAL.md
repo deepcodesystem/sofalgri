@@ -5,6 +5,16 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-02 · Synthèse des exports
+- Demande : tableau de suivi des exports sur le modèle Excel du client (une ligne par camion), avec choix d'une tranche de dates et début de saison défini (01/10/2026).
+- Choix de l'utilisateur : poids net = lignes de facture (le brut 24 250 reste une saisie) ; station = adresse de l'entrepôt (HIPECA) ; GPS = code du traceur, saisi ; colonne TY gardée telle quelle, sens inconnu ; statut et arrivée saisis sur la livraison, valeurs à préciser ; transporteur = celui du mode de livraison ; claim par avoirs ; cours issu des rapprochements pour l'instant ; trois paiements au plus.
+- Fait : nouveau module `sofalgri_export_summary` 18.0.1.0.0 : menu « BI Dashboard > Synthèse des exports » (écran dédié plutôt qu'une liste BI, car il faut saisir et filtrer les dates), liste de `account.move` (factures clients validées), champs calculés non stockés ; `res.company.season_start_date` ; `stock.picking` : `export_gps`, `export_type`, `export_status` (En transit, Arrivé), `export_arrival_date`, onglet « Expédition ». Livraison retenue : la première validée de la commande. Paiements triés par date, à partir du 4e cumulés avec le 3e, avoirs exclus.
+- Limites : filtre de dates sur la date de facture (la date de chargement n'est pas stockée) ; station d'après l'entrepôt actuel, donc HIPECA aussi sur l'historique ; transporteur vide sur les livraisons sans mode de livraison (ST/OUT/00256) ; sur F2026/068, le cours de paiement est celui de la facture.
+- Bases : lecture seule TEST (factures, livraisons, modes de livraison, rapprochement de F2026/068) et PROD (`sofalgri_packing_list` installé).
+- Modules/modèles : `sofalgri_export_summary` · `account.move`, `stock.picking`, `res.company`.
+- Commit : aucun, branche `feat/synthese-exports`, partie de `feat/tableau-palettes-calibre` pour que le serveur garde le module installé en TEST. Non installé, non testé ; syntaxe Python non contrôlée (Python absent du poste).
+- Déploiement : nouveau module, à installer ; nouveaux champs stockés sur `res.company` et `stock.picking` seulement à l'installation, donc sans risque pour la PROD pendant le test. Puis saisir le début de saison sur la fiche société.
+
 ## 2026-11-02 · BI Dashboard : tableau des palettes en frigo par calibre
 - Demande : mettre en place avec `synconics_bi_dashboard` (OPL-1, 18.0.1.0.3, installé en TEST et en PROD) les tableaux du client ; premier modèle voulu : palettes en frigo, calibres 12 à 32 en lignes, conditionnements en colonnes.
 - Constats : le module ne regroupe que sur des champs stockés de la source et sa liste groupée n'a qu'un regroupement (pas de tableau croisé) ; un graphique par article coupe le libellé avant la marque et le calibre (`dashboard.chart` : camembert id 1, liste id 2, créés pour essai dans « My Dashboard », TEST). Après le passage du graphique 1 en camembert, thème passé de « animated » à « frozen » et dernier modificateur « Public user », causes non établies.
@@ -12,7 +22,8 @@ Les entrées les plus récentes en haut.
 - Attendu en TEST (stock du 02/11) : calibre 16 : Lidl 2 ; 18 : Gold 1, Lidl 8 ; 20 : Gold 2, Lidl 9 ; 22 : Gold 9, Lidl 12 ; 24 : Gold 6, Lidl 1 ; 50 palettes au total.
 - Bases : TEST (écritures : graphiques d'essai, avec accord) ; PROD (lecture seule : quants des frigos, module installé). TEST recréée le 02/11 à 20 h 02.
 - Modules/modèles : `sofalgri_stock_calibre_report` · `sofalgri.stock.calibre.report`, `dashboard.chart`.
-- Commit : `66d3bf6` sur `feat/tableau-palettes-calibre` (poussé). Non installé, vue SQL et affichage non testés.
+- Test TEST : module installé par l'utilisateur ; la vue donne le résultat attendu, recompté sur les quants (50 palettes). Tableau `dashboard.chart` id 3 « Palettes en frigo par calibre » (liste groupée) créé dans « My Dashboard ». **Validé en TEST** par l'utilisateur.
+- Commit : `66d3bf6` sur `feat/tableau-palettes-calibre` (poussé).
 - Déploiement : nouveau module, à installer (liste des applications à mettre à jour) ; non chargé dans une base où il n'est pas installé, donc sans risque pour la PROD pendant le test.
 
 ## 2026-11-02 · Analyse des stocks négatifs restants en PROD

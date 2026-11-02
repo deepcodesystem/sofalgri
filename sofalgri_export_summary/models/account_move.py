@@ -63,7 +63,7 @@ class AccountMove(models.Model):
             move.export_gps = picking.export_gps
             move.export_truck = picking.truck_reference
             move.export_type = picking.export_type
-            move.export_carrier = picking.carrier_id.partner_id.name
+            move.export_carrier = picking.export_carrier_id.name or picking.carrier_id.partner_id.name
             move.export_plate = move.delivery_truck_number or picking.matricule
             move.export_status = picking.export_status
             move.export_arrival_date = picking.export_arrival_date

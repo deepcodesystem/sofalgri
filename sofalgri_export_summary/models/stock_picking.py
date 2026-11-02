@@ -9,6 +9,7 @@ EXPORT_STATUS = [
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
+    export_carrier_id = fields.Many2one('res.partner', string="Transporteur")
     export_gps = fields.Char(string="GPS")
     export_type = fields.Char(string="TY")
     export_status = fields.Selection(EXPORT_STATUS, string="Statut")

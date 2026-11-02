@@ -8,6 +8,7 @@
             <xpath expr="//page[@name='packing_list_shipping']/group" position="after">
                 <group string="Suivi de l'export">
                     <group>
+                        <field name="export_carrier_id"/>
                         <field name="export_gps"/>
                         <field name="export_type"/>
                     </group>

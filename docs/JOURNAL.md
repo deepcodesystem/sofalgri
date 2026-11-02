@@ -12,7 +12,7 @@ Les entrées les plus récentes en haut.
 - Limites : filtre de dates sur la date de facture (la date de chargement n'est pas stockée) ; station d'après l'entrepôt actuel, donc HIPECA aussi sur l'historique ; transporteur vide sur les livraisons sans mode de livraison (ST/OUT/00256) ; sur F2026/068, le cours de paiement est celui de la facture.
 - Bases : lecture seule TEST (factures, livraisons, modes de livraison, rapprochement de F2026/068) et PROD (`sofalgri_packing_list` installé).
 - Modules/modèles : `sofalgri_export_summary` · `account.move`, `stock.picking`, `res.company`.
-- Commit : aucun, branche `feat/synthese-exports`, partie de `feat/tableau-palettes-calibre` pour que le serveur garde le module installé en TEST. Non installé, non testé ; syntaxe Python non contrôlée (Python absent du poste).
+- Commit : `b37dc56` sur `feat/synthese-exports` (poussé), partie de `feat/tableau-palettes-calibre` pour que le serveur garde le module installé en TEST. Non installé, non testé ; syntaxe Python non contrôlée (Python absent du poste).
 - Déploiement : nouveau module, à installer ; nouveaux champs stockés sur `res.company` et `stock.picking` seulement à l'installation, donc sans risque pour la PROD pendant le test. Puis saisir le début de saison sur la fiche société.
 
 ## 2026-11-02 · BI Dashboard : tableau des palettes en frigo par calibre

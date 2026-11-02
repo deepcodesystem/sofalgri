@@ -13,7 +13,7 @@
                 <field name="export_truck"/>
                 <field name="partner_id" string="Client"/>
                 <field name="name" string="Facture"/>
-                <field name="export_load_date"/>
+                <field name="invoice_date" string="Date de chargement"/>
                 <field name="export_type"/>
                 <field name="export_carrier"/>
                 <field name="export_plate"/>

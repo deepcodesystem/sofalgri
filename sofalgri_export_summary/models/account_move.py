@@ -12,7 +12,6 @@ class AccountMove(models.Model):
     export_station = fields.Char(string="Station", compute='_compute_export_shipping')
     export_gps = fields.Char(string="GPS", compute='_compute_export_shipping')
     export_truck = fields.Char(string="Camion", compute='_compute_export_shipping')
-    export_load_date = fields.Date(string="Date de chargement", compute='_compute_export_shipping')
     export_type = fields.Char(string="TY", compute='_compute_export_shipping')
     export_carrier = fields.Char(string="Transporteur", compute='_compute_export_shipping')
     export_plate = fields.Char(string="Matricule", compute='_compute_export_shipping')
@@ -63,7 +62,6 @@ class AccountMove(models.Model):
             move.export_station = picking.picking_type_id.warehouse_id.partner_id.name
             move.export_gps = picking.export_gps
             move.export_truck = picking.truck_reference
-            move.export_load_date = picking.date_done and fields.Datetime.context_timestamp(move, picking.date_done).date()
             move.export_type = picking.export_type
             move.export_carrier = picking.carrier_id.partner_id.name
             move.export_plate = move.delivery_truck_number or picking.matricule
@@ -94,8 +92,9 @@ class AccountMove(models.Model):
     def _compute_export_payments(self):
         for move in self:
             receivable_lines = move.line_ids.filtered(lambda line: line.account_type == 'asset_receivable')
+            # Les écritures d'écart de change n'ont aucun montant en devise : ce ne sont pas des paiements.
             partials = receivable_lines.matched_credit_ids.filtered(
-                lambda partial: partial.credit_move_id.move_id.move_type != 'out_refund'
+                lambda partial: partial.debit_amount_currency and partial.credit_move_id.move_id.move_type != 'out_refund'
             ).sorted(lambda partial: (partial.max_date, partial.id))
             # Au-delà de trois paiements, les suivants sont cumulés avec le troisième.
             for index, group in enumerate((partials[:1], partials[1:2], partials[2:]), start=1):

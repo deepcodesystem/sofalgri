@@ -14,7 +14,7 @@ Les entrées les plus récentes en haut.
 - Restent ouverts : autres stocks négatifs (vrac E038, E042 à E047 et E067 dans `ST/Stock`, E003 et E072 en `Zone de réception`, emballages dans `ST/Stock`, dont Chapeaux Palette −422) ; écritures de valorisation des corrections non contrôlées.
 - Bases : PROD (lecture seule pour Claude) ; TEST (écritures avec accord).
 - Modules/modèles : aucun code · `stock.quant`, `stock.move.line`, `mrp.unbuild`.
-- Commit : à venir sur `chore/journal-deconstruction-s040`.
+- Commit : `ee2f838` sur `chore/journal-deconstruction-s040` (journal seul).
 
 ## 2026-11-01 · Signature et cachet sur les factures
 - Demande : ajouter une signature aux factures préparées (client, transitaire, pro forma).

@@ -11,7 +11,8 @@ class MrpBom(models.Model):
         digits='Product Unit of Measure',
         help="Contenance du colis produit par cette nomenclature (ex. 4 pour les cartons de 4 kg, "
              "10 pour les caisses plastique de 10 kg). Sur l'OF, le conditionnement de l'article "
-             "ayant cette contenance est sélectionné automatiquement.",
+             "ayant cette contenance est sélectionné automatiquement. "
+             "Vide : production en vrac, le conditionnement est facultatif sur l'OF.",
     )
 
     def _get_product_packaging(self, product):

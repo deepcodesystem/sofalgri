@@ -233,7 +233,9 @@ class MrpProduction(models.Model):
         # Les produits conditionnés (avocats calibrés) doivent avoir leur conditionnement et leur frigo
         for production in self.filtered(lambda p: p.product_id.packaging_ids):
             missing = []
-            if not production.product_packaging_id:
+            # Nomenclature sans poids par colis : production en vrac, conditionnement facultatif
+            bulk = production.bom_id and not production.bom_id.packaging_unit_qty
+            if not production.product_packaging_id and not bulk:
                 missing.append(_("le conditionnement"))
             if not production.storage_location_id:
                 missing.append(_("le frigo de stockage"))

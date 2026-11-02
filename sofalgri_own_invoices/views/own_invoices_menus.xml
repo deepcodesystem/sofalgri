@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_own_invoices_root"
+              name="Mes factures"
+              web_icon="account,static/description/icon.png"
+              groups="group_own_invoices"
+              sequence="40"/>
+
+    <menuitem id="menu_own_invoices_customer"
+              name="Factures clients"
+              parent="menu_own_invoices_root"
+              action="account.action_move_out_invoice_type"
+              sequence="10"/>
+
+    <menuitem id="menu_own_invoices_vendor"
+              name="Factures fournisseurs"
+              parent="menu_own_invoices_root"
+              action="account.action_move_in_invoice_type"
+              sequence="20"/>
+
+    <menuitem id="menu_own_invoices_payment"
+              name="Paiements"
+              parent="menu_own_invoices_root"
+              action="account.action_account_all_payments"
+              sequence="30"/>
+</odoo>

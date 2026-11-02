@@ -138,6 +138,27 @@ class MrpProduction(models.Model):
             [('name', '=', 'Palettes de Livraison')], limit=1)
         return self.env['stock.quant.package'].create({'package_type_id': package_type.id})
 
+    def _get_unbuild_quants(self):
+        """ Stock de cet OF encore sur sa palette, pour la déconstruction. """
+        self.ensure_one()
+        if not self.result_package_id:
+            return self.env['stock.quant']
+        return self.env['stock.quant'].search([
+            ('product_id', '=', self.product_id.id),
+            ('lot_id', '=', self.lot_producing_id.id),
+            ('package_id', '=', self.result_package_id.id),
+            ('location_id.usage', '=', 'internal'),
+            ('quantity', '>', 0),
+        ], order='quantity desc')
+
+    def button_unbuild(self):
+        # Sinon le natif propose l'emplacement de l'OF (ST/Stock), pas le frigo de la palette
+        action = super().button_unbuild()
+        location = self._get_unbuild_quants().location_id[:1]
+        if location:
+            action['context'] = dict(action['context'], default_location_id=location.id)
+        return action
+
     def action_print_pallet_label(self):
         self.ensure_one()
         if self.product_tracking in ('lot', 'serial') and not self.lot_producing_id:
@@ -158,6 +179,14 @@ class MrpProduction(models.Model):
             ])
         groups = {}
         for production in productions:
+            # Quantité déconstruite : elle n'est plus sur la palette
+            qty = production.qty_producing or production.product_qty
+            remaining_qty = qty - sum(
+                unbuild.product_uom_id._compute_quantity(unbuild.product_qty, production.product_uom_id)
+                for unbuild in production.unbuild_ids.filtered(lambda u: u.state == 'done')
+            )
+            if remaining_qty <= 0:
+                continue
             product = production.product_id
             packaging = production.product_packaging_id
             lot = production.lot_producing_id
@@ -170,8 +199,8 @@ class MrpProduction(models.Model):
                 'boxes': 0.0,
                 'qty': 0.0,
             })
-            line['boxes'] += production.product_packaging_qty
-            line['qty'] += production.qty_producing or production.product_qty
+            line['boxes'] += production.product_packaging_qty * remaining_qty / qty
+            line['qty'] += remaining_qty
 
         def sort_key(line):
             calibre = str(line['calibre'])

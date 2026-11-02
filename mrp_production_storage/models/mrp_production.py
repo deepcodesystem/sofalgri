@@ -152,11 +152,18 @@ class MrpProduction(models.Model):
         ], order='quantity desc')
 
     def button_unbuild(self):
-        # Sinon le natif propose l'emplacement de l'OF (ST/Stock), pas le frigo de la palette
+        # Sinon le natif propose l'emplacement de l'OF (ST/Stock) et une quantité de 1, pas le contenu de la palette
         action = super().button_unbuild()
-        location = self._get_unbuild_quants().location_id[:1]
-        if location:
-            action['context'] = dict(action['context'], default_location_id=location.id)
+        quants = self._get_unbuild_quants()
+        if quants:
+            location = quants.location_id[:1]
+            pallet_qty = self.product_id.uom_id._compute_quantity(
+                sum(quants.filtered(lambda q: q.location_id == location).mapped('quantity')), self.product_uom_id)
+            action['context'] = dict(
+                action['context'],
+                default_location_id=location.id,
+                default_product_qty=min(pallet_qty, self.qty_produced),
+            )
         return action
 
     def action_print_pallet_label(self):

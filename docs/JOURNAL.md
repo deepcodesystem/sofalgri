@@ -12,7 +12,7 @@ Les entrées les plus récentes en haut.
 - Attendu en TEST (stock du 02/11) : calibre 16 : Lidl 2 ; 18 : Gold 1, Lidl 8 ; 20 : Gold 2, Lidl 9 ; 22 : Gold 9, Lidl 12 ; 24 : Gold 6, Lidl 1 ; 50 palettes au total.
 - Bases : TEST (écritures : graphiques d'essai, avec accord) ; PROD (lecture seule : quants des frigos, module installé). TEST recréée le 02/11 à 20 h 02.
 - Modules/modèles : `sofalgri_stock_calibre_report` · `sofalgri.stock.calibre.report`, `dashboard.chart`.
-- Commit : aucun, branche `feat/tableau-palettes-calibre`. Non installé, vue SQL et affichage non testés.
+- Commit : `66d3bf6` sur `feat/tableau-palettes-calibre` (poussé). Non installé, vue SQL et affichage non testés.
 - Déploiement : nouveau module, à installer (liste des applications à mettre à jour) ; non chargé dans une base où il n'est pas installé, donc sans risque pour la PROD pendant le test.
 
 ## 2026-11-02 · Analyse des stocks négatifs restants en PROD

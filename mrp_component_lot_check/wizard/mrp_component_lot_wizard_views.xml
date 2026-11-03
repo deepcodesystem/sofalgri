@@ -8,9 +8,12 @@
                 <field name="allowed_move_ids" invisible="1"/>
                 <field name="default_move_id" invisible="1"/>
                 <field name="tracked_move_count" invisible="1"/>
+                <field name="allowed_package_ids" invisible="1"/>
+                <field name="allowed_lot_ids" invisible="1"/>
                 <div class="alert alert-warning" role="alert">
                     Saisissez le poids réel NET de vrac mis au calibrage, puis vérifiez que les palettes ci-dessous
                     sont bien celles utilisées. Changez la palette si besoin : le lot se met à jour automatiquement.
+                    Pour prendre les lots d'un autre jour, indiquez la date du lot.
                 </div>
                 <div class="alert alert-danger fw-bold" role="alert" invisible="not weight_warning">
                     <field name="weight_warning"/>
@@ -19,6 +22,7 @@
                     <group>
                         <field name="production_id"/>
                         <field name="product_id"/>
+                        <field name="lot_date"/>
                     </group>
                     <group invisible="tracked_move_count != 1">
                         <field name="expected_qty"/>

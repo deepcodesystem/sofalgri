@@ -14,7 +14,8 @@ Les entrées les plus récentes en haut.
 - **Validé en TEST** par l'utilisateur le 03/11 (« ça fonctionne bien »).
 - Bases : lecture seule TEST (lots du 03/11, quants du vrac en `Zone de réception`, lignes de `WH/MOF/04030` et `04031`).
 - Modules/modèles : `mrp_component_lot_check` · `mrp.component.lot.wizard`, `mrp.component.lot.wizard.line`.
-- Commit : `7cfc1fc` sur `feat/date-lot-popup-of` (poussé).
+- Commit : `7cfc1fc` sur `feat/date-lot-popup-of` ; PR deepcodesystem/sofalgri#33 **fusionnée** dans `18.0` (`a3fccc0`).
+- PROD (par l'utilisateur, contrôlé en lecture le 03/11) : `mrp_component_lot_check` 18.0.1.5.0, champ `lot_date` présent. Popup non contrôlé à l'écran en PROD.
 - Déploiement : nouveau champ stocké sur le modèle du popup → mise à jour en ligne de commande de `mrp_component_lot_check` sur **les deux bases** avant redémarrage.
 
 ## 2026-11-02 · OF en vrac : conditionnement non obligatoire

@@ -5,6 +5,15 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-03 · Palette E276 : poids brut mal saisi à la réception
+- Demande : E276 (`ST/IN/00779`, `P-20260103-0291`, Ferme Saybara) devait peser 937 kg brut, 337 kg saisis, avec 15 caisses au lieu de 42 (vérifié par l'utilisateur).
+- Fait (PROD, par l'utilisateur) : réception déverrouillée, ligne corrigée puis reverrouillée ; palette corrigée à la main. Aucun code, aucune écriture par Claude.
+- Contrôle (PROD, lecture seule) : ligne 60260 : brut 937, 42 caisses, tare 146, net 791. Stock E276 : 791 kg (+519), lot `027FE03112026`, valeur 13 565,65 MAD. Couche de valorisation « Correction de ST/IN/00779 » : +519 kg, +8 900,85 MAD, sans écriture comptable. Commande : 4 350 kg reçus et à facturer, aucune facture.
+- Reste : le colis E276 affiche encore 15 caisses (`stock.quant.package.crate_quantity`, poids et tare corrects) : champ absent du formulaire du colis, et non recalculé après la validation. Étiquette réimprimée non contrôlée.
+- À noter : la correction a repoussé la date d'entrée du quant au 03/11 à 17:32, donc E276 passe après les palettes reçues plus tôt dans le FIFO. Pas d'essai préalable en TEST constaté.
+- Bases : lecture seule PROD (ligne de mouvement, quant, colis, couches de valorisation, ligne de commande) ; TEST non modifiée.
+- Modules/modèles : aucun code · `stock.move.line`, `stock.quant`, `stock.quant.package`, `stock.valuation.layer`, `purchase.order.line`.
+
 ## 2026-11-03 · Popup des lots d'OF : choix des lots par date
 - Demande : le client veut consommer les lots du 03/11/2026 alors que le FIFO propose les anciens, et le popup semble l'interdire.
 - Constat (TEST) : aucun blocage par date dans le code ; `WH/MOF/04030` a consommé `023FE03112026` (E255, E256) alors que des lots plus anciens restent en stock. Cause probable, à confirmer auprès du client : changer le lot sans la palette est refusé (« Le lot X n'est pas sur la palette Y ») ; listes sans date. Contournement sans mise à jour : changer la palette, le lot suit.

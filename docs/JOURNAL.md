@@ -12,7 +12,7 @@ Les entrées les plus récentes en haut.
 - Limites : montants lus en MAD, seule devise des achats constatée ; frais d'après la commande ; une ligne de frais sans article serait ignorée.
 - Bases : lecture seule PROD (commandes, lignes, factures, paiements, articles) et TEST (commandes, factures).
 - Modules/modèles : `sofalgri_purchase_summary` · `sofalgri.purchase.summary.report`.
-- Commit : aucun, branche `feat/achats-avocats`. Non installé, non testé ; syntaxe Python non contrôlée (Python absent du poste).
+- Commit : `6684be6` sur `feat/achats-avocats` (poussé). Non installé, non testé ; syntaxe Python non contrôlée (Python absent du poste).
 - Déploiement : nouveau module, à installer ; aucune colonne ajoutée aux modèles existants, non chargé dans une base où il n'est pas installé.
 
 ## 2026-11-03 · Palette E276 : poids brut mal saisi à la réception

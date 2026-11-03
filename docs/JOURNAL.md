@@ -9,11 +9,13 @@ Les entrées les plus récentes en haut.
 - Demande : le produit « AVOCAT HASS CALIBRÉS - Petits Calibres » se vend en vrac ou en caisse de 10 kg ; un OF sur la nomenclature « EN VRAC » est refusé à « Produire » (`WH/MOF/04001`, TEST) car l'article a un conditionnement.
 - Fait : `mrp_production_storage` 18.0.1.4.2 : conditionnement facultatif à « Produire » si la nomenclature n'a pas de « Poids par colis » ; frigo toujours obligatoire. Sans nomenclature ou avec un poids par colis : contrôle inchangé. Étiquette palette et liste de colisage lues : tiret ou vide si pas de conditionnement, sans erreur.
 - À faire : la nomenclature « déchets ferme » (id 15, carton 4 kg, TEST et PROD) n'a pas de poids par colis et perdrait le contrôle : y saisir 4.
-- Limite : une palette S est toujours créée sur un OF en vrac. Non testé dans Odoo.
+- Testé en TEST par l'utilisateur : correct.
+- Évolution (18.0.1.5.0), au choix de l'utilisateur : OF en vrac sans palette (champ et bouton « Étiquette palette » masqués, sauf palette déjà saisie). Palettes V001, V002… pour le plastique 10 kg des Petits Calibres seulement, les autres gardent S : champ « Séquence des palettes » (`pallet_sequence_id`) sur `mrp.bom`, séquence `stock.quant.package.small_calibre` (préfixe V). Palettes V acceptées en palette mixte. À faire : choisir cette séquence sur la nomenclature « Caisse Plastique 10KG » des Petits Calibres (id 18). Non testé dans Odoo.
+- Limite : le vrac sans palette n'apparaît pas dans la vue « palettes en frigo » (`sofalgri_stock_calibre_report`), qui ne compte que les quants avec palette.
 - Bases : lecture seule TEST (`WH/MOF/04001`, nomenclatures) et PROD (nomenclatures sans poids par colis : ids 11, 15, 19).
 - Modules/modèles : `mrp_production_storage` · `mrp.production`, `mrp.bom`.
-- Commit : `b1708f5` sur `fix/of-vrac-sans-conditionnement` (poussé).
-- Déploiement : aucun champ stocké, mise à jour normale du module.
+- Commit : `b1708f5` et `b142e19` (18.0.1.5.0) sur `fix/of-vrac-sans-conditionnement` (poussé).
+- Déploiement : nouveau champ stocké sur `mrp.bom` (18.0.1.5.0) → mise à jour en ligne de commande de `mrp_production_storage` sur **les deux bases** avant redémarrage.
 
 ## 2026-11-02 · Groupe « Mes factures uniquement »
 - Demande : un groupe d'utilisateurs qui crée une facture à son nom, la valide et la paie, sans voir les autres factures, surtout clients.

@@ -5,6 +5,16 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-03 · Tableau des achats d'avocats
+- Demande : tableau des achats d'avocats avec fournisseur, quantités commandée et reçue, variation, montants, paiement.
+- Constats (PROD, lecture seule) : 27 commandes d'avocats depuis le 01/10 (5 fournisseurs) ; 188 337 kg commandés, 187 151 kg reçus, −1 186 kg. Une seule facture : FA2026/10/001, soit reçu × prix net + frais (8 822 × 17,64 + 3 250 = 158 870,08). `purchase.order.amount_residual` part du commandé, donc faux après une variation (−917,28 sur `P-20260129-0260`) : non utilisé. `purchase_order_workflow` paie en espèces dès la création de la facture : « Payé » peut précéder le règlement réel, à confirmer.
+- Fait : nouveau module `sofalgri_purchase_summary` 18.0.1.0.0 : vue SQL `sofalgri.purchase.summary.report` (une ligne par commande confirmée contenant un article de catégorie « Matière Première », seul article : Avocats pour export), montant avocats = reçu × prix net, frais = autres lignes, payé = factures au prorata et avances non rapprochées ; menu « BI Dashboard > Achats d'avocats », filtres saison, statut et dates, totaux, clic vers la commande. Accès : Utilisateur achats et Administrateur comptable, pas le groupe Facturation, car la vue SQL ignore les règles de « Mes factures uniquement ».
+- Limites : montants lus en MAD, seule devise des achats constatée ; frais d'après la commande ; une ligne de frais sans article serait ignorée.
+- Bases : lecture seule PROD (commandes, lignes, factures, paiements, articles) et TEST (commandes, factures).
+- Modules/modèles : `sofalgri_purchase_summary` · `sofalgri.purchase.summary.report`.
+- Commit : aucun, branche `feat/achats-avocats`. Non installé, non testé ; syntaxe Python non contrôlée (Python absent du poste).
+- Déploiement : nouveau module, à installer ; aucune colonne ajoutée aux modèles existants, non chargé dans une base où il n'est pas installé.
+
 ## 2026-11-03 · Palette E276 : poids brut mal saisi à la réception
 - Demande : E276 (`ST/IN/00779`, `P-20260103-0291`, Ferme Saybara) devait peser 937 kg brut, 337 kg saisis, avec 15 caisses au lieu de 42 (vérifié par l'utilisateur).
 - Fait (PROD, par l'utilisateur) : réception déverrouillée, ligne corrigée puis reverrouillée ; palette corrigée à la main. Aucun code, aucune écriture par Claude.

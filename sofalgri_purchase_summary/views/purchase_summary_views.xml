@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_purchase_summary_list" model="ir.ui.view">
+        <field name="name">sofalgri.purchase.summary.report.list</field>
+        <field name="model">sofalgri.purchase.summary.report</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0" delete="0" action="action_open_order" type="object">
+                <field name="currency_id" column_invisible="1"/>
+                <field name="partner_id"/>
+                <field name="order_id"/>
+                <field name="date_order" widget="date"/>
+                <field name="qty_ordered" sum="Total"/>
+                <field name="qty_received" sum="Total"/>
+                <field name="qty_variation" sum="Total"
+                       decoration-danger="qty_variation &lt; 0"
+                       decoration-success="qty_variation &gt; 0"/>
+                <field name="variation_percent"/>
+                <field name="amount_avocado" sum="Total"/>
+                <field name="amount_fees" sum="Total"/>
+                <field name="amount_due" sum="Total"/>
+                <field name="amount_paid" sum="Total"/>
+                <field name="amount_residual" sum="Total"/>
+                <field name="payment_status" widget="badge"
+                       decoration-danger="payment_status == 'not_paid'"
+                       decoration-warning="payment_status == 'partial'"
+                       decoration-success="payment_status == 'paid'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_purchase_summary_search" model="ir.ui.view">
+        <field name="name">sofalgri.purchase.summary.report.search</field>
+        <field name="model">sofalgri.purchase.summary.report</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="partner_id"/>
+                <field name="order_id"/>
+                <filter name="current_season" string="Saison en cours" domain="[('current_season', '=', True)]"/>
+                <separator/>
+                <filter name="not_paid" string="Non payé" domain="[('payment_status', '=', 'not_paid')]"/>
+                <filter name="partial" string="Partiel" domain="[('payment_status', '=', 'partial')]"/>
+                <filter name="paid" string="Payé" domain="[('payment_status', '=', 'paid')]"/>
+                <separator/>
+                <filter name="date_order" string="Date de commande" date="date_order"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="group_partner" string="Fournisseur" context="{'group_by': 'partner_id'}"/>
+                    <filter name="group_status" string="Statut" context="{'group_by': 'payment_status'}"/>
+                    <filter name="group_month" string="Mois de commande" context="{'group_by': 'date_order:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_purchase_summary" model="ir.actions.act_window">
+        <field name="name">Achats d'avocats</field>
+        <field name="res_model">sofalgri.purchase.summary.report</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'search_default_current_season': 1}</field>
+        <field name="search_view_id" ref="view_purchase_summary_search"/>
+    </record>
+
+    <menuitem id="menu_purchase_summary"
+              name="Achats d'avocats"
+              parent="synconics_bi_dashboard.parent_dashboard_menu"
+              action="action_purchase_summary"
+              groups="purchase.group_purchase_user,account.group_account_manager"
+              sequence="6"/>
+</odoo>

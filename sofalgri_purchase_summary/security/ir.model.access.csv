@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_sofalgri_purchase_summary_report_purchase,sofalgri.purchase.summary.report purchase,model_sofalgri_purchase_summary_report,purchase.group_purchase_user,1,0,0,0
+access_sofalgri_purchase_summary_report_account,sofalgri.purchase.summary.report account,model_sofalgri_purchase_summary_report,account.group_account_manager,1,0,0,0

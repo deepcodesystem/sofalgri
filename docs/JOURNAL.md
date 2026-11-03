@@ -5,6 +5,15 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-03 · Popup des lots d'OF : stock de la palette contrôlé
+- Demande : éviter les stocks négatifs créés par le report du poids réel (E156, −13 kg, voir l'entrée suivante).
+- Fait : `mrp_component_lot_check` 18.0.1.6.0 : le report de l'écart s'arrête au stock de la dernière palette, avec une alerte indiquant ce qui manque ; à la validation, refus si une palette est demandée au-delà de son stock réel, toutes lignes du popup confondues. Contrôle sur le stock réel (réservations d'autres OF non déduites, pour ne pas bloquer davantage). Plus de reliquat possible sans ajouter de palette ou corriger le stock.
+- Limite : après validation, un autre OF peut encore consommer la même palette avant « Produire » ; l'alerte sur écart de 5 % reste indépendante.
+- Bases : lecture seule PROD (lot `014MO31102026`, `WH/MOF/04001` et son fil).
+- Modules/modèles : `mrp_component_lot_check` · `mrp.component.lot.wizard`, `mrp.component.lot.wizard.line`.
+- Commit : aucun, branche `fix/popup-stock-palette`. Non testé dans Odoo ; syntaxe Python non contrôlée (Python absent du poste).
+- Déploiement : aucun champ ajouté, mise à jour normale du module.
+
 ## 2026-11-03 · Tableau des achats d'avocats
 - Demande : tableau des achats d'avocats avec fournisseur, quantités commandée et reçue, variation, montants, paiement.
 - Constats (PROD, lecture seule) : 27 commandes d'avocats depuis le 01/10 (5 fournisseurs) ; 188 337 kg commandés, 187 151 kg reçus, −1 186 kg. Une seule facture : FA2026/10/001, soit reçu × prix net + frais (8 822 × 17,64 + 3 250 = 158 870,08). `purchase.order.amount_residual` part du commandé, donc faux après une variation (−917,28 sur `P-20260129-0260`) : non utilisé. `purchase_order_workflow` paie en espèces dès la création de la facture ; d'après l'utilisateur, les factures sont créées au moment du règlement (peut changer) : « Payé » est donc fiable aujourd'hui.
@@ -15,7 +24,9 @@ Les entrées les plus récentes en haut.
 - Limites : montants lus en MAD, seule devise des achats constatée ; frais d'après la commande ; une ligne de frais sans article serait ignorée.
 - Bases : lecture seule PROD (commandes, lignes, factures, paiements, articles) et TEST (commandes, factures).
 - Modules/modèles : `sofalgri_purchase_summary` · `sofalgri.purchase.summary.report`.
-- Commit : `6684be6`, `4cd0328`, `5c0734d` et `cc52838` sur `feat/achats-avocats` ; écran validé en TEST par l'utilisateur ; PR deepcodesystem/sofalgri#36, ouverte, PROD non déployée. Reste à passer l'article sur « Quantités commandées » en PROD.
+- Commit : `6684be6`, `4cd0328`, `5c0734d` et `cc52838` sur `feat/achats-avocats` ; écran validé en TEST par l'utilisateur ; PR deepcodesystem/sofalgri#36 **fusionnée** dans `18.0` (`79e0ee8`).
+- PROD (par l'utilisateur, contrôlé en lecture le 03/11) : 18.0.1.2.0 installée, article sur « Quantités commandées », début de saison 01/10/2026. 27 commandes : colonnes calibré et non calibré identiques au recomptage des lots (121 345 kg calibrés, 65 806 kg de stock, 187 151 kg reçus) ; total à payer 3 325 569,68 MAD, payé 157 952,80 MAD. FA2026/10/001 refaite par l'utilisateur le 03/11 à 23:37 (facture id 1505, 8 770 kg, 157 952,80 MAD), `P-20260129-0260` payée. Écran non contrôlé en PROD.
+- Stock de −13 kg sur `P-20260131-0277` (lot `014MO31102026`, PROD, lecture seule) : palette E156, 557 kg reçus, 570 kg consommés par `WH/MOF/04001` (02/11 à 23:57, poids réel 897 pour 880). `_onchange_actual_qty` reporte l'écart de poids sur la dernière palette sans contrôler son stock (déduit : 553 + 17) ; même mécanisme probable que E072 (−8). Les 13 autres palettes sont consommées exactement. Non corrigé.
 - Déploiement : nouveau module, à installer ; aucune colonne ajoutée aux modèles existants, non chargé dans une base où il n'est pas installé.
 
 ## 2026-11-03 · Palette E276 : poids brut mal saisi à la réception

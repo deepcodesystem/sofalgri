@@ -11,7 +11,7 @@ Les entrées les plus récentes en haut.
 - Limite : après validation, un autre OF peut encore consommer la même palette avant « Produire » ; l'alerte sur écart de 5 % reste indépendante.
 - Bases : lecture seule PROD (lot `014MO31102026`, `WH/MOF/04001` et son fil).
 - Modules/modèles : `mrp_component_lot_check` · `mrp.component.lot.wizard`, `mrp.component.lot.wizard.line`.
-- Commit : aucun, branche `fix/popup-stock-palette`. Non testé dans Odoo ; syntaxe Python non contrôlée (Python absent du poste).
+- Commit : `aeb44bf` sur `fix/popup-stock-palette`. **Validé en TEST** par l'utilisateur ; PR deepcodesystem/sofalgri#37, ouverte, PROD non déployée.
 - Déploiement : aucun champ ajouté, mise à jour normale du module.
 
 ## 2026-11-03 · Tableau des achats d'avocats

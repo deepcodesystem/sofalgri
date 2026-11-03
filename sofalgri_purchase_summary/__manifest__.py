@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': "Achats d'avocats",
-    'version': '18.0.1.0.0',
+    'version': '18.0.1.0.1',
     'category': 'Inventory/Purchase',
     'summary': "Écran de suivi des achats d'avocats : quantités commandées et reçues, montants et paiements",
     'description': """

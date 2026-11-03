@@ -11,7 +11,7 @@ class PurchaseSummaryReport(models.Model):
         'purchase.order': ['name', 'state', 'partner_id', 'date_order', 'company_id'],
         'purchase.order.line': ['order_id', 'product_id', 'product_qty', 'qty_received', 'price_subtotal'],
         'account.move': ['state', 'move_type', 'amount_total', 'amount_residual'],
-        'account.move.line': ['move_id', 'purchase_line_id', 'balance', 'amount_residual', 'account_type'],
+        'account.move.line': ['move_id', 'purchase_line_id', 'balance', 'amount_residual', 'account_id'],
         'account.payment': ['purchase_id', 'move_id'],
     }
 
@@ -98,9 +98,10 @@ class PurchaseSummaryReport(models.Model):
                     FROM account_payment payment
                     JOIN account_move payment_move ON payment_move.id = payment.move_id
                     JOIN account_move_line payment_line ON payment_line.move_id = payment_move.id
+                    JOIN account_account account ON account.id = payment_line.account_id
                     WHERE payment.purchase_id IS NOT NULL
                       AND payment_move.state = 'posted'
-                      AND payment_line.account_type = 'liability_payable'
+                      AND account.account_type = 'liability_payable'
                     GROUP BY payment.purchase_id
                 ),
                 totals AS (

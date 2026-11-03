@@ -13,6 +13,9 @@ class PurchaseSummaryReport(models.Model):
         'account.move': ['state', 'move_type', 'amount_total', 'amount_residual'],
         'account.move.line': ['move_id', 'purchase_line_id', 'balance', 'amount_residual', 'account_id'],
         'account.payment': ['purchase_id', 'move_id'],
+        'stock.move': ['purchase_line_id'],
+        'stock.move.line': ['move_id', 'lot_id', 'state', 'quantity', 'location_id', 'location_dest_id'],
+        'stock.quant': ['lot_id', 'location_id', 'quantity'],
     }
 
     order_id = fields.Many2one('purchase.order', string="Commande", readonly=True)
@@ -25,6 +28,8 @@ class PurchaseSummaryReport(models.Model):
     qty_received = fields.Float(string="Qté reçue (kg)", readonly=True)
     qty_variation = fields.Float(string="Variation (kg)", readonly=True)
     variation_percent = fields.Float(string="Variation (%)", digits=(12, 2), readonly=True, aggregator=None)
+    qty_calibrated = fields.Float(string="Qté calibrée (kg)", readonly=True)
+    qty_not_calibrated = fields.Float(string="Qté non calibrée (kg)", readonly=True)
 
     amount_avocado = fields.Monetary(string="Montant avocats", readonly=True)
     amount_fees = fields.Monetary(string="Frais", readonly=True)
@@ -104,6 +109,44 @@ class PurchaseSummaryReport(models.Model):
                       AND account.account_type = 'liability_payable'
                     GROUP BY payment.purchase_id
                 ),
+                order_lots AS (
+                    SELECT DISTINCT po_line.order_id, move_line.lot_id
+                    FROM stock_move_line move_line
+                    JOIN stock_move receipt_move ON receipt_move.id = move_line.move_id
+                    JOIN purchase_order_line po_line ON po_line.id = receipt_move.purchase_line_id
+                    WHERE move_line.state = 'done'
+                      AND move_line.lot_id IS NOT NULL
+                ),
+                -- Consommé par les OF, moins ce que les déconstructions ont rendu.
+                lot_calibrated AS (
+                    SELECT move_line.lot_id,
+                           SUM(CASE WHEN dest_location.usage = 'production' THEN move_line.quantity
+                                    ELSE -move_line.quantity END) AS qty
+                    FROM stock_move_line move_line
+                    JOIN stock_location src_location ON src_location.id = move_line.location_id
+                    JOIN stock_location dest_location ON dest_location.id = move_line.location_dest_id
+                    WHERE move_line.state = 'done'
+                      AND move_line.lot_id IS NOT NULL
+                      AND (src_location.usage = 'production') <> (dest_location.usage = 'production')
+                    GROUP BY move_line.lot_id
+                ),
+                lot_stock AS (
+                    SELECT quant.lot_id, SUM(quant.quantity) AS qty
+                    FROM stock_quant quant
+                    JOIN stock_location quant_location ON quant_location.id = quant.location_id
+                    WHERE quant_location.usage = 'internal'
+                      AND quant.lot_id IS NOT NULL
+                    GROUP BY quant.lot_id
+                ),
+                order_calibration AS (
+                    SELECT lots.order_id,
+                           SUM(COALESCE(calibrated.qty, 0)) AS qty_calibrated,
+                           SUM(COALESCE(stock.qty, 0)) AS qty_not_calibrated
+                    FROM order_lots lots
+                    LEFT JOIN lot_calibrated calibrated ON calibrated.lot_id = lots.lot_id
+                    LEFT JOIN lot_stock stock ON stock.lot_id = lots.lot_id
+                    GROUP BY lots.order_id
+                ),
                 totals AS (
                     SELECT po.id,
                            po.partner_id,
@@ -112,6 +155,8 @@ class PurchaseSummaryReport(models.Model):
                            company.currency_id,
                            amounts.qty_ordered,
                            amounts.qty_received,
+                           COALESCE(calibration.qty_calibrated, 0) AS qty_calibrated,
+                           COALESCE(calibration.qty_not_calibrated, 0) AS qty_not_calibrated,
                            ROUND(COALESCE(amounts.amount_avocado, 0)::numeric, 2) AS amount_avocado,
                            ROUND(COALESCE(amounts.amount_fees, 0)::numeric, 2) AS amount_fees,
                            ROUND((COALESCE(bills.amount, 0) + COALESCE(advances.amount, 0))::numeric, 2) AS amount_paid
@@ -120,6 +165,7 @@ class PurchaseSummaryReport(models.Model):
                     JOIN order_amounts amounts ON amounts.order_id = po.id
                     LEFT JOIN bill_payments bills ON bills.order_id = po.id
                     LEFT JOIN advance_payments advances ON advances.order_id = po.id
+                    LEFT JOIN order_calibration calibration ON calibration.order_id = po.id
                     WHERE po.state IN ('purchase', 'done')
                       AND amounts.qty_ordered IS NOT NULL
                 )
@@ -133,6 +179,8 @@ class PurchaseSummaryReport(models.Model):
                        qty_received,
                        qty_received - qty_ordered AS qty_variation,
                        100 * (qty_received - qty_ordered) / NULLIF(qty_ordered, 0) AS variation_percent,
+                       qty_calibrated,
+                       qty_not_calibrated,
                        amount_avocado,
                        amount_fees,
                        amount_avocado + amount_fees AS amount_due,

@@ -16,7 +16,8 @@ Les entrées les plus récentes en haut.
 - Limite : le vrac sans palette n'apparaît pas dans la vue « palettes en frigo » (`sofalgri_stock_calibre_report`), qui ne compte que les quants avec palette.
 - Bases : lecture seule TEST (`WH/MOF/04001`, nomenclatures) et PROD (nomenclatures sans poids par colis : ids 11, 15, 19).
 - Modules/modèles : `mrp_production_storage` · `mrp.production`, `mrp.bom`.
-- Commit : `b1708f5` et `b142e19` (18.0.1.5.0) sur `fix/of-vrac-sans-conditionnement`.
+- PROD (par l'utilisateur, contrôlé en lecture le 03/11) : `mrp_production_storage` 18.0.1.5.0, séquence V présente et choisie sur la nomenclature id 18. Nomenclature id 15 : poids par colis 4, renommée « Déchets Ferme Carton 4KG », **archivée** ; en TEST, poids par colis toujours vide.
+- Commit : `b1708f5` et `b142e19` (18.0.1.5.0) ; PR deepcodesystem/sofalgri#31 **fusionnée** dans `18.0` (`6d27899`).
 - Déploiement : nouveau champ stocké sur `mrp.bom` (18.0.1.5.0) → mise à jour en ligne de commande de `mrp_production_storage` sur **les deux bases** avant redémarrage.
 
 ## 2026-11-02 · Groupe « Mes factures uniquement »

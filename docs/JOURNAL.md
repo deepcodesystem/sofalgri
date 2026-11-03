@@ -5,6 +5,18 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-03 · Popup des lots d'OF : choix des lots par date
+- Demande : le client veut consommer les lots du 03/11/2026 alors que le FIFO propose les anciens, et le popup semble l'interdire.
+- Constat (TEST) : aucun blocage par date dans le code ; `WH/MOF/04030` a consommé `023FE03112026` (E255, E256) alors que des lots plus anciens restent en stock. Cause probable, à confirmer auprès du client : changer le lot sans la palette est refusé (« Le lot X n'est pas sur la palette Y ») ; listes sans date. Contournement sans mise à jour : changer la palette, le lot suit.
+- Fait : `mrp_component_lot_check` 18.0.1.5.0 : champ « Date du lot » (`lot_date`) dans le popup. Vide : FIFO inchangé. Date saisie : lignes remplacées par les palettes de ce jour (les plus anciennes d'abord, stock réservé par un autre OF exclu) jusqu'à couvrir le poids, listes limitées à ces lots ; alerte si rien n'est disponible ou si le poids n'est pas couvert. Date vidée : lignes conservées et listes rouvertes, pour compléter avec une autre palette. Choisir un lot met à jour la palette (celle du lot s'il n'en a qu'une, sinon vide). Choix tracé dans le fil de l'OF (« hors FIFO »).
+- Date prise dans le nom du lot (…JJMMAAAA, imprimée sur l'étiquette), pas la date d'entrée : `019FE01112026` et `010FE31102026` sont entrés le 02/11.
+- Limites : un lot sans date à la fin de son nom n'est pas trouvé par ce filtre ; changer le poids réel avec une date saisie recalcule les lignes et efface les retouches ; pour revenir au FIFO, fermer et rouvrir le popup.
+- **Validé en TEST** par l'utilisateur le 03/11 (« ça fonctionne bien »).
+- Bases : lecture seule TEST (lots du 03/11, quants du vrac en `Zone de réception`, lignes de `WH/MOF/04030` et `04031`).
+- Modules/modèles : `mrp_component_lot_check` · `mrp.component.lot.wizard`, `mrp.component.lot.wizard.line`.
+- Commit : `7cfc1fc` sur `feat/date-lot-popup-of` (poussé).
+- Déploiement : nouveau champ stocké sur le modèle du popup → mise à jour en ligne de commande de `mrp_component_lot_check` sur **les deux bases** avant redémarrage.
+
 ## 2026-11-02 · OF en vrac : conditionnement non obligatoire
 - Demande : le produit « AVOCAT HASS CALIBRÉS - Petits Calibres » se vend en vrac ou en caisse de 10 kg ; un OF sur la nomenclature « EN VRAC » est refusé à « Produire » (`WH/MOF/04001`, TEST) car l'article a un conditionnement.
 - Fait : `mrp_production_storage` 18.0.1.4.2 : conditionnement facultatif à « Produire » si la nomenclature n'a pas de « Poids par colis » ; frigo toujours obligatoire. Sans nomenclature ou avec un poids par colis : contrôle inchangé. Étiquette palette et liste de colisage lues : tiret ou vide si pas de conditionnement, sans erreur.

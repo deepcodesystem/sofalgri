@@ -34,6 +34,15 @@ class MrpComponentLotWizard(models.TransientModel):
     )
     weight_warning = fields.Char(compute='_compute_weight_warning')
 
+    # Choix des lots d'un jour précis, hors FIFO
+    lot_date = fields.Date(
+        string="Date du lot",
+        help="Propose les palettes des lots de cette date et limite les listes à ces lots. "
+             "Vider la date garde les lignes et rouvre les listes, pour compléter avec une autre palette.",
+    )
+    allowed_package_ids = fields.Many2many('stock.quant.package', compute='_compute_allowed_stock')
+    allowed_lot_ids = fields.Many2many('stock.lot', compute='_compute_allowed_stock')
+
     @api.model
     def default_get(self, fields_list):
         """ Une ligne par palette / lot réservé sur les composants suivis par lot. """
@@ -61,6 +70,29 @@ class MrpComponentLotWizard(models.TransientModel):
             wizard.tracked_move_count = len(moves)
             wizard.expected_qty = sum(moves.mapped('product_uom_qty'))
 
+    def _get_available_quants(self):
+        """ Stock des composants suivis par lot, limité à la date choisie. Cette date est celle du nom
+        du lot (…JJMMAAAA), imprimée sur l'étiquette : la date d'entrée peut différer (nuit, correction). """
+        self.ensure_one()
+        moves = self.production_id._get_lot_tracked_raw_moves()
+        quants = self.env['stock.quant'].search([
+            ('product_id', 'in', moves.product_id.ids),
+            ('location_id', 'child_of', moves.location_id.ids),
+            ('lot_id', '!=', False),
+            ('quantity', '>', 0),
+        ])
+        if self.lot_date:
+            suffix = self.lot_date.strftime('%d%m%Y')
+            quants = quants.filtered(lambda q: q.lot_id.name.endswith(suffix))
+        return quants
+
+    @api.depends('production_id', 'lot_date')
+    def _compute_allowed_stock(self):
+        for wizard in self:
+            quants = wizard._get_available_quants()
+            wizard.allowed_package_ids = quants.package_id
+            wizard.allowed_lot_ids = quants.lot_id
+
     @api.depends('actual_qty', 'expected_qty', 'tracked_move_count')
     def _compute_weight_warning(self):
         for wizard in self:
@@ -83,10 +115,68 @@ class MrpComponentLotWizard(models.TransientModel):
         (l'opérateur peut ensuite répartir autrement). """
         if self.tracked_move_count != 1 or not self.actual_qty or not self.line_ids:
             return
+        # Lots choisis par date : on reprend les palettes pour couvrir le nouveau poids
+        if self.lot_date:
+            return self._onchange_lot_date()
         last_line = self.line_ids[-1]
         diff = self.actual_qty - sum(self.line_ids.mapped('quantity'))
         if last_line.quantity + diff > 0:
             last_line.quantity += diff
+
+    def _prepare_lot_date_lines(self):
+        """ Palettes des lots de la date choisie, les plus anciennes d'abord, jusqu'à couvrir chaque composant.
+        Retourne les lignes à créer et la quantité restant à couvrir. """
+        moves = self.production_id._get_lot_tracked_raw_moves()
+        quants = self._get_available_quants()
+        lines = []
+        missing_qty = 0.0
+        for move in moves:
+            rounding = move.product_uom.rounding
+            remaining = self.actual_qty if len(moves) == 1 and self.actual_qty else move.product_uom_qty
+            move_quants = quants.filtered(lambda q: q.product_id == move.product_id)
+            for quant in move_quants.sorted(lambda q: (q.in_date, q.package_id.name or '')):
+                # Ce que cet OF réserve déjà sur ce stock sera libéré à la validation
+                own_qty = sum(move.move_line_ids.filtered(
+                    lambda ml: ml.lot_id == quant.lot_id
+                    and ml.package_id == quant.package_id
+                    and ml.location_id == quant.location_id
+                ).mapped('quantity'))
+                qty = min(quant.quantity - quant.reserved_quantity + own_qty, remaining)
+                if float_compare(qty, 0, precision_rounding=rounding) <= 0:
+                    continue
+                lines.append(fields.Command.create({
+                    'move_id': move._origin.id,
+                    'package_id': quant.package_id.id,
+                    'lot_id': quant.lot_id.id,
+                    'quantity': qty,
+                }))
+                remaining -= qty
+                if float_is_zero(remaining, precision_rounding=rounding):
+                    break
+            missing_qty += max(remaining, 0.0)
+        return lines, missing_qty
+
+    @api.onchange('lot_date')
+    def _onchange_lot_date(self):
+        """ Remplace les palettes proposées par le FIFO. Date vidée : les lignes restent. """
+        if not self.lot_date:
+            return
+        date_label = self.lot_date.strftime('%d/%m/%Y')
+        lines, missing_qty = self._prepare_lot_date_lines()
+        if not lines:
+            self.lot_date = False
+            return {'warning': {
+                'title': _("Date du lot"),
+                'message': _("Aucune palette disponible pour les lots du %s.", date_label),
+            }}
+        self.line_ids = [fields.Command.clear()] + lines
+        if missing_qty > 0:
+            return {'warning': {
+                'title': _("Date du lot"),
+                'message': _("Les palettes du %(date)s ne couvrent pas tout : il manque %(qty)s. "
+                             "Videz la date pour compléter avec une autre palette.",
+                             date=date_label, qty='%g' % missing_qty),
+            }}
 
     def action_validate(self):
         self.ensure_one()
@@ -168,6 +258,9 @@ class MrpComponentLotWizard(models.TransientModel):
                                              actual='%g' % self.actual_qty, expected='%g' % self.expected_qty)
             if self.weight_warning:
                 weight += Markup("<p><b>%s</b></p>") % _("Écart inhabituel confirmé par l'opérateur.")
+        if self.lot_date:
+            weight += Markup("<p><b>%s</b></p>") % _("Lots du %s choisis par l'opérateur, hors FIFO.",
+                                                     self.lot_date.strftime('%d/%m/%Y'))
         return Markup("%s<ul>%s</ul>%s") % (escape(_("Lots des composants vérifiés :")), items, weight)
 
 
@@ -188,14 +281,12 @@ class MrpComponentLotWizardLine(models.TransientModel):
     package_id = fields.Many2one(
         'stock.quant.package',
         string="Palette",
-        domain="[('quant_ids.product_id', '=', product_id), ('quant_ids.location_id', 'child_of', location_id), "
-               "('quant_ids.quantity', '>', 0)]",
+        domain="[('quant_ids.product_id', '=', product_id), ('id', 'in', parent.allowed_package_ids)]",
     )
     lot_id = fields.Many2one(
         'stock.lot',
         string="Lot",
-        domain="[('product_id', '=', product_id), ('quant_ids.location_id', 'child_of', location_id), "
-               "('quant_ids.quantity', '>', 0)]",
+        domain="[('product_id', '=', product_id), ('id', 'in', parent.allowed_lot_ids)]",
     )
     quantity = fields.Float(string="Quantité", digits='Product Unit of Measure')
 
@@ -226,3 +317,17 @@ class MrpComponentLotWizardLine(models.TransientModel):
             self.lot_id = quants.lot_id
         if self.package_id and not self.quantity:
             self.quantity = sum(quants.mapped('quantity'))
+
+    @api.onchange('lot_id')
+    def _onchange_lot_id(self):
+        """ Le choix du lot met à jour la palette : celle du lot s'il n'en a qu'une, sinon à choisir. """
+        if not self.lot_id or self.lot_id in self.package_id.quant_ids.lot_id:
+            return
+        quants = self.env['stock.quant'].search([
+            ('product_id', '=', self.product_id.id),
+            ('lot_id', '=', self.lot_id.id),
+            ('location_id', 'child_of', self.location_id.id),
+            ('quantity', '>', 0),
+        ])
+        on_one_package = len(quants.package_id) == 1 and all(quant.package_id for quant in quants)
+        self.package_id = quants.package_id if on_one_package else False

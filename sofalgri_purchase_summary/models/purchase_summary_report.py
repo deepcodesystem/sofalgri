@@ -71,17 +71,29 @@ class PurchaseSummaryReport(models.Model):
         tools.drop_view_if_exists(self.env.cr, self._table)
         self.env.cr.execute(f"""
             CREATE OR REPLACE VIEW {self._table} AS (
-                WITH order_amounts AS (
+                WITH billed_lines AS (
+                    SELECT bill_line.purchase_line_id, SUM(bill_line.balance) AS amount
+                    FROM account_move_line bill_line
+                    JOIN account_move bill ON bill.id = bill_line.move_id
+                    WHERE bill.state = 'posted'
+                      AND bill.move_type IN ('in_invoice', 'in_refund')
+                      AND bill_line.purchase_line_id IS NOT NULL
+                    GROUP BY bill_line.purchase_line_id
+                ),
+                -- Dû : le montant facturé si la ligne a une facture, sinon le montant commandé.
+                order_amounts AS (
                     SELECT line.order_id,
                            SUM(line.product_qty) FILTER (WHERE category.complete_name ILIKE '%Matière Première%') AS qty_ordered,
                            SUM(line.qty_received) FILTER (WHERE category.complete_name ILIKE '%Matière Première%') AS qty_received,
-                           SUM(line.qty_received * line.price_subtotal / NULLIF(line.product_qty, 0))
+                           SUM(COALESCE(billed.amount, line.price_subtotal))
                                FILTER (WHERE category.complete_name ILIKE '%Matière Première%') AS amount_avocado,
-                           SUM(line.price_subtotal) FILTER (WHERE category.complete_name NOT ILIKE '%Matière Première%') AS amount_fees
+                           SUM(COALESCE(billed.amount, line.price_subtotal))
+                               FILTER (WHERE category.complete_name NOT ILIKE '%Matière Première%') AS amount_fees
                     FROM purchase_order_line line
                     JOIN product_product product ON product.id = line.product_id
                     JOIN product_template template ON template.id = product.product_tmpl_id
                     JOIN product_category category ON category.id = template.categ_id
+                    LEFT JOIN billed_lines billed ON billed.purchase_line_id = line.id
                     GROUP BY line.order_id
                 ),
                 -- Part payée de chaque facture, au prorata de ce qu'elle facture sur la commande.

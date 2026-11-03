@@ -11,7 +11,15 @@ class MrpBom(models.Model):
         digits='Product Unit of Measure',
         help="Contenance du colis produit par cette nomenclature (ex. 4 pour les cartons de 4 kg, "
              "10 pour les caisses plastique de 10 kg). Sur l'OF, le conditionnement de l'article "
-             "ayant cette contenance est sélectionné automatiquement.",
+             "ayant cette contenance est sélectionné automatiquement. "
+             "Vide : production en vrac, sans palette, le conditionnement est facultatif sur l'OF.",
+    )
+    pallet_sequence_id = fields.Many2one(
+        'ir.sequence',
+        string="Séquence des palettes",
+        domain="[('code', '=', 'stock.quant.package.small_calibre')]",
+        help="Numérotation des palettes produites par cette nomenclature (ex. V001, V002...). "
+             "Vide : numérotation normale (S001, S002...).",
     )
 
     def _get_product_packaging(self, product):

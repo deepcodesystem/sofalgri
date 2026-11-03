@@ -5,6 +5,20 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-02 · OF en vrac : conditionnement non obligatoire
+- Demande : le produit « AVOCAT HASS CALIBRÉS - Petits Calibres » se vend en vrac ou en caisse de 10 kg ; un OF sur la nomenclature « EN VRAC » est refusé à « Produire » (`WH/MOF/04001`, TEST) car l'article a un conditionnement.
+- Fait : `mrp_production_storage` 18.0.1.4.2 : conditionnement facultatif à « Produire » si la nomenclature n'a pas de « Poids par colis » ; frigo toujours obligatoire. Sans nomenclature ou avec un poids par colis : contrôle inchangé. Étiquette palette et liste de colisage lues : tiret ou vide si pas de conditionnement, sans erreur.
+- À faire : la nomenclature « déchets ferme » (id 15, carton 4 kg, TEST et PROD) n'a pas de poids par colis et perdrait le contrôle : y saisir 4.
+- Testé en TEST par l'utilisateur : correct.
+- Évolution (18.0.1.5.0), au choix de l'utilisateur : OF en vrac sans palette (champ et bouton « Étiquette palette » masqués, sauf palette déjà saisie). Palettes V001, V002… pour le plastique 10 kg des Petits Calibres seulement, les autres gardent S : champ « Séquence des palettes » (`pallet_sequence_id`) sur `mrp.bom`, séquence `stock.quant.package.small_calibre` (préfixe V). Palettes V acceptées en palette mixte. Séquence choisie sur la nomenclature « Caisse Plastique 10KG » des Petits Calibres (id 18) en TEST ; **reste à faire en PROD**. `WH/MOF/04002` (TEST, avant ce réglage) a donné S085, puis palette V001 créée. **Validé en TEST** par l'utilisateur.
+- Incident : après récupération de la branche et redémarrage, PROD en erreur sur `mrp.bom` (`column mrp_bom.pallet_sequence_id does not exist`), base `sofalgri` non mise à jour. Corrigé par l'utilisateur, lecture PROD de nouveau correcte.
+- Constat : `WH/MOF/04002` et V001 sont sur `ST/Stock`, accepté comme « frigo de stockage » ; ces palettes ne comptent pas dans le tableau des palettes en frigo. Pas de changement pour l'instant.
+- Limite : le vrac sans palette n'apparaît pas dans la vue « palettes en frigo » (`sofalgri_stock_calibre_report`), qui ne compte que les quants avec palette.
+- Bases : lecture seule TEST (`WH/MOF/04001`, nomenclatures) et PROD (nomenclatures sans poids par colis : ids 11, 15, 19).
+- Modules/modèles : `mrp_production_storage` · `mrp.production`, `mrp.bom`.
+- Commit : `b1708f5` et `b142e19` (18.0.1.5.0) sur `fix/of-vrac-sans-conditionnement`.
+- Déploiement : nouveau champ stocké sur `mrp.bom` (18.0.1.5.0) → mise à jour en ligne de commande de `mrp_production_storage` sur **les deux bases** avant redémarrage.
+
 ## 2026-11-02 · Groupe « Mes factures uniquement »
 - Demande : un groupe d'utilisateurs qui crée une facture à son nom, la valide et la paie, sans voir les autres factures, surtout clients.
 - Choix de l'utilisateur : factures clients et fournisseurs ; « à son nom » = créée par lui (`create_uid`, non modifiable) ; paiement en caisse et banque ; menu dédié.
@@ -15,7 +29,7 @@ Les entrées les plus récentes en haut.
 - Limites : un utilisateur de ce groupe ne voit pas une facture créée par un autre, même s'il doit la payer. Les contacts restent visibles (nécessaires pour facturer).
 - Bases : lecture seule TEST (groupes, règles d'accès, journaux, identifiants natifs).
 - Modules/modèles : `sofalgri_own_invoices` · `res.groups`, `ir.rule`, `ir.ui.menu`.
-- Commit : `ac6ba6c` sur `feat/groupe-mes-factures` (poussé). Installé en TEST par l'utilisateur ; PROD : non installé.
+- Commit : `ac6ba6c` ; PR deepcodesystem/sofalgri#30 **fusionnée** dans `18.0` (`6baeb94`). Installé en TEST et en PROD par l'utilisateur (PROD contrôlée en lecture : 18.0.1.0.0 le 02/11).
 - Déploiement : nouveau module, à installer (liste des applications à mettre à jour) ; aucun champ stocké ; non chargé dans une base où il n'est pas installé. Puis affecter le groupe sur la fiche de l'utilisateur.
 
 ## 2026-11-02 · Synthèse des exports

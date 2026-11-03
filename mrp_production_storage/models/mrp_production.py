@@ -40,13 +40,14 @@ class MrpProduction(models.Model):
     result_package_id = fields.Many2one(
         'stock.quant.package',
         string="N° de palette",
-        domain="['|', ('quant_ids', '=', False), '&', ('name', '=like', 'S%'), ('location_id', '=', storage_location_id)]",
+        domain="['|', ('quant_ids', '=', False), '&', '|', ('name', '=like', 'S%'), ('name', '=like', 'V%'), ('location_id', '=', storage_location_id)]",
         copy=False,
         tracking=True,
         help="Palette de sortie du produit fini. Laisser vide pour créer automatiquement "
-             "la palette suivante (S001, S002...) à l'impression de l'étiquette ou à la production. "
-             "Palette mixte : choisir une palette S déjà présente dans le frigo de stockage.",
+             "la palette suivante (S001... ou V001... selon la nomenclature) à l'impression de l'étiquette "
+             "ou à la production. Palette mixte : choisir une palette S ou V déjà présente dans le frigo de stockage.",
     )
+    bom_packaging_unit_qty = fields.Float(related='bom_id.packaging_unit_qty')
 
     @api.depends('bom_id', 'product_id')
     def _compute_product_packaging_id(self):
@@ -130,13 +131,22 @@ class MrpProduction(models.Model):
             self._apply_storage_to_finished_moves()
         return res
 
+    def _is_bulk_production(self):
+        """ Nomenclature sans poids par colis : production en vrac, sans conditionnement ni palette. """
+        self.ensure_one()
+        return bool(self.bom_id and not self.bom_id.packaging_unit_qty)
+
     def _create_pallet_package(self):
-        """ Palette de sortie numérotée par la séquence native des colis (S001, S002...),
+        """ Palette de sortie numérotée par la séquence de la nomenclature (V001, V002...),
+        à défaut par la séquence native des colis (S001, S002...),
         avec le type du conditionnement (« Palettes de Livraison »). """
         self.ensure_one()
         package_type = self.product_packaging_id.package_type_id or self.env['stock.package.type'].search(
             [('name', '=', 'Palettes de Livraison')], limit=1)
-        return self.env['stock.quant.package'].create({'package_type_id': package_type.id})
+        vals = {'package_type_id': package_type.id}
+        if self.bom_id.pallet_sequence_id:
+            vals['name'] = self.bom_id.pallet_sequence_id.next_by_id()
+        return self.env['stock.quant.package'].create(vals)
 
     def _get_unbuild_quants(self):
         """ Stock de cet OF encore sur sa palette, pour la déconstruction. """
@@ -170,6 +180,8 @@ class MrpProduction(models.Model):
         self.ensure_one()
         if self.product_tracking in ('lot', 'serial') and not self.lot_producing_id:
             raise UserError(_("Indiquez le lot produit avant d'imprimer l'étiquette palette."))
+        if not self.result_package_id and self._is_bulk_production():
+            raise UserError(_("Production en vrac : pas de palette, donc pas d'étiquette palette."))
         if not self.result_package_id and self.state not in ('done', 'cancel'):
             self.result_package_id = self._create_pallet_package()
         return self.env.ref('mrp_production_storage.action_report_production_pallet').report_action(self)
@@ -233,7 +245,8 @@ class MrpProduction(models.Model):
         # Les produits conditionnés (avocats calibrés) doivent avoir leur conditionnement et leur frigo
         for production in self.filtered(lambda p: p.product_id.packaging_ids):
             missing = []
-            if not production.product_packaging_id:
+            bulk = production._is_bulk_production()
+            if not production.product_packaging_id and not bulk:
                 missing.append(_("le conditionnement"))
             if not production.storage_location_id:
                 missing.append(_("le frigo de stockage"))
@@ -248,7 +261,7 @@ class MrpProduction(models.Model):
                                   of=production.name, pallet=production.result_package_id.name,
                                   location=package_location.display_name,
                                   storage=production.storage_location_id.display_name))
-            if not production.result_package_id:
+            if not production.result_package_id and not bulk:
                 production.result_package_id = production._create_pallet_package()
         self._apply_storage_to_finished_moves()
         return super().button_mark_done()

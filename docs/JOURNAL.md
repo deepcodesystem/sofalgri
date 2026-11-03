@@ -10,11 +10,13 @@ Les entrées les plus récentes en haut.
 - Fait : `mrp_production_storage` 18.0.1.4.2 : conditionnement facultatif à « Produire » si la nomenclature n'a pas de « Poids par colis » ; frigo toujours obligatoire. Sans nomenclature ou avec un poids par colis : contrôle inchangé. Étiquette palette et liste de colisage lues : tiret ou vide si pas de conditionnement, sans erreur.
 - À faire : la nomenclature « déchets ferme » (id 15, carton 4 kg, TEST et PROD) n'a pas de poids par colis et perdrait le contrôle : y saisir 4.
 - Testé en TEST par l'utilisateur : correct.
-- Évolution (18.0.1.5.0), au choix de l'utilisateur : OF en vrac sans palette (champ et bouton « Étiquette palette » masqués, sauf palette déjà saisie). Palettes V001, V002… pour le plastique 10 kg des Petits Calibres seulement, les autres gardent S : champ « Séquence des palettes » (`pallet_sequence_id`) sur `mrp.bom`, séquence `stock.quant.package.small_calibre` (préfixe V). Palettes V acceptées en palette mixte. À faire : choisir cette séquence sur la nomenclature « Caisse Plastique 10KG » des Petits Calibres (id 18). Non testé dans Odoo.
+- Évolution (18.0.1.5.0), au choix de l'utilisateur : OF en vrac sans palette (champ et bouton « Étiquette palette » masqués, sauf palette déjà saisie). Palettes V001, V002… pour le plastique 10 kg des Petits Calibres seulement, les autres gardent S : champ « Séquence des palettes » (`pallet_sequence_id`) sur `mrp.bom`, séquence `stock.quant.package.small_calibre` (préfixe V). Palettes V acceptées en palette mixte. Séquence choisie sur la nomenclature « Caisse Plastique 10KG » des Petits Calibres (id 18) en TEST ; **reste à faire en PROD**. `WH/MOF/04002` (TEST, avant ce réglage) a donné S085, puis palette V001 créée. **Validé en TEST** par l'utilisateur.
+- Incident : après récupération de la branche et redémarrage, PROD en erreur sur `mrp.bom` (`column mrp_bom.pallet_sequence_id does not exist`), base `sofalgri` non mise à jour. Corrigé par l'utilisateur, lecture PROD de nouveau correcte.
+- Constat : `WH/MOF/04002` et V001 sont sur `ST/Stock`, accepté comme « frigo de stockage » ; ces palettes ne comptent pas dans le tableau des palettes en frigo. Pas de changement pour l'instant.
 - Limite : le vrac sans palette n'apparaît pas dans la vue « palettes en frigo » (`sofalgri_stock_calibre_report`), qui ne compte que les quants avec palette.
 - Bases : lecture seule TEST (`WH/MOF/04001`, nomenclatures) et PROD (nomenclatures sans poids par colis : ids 11, 15, 19).
 - Modules/modèles : `mrp_production_storage` · `mrp.production`, `mrp.bom`.
-- Commit : `b1708f5` et `b142e19` (18.0.1.5.0) sur `fix/of-vrac-sans-conditionnement` (poussé).
+- Commit : `b1708f5` et `b142e19` (18.0.1.5.0) sur `fix/of-vrac-sans-conditionnement`.
 - Déploiement : nouveau champ stocké sur `mrp.bom` (18.0.1.5.0) → mise à jour en ligne de commande de `mrp_production_storage` sur **les deux bases** avant redémarrage.
 
 ## 2026-11-02 · Groupe « Mes factures uniquement »

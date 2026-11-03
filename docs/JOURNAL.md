@@ -11,7 +11,7 @@ Les entrées les plus récentes en haut.
 - Fait : `mrp_component_lot_check` 18.0.1.5.0 : champ « Date du lot » (`lot_date`) dans le popup. Vide : FIFO inchangé. Date saisie : lignes remplacées par les palettes de ce jour (les plus anciennes d'abord, stock réservé par un autre OF exclu) jusqu'à couvrir le poids, listes limitées à ces lots ; alerte si rien n'est disponible ou si le poids n'est pas couvert. Date vidée : lignes conservées et listes rouvertes, pour compléter avec une autre palette. Choisir un lot met à jour la palette (celle du lot s'il n'en a qu'une, sinon vide). Choix tracé dans le fil de l'OF (« hors FIFO »).
 - Date prise dans le nom du lot (…JJMMAAAA, imprimée sur l'étiquette), pas la date d'entrée : `019FE01112026` et `010FE31102026` sont entrés le 02/11.
 - Limites : un lot sans date à la fin de son nom n'est pas trouvé par ce filtre ; changer le poids réel avec une date saisie recalcule les lignes et efface les retouches ; pour revenir au FIFO, fermer et rouvrir le popup.
-- À contrôler en TEST (non testé, pas de serveur Odoo sur le poste) : date avec palettes suffisantes, insuffisantes, sans palette ; date vidée puis ajout d'une autre palette ; lot changé seul ; réservations et stock après « Produire ».
+- **Validé en TEST** par l'utilisateur le 03/11 (« ça fonctionne bien »).
 - Bases : lecture seule TEST (lots du 03/11, quants du vrac en `Zone de réception`, lignes de `WH/MOF/04030` et `04031`).
 - Modules/modèles : `mrp_component_lot_check` · `mrp.component.lot.wizard`, `mrp.component.lot.wizard.line`.
 - Commit : `7cfc1fc` sur `feat/date-lot-popup-of` (poussé).

@@ -7,6 +7,8 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='code']" position="after">
                 <field name="packaging_unit_qty" invisible="type != 'normal'"/>
+                <field name="pallet_sequence_id" options="{'no_create': True, 'no_open': True}"
+                       invisible="type != 'normal' or not packaging_unit_qty"/>
             </xpath>
         </field>
     </record>

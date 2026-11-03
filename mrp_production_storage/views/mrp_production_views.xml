@@ -9,19 +9,21 @@
             <xpath expr="//header" position="inside">
                 <button name="action_print_pallet_label" type="object" string="Étiquette palette"
                         icon="fa-print"
-                        invisible="state in ('draft', 'cancel')"/>
+                        invisible="state in ('draft', 'cancel') or (bom_id and not bom_packaging_unit_qty and not result_package_id)"/>
             </xpath>
             <!-- Après la ligne de la nomenclature (bom_id est dans une div o_row, sans libellé) -->
             <xpath expr="//div[@name='bom_div']" position="after">
                 <field name="storage_parent_location_id" invisible="1"/>
+                <field name="bom_packaging_unit_qty" invisible="1"/>
                 <field name="product_packaging_id" options="{'no_create': True, 'no_open': True}"
                        readonly="state in ('done', 'cancel')"/>
                 <field name="product_packaging_qty" invisible="not product_packaging_id"
                        readonly="state in ('done', 'cancel')"/>
                 <field name="storage_location_id" options="{'no_create': True, 'no_open': True}"
                        readonly="state in ('done', 'cancel')"/>
-                <field name="result_package_id" placeholder="Automatique (S001, S002...)"
+                <field name="result_package_id" placeholder="Automatique"
                        options="{'no_create_edit': True, 'no_open': True}"
+                       invisible="bom_id and not bom_packaging_unit_qty and not result_package_id"
                        readonly="state in ('done', 'cancel')"/>
             </xpath>
         </field>

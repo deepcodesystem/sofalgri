@@ -14,12 +14,13 @@ Les entrées les plus récentes en haut.
 - Fait (code) : nouveau module `sofalgri_local_sale_journal` 18.0.1.0.0 (dépend de `account`, `sale`) : case « Journal des ventes locales » (`account.journal.is_local_sale`) ; `sale.order._prepare_invoice` et onchange de la facture brouillon jamais validée : journal d'après la position (nom contenant « Export », comme la Synthèse) ; `account.move._post` : refus avant numérotation d'une position d'export ou d'une devise étrangère dans le journal local, ou d'une facture sans position d'export dans un autre journal de vente. Journal choisi sur la commande conservé. Sans journal coché, aucun effet.
 - Constat (PROD, lecture seule) : aucune facture client non annulée sans position fiscale, donc pas de conflit avec l'historique.
 - Limites : vente d'export en MAD sans position classée en local sans alerte ; plusieurs commandes regroupées dans une facture prennent le journal de la première, contrôle à la validation.
-- Test : non testé, Python absent du poste, syntaxe non contrôlée.
+- Test : module 18.0.1.0.0 essayé en TEST par l'utilisateur, « ça fonctionne comme prévu » (détail des 7 essais non précisé).
+- Évolution (18.0.1.1.0) : menu « Ventes locales » sous Facturation > Clients : factures et avoirs du journal coché ; création en facture client. Non testé.
 - Déploiement : nouveau module, à installer ; aucune colonne ajoutée à `account_journal` dans une base où il n'est pas installé. Puis cocher la case sur le journal « Ventes locales ».
 - Reste : essais en TEST, avis du comptable, création du journal et installation en PROD avec « OK prod ».
 - Bases : TEST (écriture : `account.journal` ; lecture : journaux, champ `sale.order.journal_id`) ; PROD (lecture seule : journaux de vente).
 - Modules/modèles : `sofalgri_local_sale_journal` · `account.journal`, `account.move`, `sale.order`.
-- Commit : `0083223` sur `feat/journal-ventes-locales` (poussé).
+- Commit : `0083223` et `ae2e24f` sur `feat/journal-ventes-locales` (poussé).
 
 ## 2026-11-04 · Renumérotation de la dernière facture après suppression des factures locales (TEST et PROD)
 - Demande : factures locales supprimées par l'utilisateur, en TEST puis en PROD ; ramener la dernière facture à F2026/072.

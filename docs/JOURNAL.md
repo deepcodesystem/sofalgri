@@ -20,7 +20,7 @@ Les entrées les plus récentes en haut.
 - Reste : essais en TEST, avis du comptable, création du journal et installation en PROD avec « OK prod ».
 - Bases : TEST (écriture : `account.journal` ; lecture : journaux, champ `sale.order.journal_id`) ; PROD (lecture seule : journaux de vente).
 - Modules/modèles : `sofalgri_local_sale_journal` · `account.journal`, `account.move`, `sale.order`.
-- Commit : `0083223` et `ae2e24f` sur `feat/journal-ventes-locales` (poussé).
+- Commit : `0083223` et `ae2e24f` sur `feat/journal-ventes-locales` (poussé) ; PR deepcodesystem/sofalgri#41.
 
 ## 2026-11-04 · Renumérotation de la dernière facture après suppression des factures locales (TEST et PROD)
 - Demande : factures locales supprimées par l'utilisateur, en TEST puis en PROD ; ramener la dernière facture à F2026/072.

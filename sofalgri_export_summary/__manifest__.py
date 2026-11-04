@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Synthèse des exports',
-    'version': '18.0.1.0.2',
+    'version': '18.0.1.0.3',
     'category': 'Sales/Sales',
     'summary': "Écran de suivi des exports : une ligne par facture client, avec filtre sur la saison et les dates",
     'description': """
-        Liste des factures clients validées : station, poids net, GPS, camion, client, chargement, transporteur,
+        Liste des factures clients d'export validées (position fiscale Import/Export) : station, poids net, GPS, camion, client, chargement, transporteur,
         matricule, statut, arrivée, prix, claim (avoirs), cours et paiements (trois au plus).
         Transporteur, GPS, TY, statut et date d'arrivée sont saisis sur la livraison, onglet « Expédition ».
         Le début de saison est saisi sur la fiche société.

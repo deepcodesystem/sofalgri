@@ -61,7 +61,7 @@
         <field name="name">Synthèse des exports</field>
         <field name="res_model">account.move</field>
         <field name="view_mode">list,form</field>
-        <field name="domain">[('move_type', '=', 'out_invoice'), ('state', '=', 'posted')]</field>
+        <field name="domain">[('move_type', '=', 'out_invoice'), ('state', '=', 'posted'), ('fiscal_position_id.name', 'ilike', 'Export')]</field>
         <field name="context">{'search_default_current_season': 1, 'default_move_type': 'out_invoice'}</field>
         <field name="search_view_id" ref="view_export_summary_search"/>
         <field name="view_ids" eval="[(5, 0, 0),

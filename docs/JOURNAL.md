@@ -15,7 +15,7 @@ Les entrées les plus récentes en haut.
 - Constat (PROD, lecture seule) : aucune facture client non annulée sans position fiscale, donc pas de conflit avec l'historique.
 - Limites : vente d'export en MAD sans position classée en local sans alerte ; plusieurs commandes regroupées dans une facture prennent le journal de la première, contrôle à la validation.
 - Test : module 18.0.1.0.0 essayé en TEST par l'utilisateur, « ça fonctionne comme prévu » (détail des 7 essais non précisé).
-- Évolution (18.0.1.1.0) : menu « Ventes locales » sous Facturation > Clients : factures et avoirs du journal coché ; création en facture client. Non testé.
+- Évolution (18.0.1.1.0) : menu « Ventes locales » sous Facturation > Clients : factures et avoirs du journal coché ; création en facture client. **Validé en TEST** par l'utilisateur (« ça passe »).
 - Déploiement : nouveau module, à installer ; aucune colonne ajoutée à `account_journal` dans une base où il n'est pas installé. Puis cocher la case sur le journal « Ventes locales ».
 - Reste : essais en TEST, avis du comptable, création du journal et installation en PROD avec « OK prod ».
 - Bases : TEST (écriture : `account.journal` ; lecture : journaux, champ `sale.order.journal_id`) ; PROD (lecture seule : journaux de vente).

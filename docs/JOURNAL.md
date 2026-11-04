@@ -5,6 +5,16 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-04 · Synthèse des exports : factures d'export seulement
+- Demande : l'écran affiche toutes les factures clients ; le limiter aux exportations.
+- Constat (PROD, lecture seule) : 163 factures validées : 160 en EUR ou GBP, position fiscale « Import/Export », avec incoterm ; 3 en MAD, sans position ni incoterm (Abdellah, F2026/072 à 074, 498 264 MAD). Les critères concordent.
+- Fait : `sofalgri_export_summary` 18.0.1.0.3 : domaine de l'action limité à la position fiscale dont le nom contient « Export ». Contrôle TEST : version et domaine en place, écran ouvert sans erreur par l'utilisateur ; TEST n'a aucune facture locale, effet à confirmer en PROD.
+- Limite : une facture d'export sans cette position (client marocain, position retirée) n'apparaît pas.
+- Bases : lecture seule PROD (factures clients, positions fiscales, journal de vente).
+- Modules/modèles : `sofalgri_export_summary` · action de la synthèse (`account.move`).
+- Commit : `3fb369c` sur `fix/synthese-exports-seulement` ; PR deepcodesystem/sofalgri#39, ouverte, PROD non déployée.
+- Déploiement : aucun champ ajouté, mise à jour normale du module.
+
 ## 2026-11-03 · Popup des lots d'OF : stock de la palette contrôlé
 - Demande : éviter les stocks négatifs créés par le report du poids réel (E156, −13 kg, voir l'entrée suivante).
 - Fait : `mrp_component_lot_check` 18.0.1.6.0 : le report de l'écart s'arrête au stock de la dernière palette, avec une alerte indiquant ce qui manque ; à la validation, refus si une palette est demandée au-delà de son stock réel, toutes lignes du popup confondues. Contrôle sur le stock réel (réservations d'autres OF non déduites, pour ne pas bloquer davantage). Plus de reliquat possible sans ajouter de palette ou corriger le stock.

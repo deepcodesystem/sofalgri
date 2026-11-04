@@ -30,7 +30,7 @@ class MrpComponentLotWizard(models.TransientModel):
     actual_qty = fields.Float(
         string="Poids réel consommé",
         digits='Product Unit of Measure',
-        help="Poids net réellement mis au calibrage. L'écart avec la nomenclature est reporté sur la dernière palette.",
+        help="Poids net réellement mis au calibrage. L'écart avec la nomenclature est reporté sur la dernière palette, dans la limite de son stock.",
     )
     weight_warning = fields.Char(compute='_compute_weight_warning')
 
@@ -111,8 +111,8 @@ class MrpComponentLotWizard(models.TransientModel):
 
     @api.onchange('actual_qty')
     def _onchange_actual_qty(self):
-        """ L'écart entre le poids réel et le total des palettes est reporté sur la dernière palette
-        (l'opérateur peut ensuite répartir autrement). """
+        """ L'écart entre le poids réel et le total des palettes est reporté sur la dernière palette,
+        dans la limite de son stock (l'opérateur peut ensuite répartir autrement). """
         if self.tracked_move_count != 1 or not self.actual_qty or not self.line_ids:
             return
         # Lots choisis par date : on reprend les palettes pour couvrir le nouveau poids
@@ -120,6 +120,18 @@ class MrpComponentLotWizard(models.TransientModel):
             return self._onchange_lot_date()
         last_line = self.line_ids[-1]
         diff = self.actual_qty - sum(self.line_ids.mapped('quantity'))
+        if diff > 0 and last_line.lot_id:
+            room = max(last_line._get_stock_qty() - last_line._get_requested_qty(), 0.0)
+            missing_qty = diff - room
+            if float_compare(missing_qty, 0, precision_rounding=last_line.move_id.product_uom.rounding) > 0:
+                last_line.quantity += room
+                return {'warning': {
+                    'title': _("Poids réel"),
+                    'message': _("La palette %(package)s ne couvre pas tout : il manque %(qty)s. "
+                                 "Ajoutez une autre palette.",
+                                 package=last_line.package_id.name or _("hors palette"),
+                                 qty='%g' % missing_qty),
+                }}
         if last_line.quantity + diff > 0:
             last_line.quantity += diff
 
@@ -201,6 +213,15 @@ class MrpComponentLotWizard(models.TransientModel):
                 raise UserError(_("La quantité doit être positive (lot %s).") % line.lot_id.name)
             if line.package_id and line.lot_id not in line.package_id.quant_ids.lot_id:
                 raise UserError(_("Le lot %s n'est pas sur la palette %s.") % (line.lot_id.name, line.package_id.name))
+            requested_qty = line._get_requested_qty()
+            stock_qty = line._get_stock_qty()
+            if float_compare(requested_qty, stock_qty, precision_rounding=line.move_id.product_uom.rounding) > 0:
+                raise UserError(_("La palette %(package)s (lot %(lot)s) contient %(stock)s pour %(requested)s demandés : "
+                                  "ajoutez une autre palette, ou corrigez d'abord son stock si le poids est juste.",
+                                  package=line.package_id.name or _("hors palette"),
+                                  lot=line.lot_id.name,
+                                  stock='%g' % stock_qty,
+                                  requested='%g' % requested_qty))
 
         # Palettes retirées par l'opérateur : on libère leur réservation
         (moves.move_line_ids - self.line_ids.move_line_id).unlink()
@@ -290,17 +311,32 @@ class MrpComponentLotWizardLine(models.TransientModel):
     )
     quantity = fields.Float(string="Quantité", digits='Product Unit of Measure')
 
-    def _get_source_location(self):
-        """ Emplacement réel du lot et de la palette : l'OF prend dans ST/Stock, mais le stock est dans
-        un sous-emplacement. Consommer sur ST/Stock y créerait un stock négatif. """
+    def _get_stock_quants(self):
         self.ensure_one()
-        quant = self.env['stock.quant'].search([
+        return self.env['stock.quant'].search([
             ('product_id', '=', self.product_id.id),
             ('lot_id', '=', self.lot_id.id),
             ('package_id', '=', self.package_id.id),
             ('location_id', 'child_of', self.location_id.id),
             ('quantity', '>', 0),
-        ], order='quantity desc', limit=1)
+        ], order='quantity desc')
+
+    def _get_stock_qty(self):
+        """ Stock réel du lot sur la palette, réservations comprises. """
+        return sum(self._get_stock_quants().mapped('quantity'))
+
+    def _get_requested_qty(self):
+        """ Quantité demandée sur ce lot et cette palette, toutes lignes du popup confondues. """
+        self.ensure_one()
+        return sum(self.wizard_id.line_ids.filtered(
+            lambda line: line.lot_id == self.lot_id and line.package_id == self.package_id
+        ).mapped('quantity'))
+
+    def _get_source_location(self):
+        """ Emplacement réel du lot et de la palette : l'OF prend dans ST/Stock, mais le stock est dans
+        un sous-emplacement. Consommer sur ST/Stock y créerait un stock négatif. """
+        self.ensure_one()
+        quant = self._get_stock_quants()[:1]
         if not quant:
             raise UserError(_("Le lot %(lot)s n'a pas de stock %(where)s : choisissez la palette qui le contient.",
                               lot=self.lot_id.name,

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Ventes : journal des ventes locales',
-    'version': '18.0.1.0.0',
+    'version': '18.0.1.1.0',
     'category': 'Accounting',
     'summary': "Choisit le journal de vente selon la position fiscale et refuse une facture dans le mauvais journal",
     'description': """
@@ -14,6 +14,7 @@
     'depends': ['account', 'sale'],
     'data': [
         'views/account_journal_views.xml',
+        'views/local_sale_menus.xml',
     ],
     'installable': True,
     'application': False,

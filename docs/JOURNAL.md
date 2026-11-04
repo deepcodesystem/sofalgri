@@ -12,7 +12,8 @@ Les entrées les plus récentes en haut.
 - Limite : une facture d'export sans cette position (client marocain, position retirée) n'apparaît pas.
 - Bases : lecture seule PROD (factures clients, positions fiscales, journal de vente).
 - Modules/modèles : `sofalgri_export_summary` · action de la synthèse (`account.move`).
-- Commit : `3fb369c` sur `fix/synthese-exports-seulement` ; PR deepcodesystem/sofalgri#39, ouverte, PROD non déployée.
+- Commit : `3fb369c` sur `fix/synthese-exports-seulement` ; PR deepcodesystem/sofalgri#39 **fusionnée** dans `18.0` (`e766b63`).
+- PROD (par l'utilisateur, contrôlé en lecture le 04/11) : 18.0.1.0.3, domaine en place ; 3 factures de saison avec la position Import/Export (F2026/069 à 071). Écran non contrôlé en PROD (le MCP n'applique pas les filtres sur un champ lié).
 - Déploiement : aucun champ ajouté, mise à jour normale du module.
 
 ## 2026-11-03 · Popup des lots d'OF : stock de la palette contrôlé

@@ -5,6 +5,33 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-04 · Journal « Ventes locales » pour numéroter les factures locales à part
+- Demande : une séquence propre aux ventes locales, sans nouveau modèle si possible.
+- Constat : numérotation par journal ; un seul journal de vente en TEST et en PROD (`FAC`, ordre 5, numéros `F2026/…`). Champ natif `sale.order.journal_id` « Journal de facturation » présent ; visibilité sur le formulaire non contrôlée.
+- Fait (TEST, écriture MCP avec accord) : `account.journal` id 9 « Ventes locales », code `FL`, type vente, ordre 10, série d'avoirs activée, compte 711100. Aucun code. Aucune facture d'essai.
+- Essai en TEST jugé correct par l'utilisateur (« ça fonctionne bien »), détail des contrôles non précisé.
+- Constat pour l'automatisation (PROD, lecture seule) : position « Import/Export » sur les fiches de TROFI BV et Westfalia, tarif EUR ; Abdellah sans position, sans pays, tarif MAD. Solde client d'Abdellah : −1 008 223,50 MAD, dont 539 425 de paiements sans facture ; les 468 798,50 restants ne sont pas analysés.
+- Fait (code) : nouveau module `sofalgri_local_sale_journal` 18.0.1.0.0 (dépend de `account`, `sale`) : case « Journal des ventes locales » (`account.journal.is_local_sale`) ; `sale.order._prepare_invoice` et onchange de la facture brouillon jamais validée : journal d'après la position (nom contenant « Export », comme la Synthèse) ; `account.move._post` : refus avant numérotation d'une position d'export ou d'une devise étrangère dans le journal local, ou d'une facture sans position d'export dans un autre journal de vente. Journal choisi sur la commande conservé. Sans journal coché, aucun effet.
+- Constat (PROD, lecture seule) : aucune facture client non annulée sans position fiscale, donc pas de conflit avec l'historique.
+- Limites : vente d'export en MAD sans position classée en local sans alerte ; plusieurs commandes regroupées dans une facture prennent le journal de la première, contrôle à la validation.
+- Test : module 18.0.1.0.0 essayé en TEST par l'utilisateur, « ça fonctionne comme prévu » (détail des 7 essais non précisé).
+- Évolution (18.0.1.1.0) : menu « Ventes locales » sous Facturation > Clients : factures et avoirs du journal coché ; création en facture client. **Validé en TEST** par l'utilisateur (« ça passe »).
+- Déploiement : nouveau module, à installer ; aucune colonne ajoutée à `account_journal` dans une base où il n'est pas installé. Puis cocher la case sur le journal « Ventes locales ».
+- Reste : essais en TEST, avis du comptable, création du journal et installation en PROD avec « OK prod ».
+- Bases : TEST (écriture : `account.journal` ; lecture : journaux, champ `sale.order.journal_id`) ; PROD (lecture seule : journaux de vente).
+- Modules/modèles : `sofalgri_local_sale_journal` · `account.journal`, `account.move`, `sale.order`.
+- Commit : `0083223` et `ae2e24f` sur `feat/journal-ventes-locales` (poussé) ; PR deepcodesystem/sofalgri#41.
+
+## 2026-11-04 · Renumérotation de la dernière facture après suppression des factures locales (TEST et PROD)
+- Demande : factures locales supprimées par l'utilisateur, en TEST puis en PROD ; ramener la dernière facture à F2026/072.
+- Fait (PROD, écriture MCP avec « OK prod », après validation en TEST) : factures F2026/072 à 075 d'Abdellah (ids 1499, 1507, 1509, 1512) supprimées par l'utilisateur et absentes à la relecture ; `account.move` 1514 : `name` et `payment_reference` passés de F2026/076 à F2026/072. Contrôle en lecture : `sequence_number` 72, ligne client 6035 à F2026/072, montants inchangés, F2026/073 à 076 absents. Écriture tracée au nom de « Public user ». Prochain numéro attendu : F2026/073, non testé.
+- Reste en PROD : mêmes 4 paiements d'Abdellah, état « en cours », non rapprochés, sans facture (539 425 MAD), non modifiés. Comptabilité : suppression et réattribution de numéro à faire valider.
+- Fait (TEST, écriture MCP avec accord) : `account.move` 1514 (Westfalia Marketing BV, C-00214, 56 240 €, non payée, non envoyée) : `name` et `payment_reference` passés de F2026/076 à F2026/072. Contrôle en lecture : `sequence_number` 72, ligne client 6035 à F2026/072, montants inchangés, plus de trou signalé sur cette facture (`made_sequence_gap` faux). Prochain numéro attendu : F2026/073, non testé.
+- Reste : 4 paiements d'Abdellah validés et non rapprochés, sans facture, référence F2026/072 à 075 (`PBNK1/2026/00158` à `00161`, 539 425 MAD) : crédit au compte du client, référence 072 identique à celle de la facture Westfalia. Non modifiés, décision de l'utilisateur attendue.
+- Bases : TEST et PROD (écriture : `account.move` 1514 ; lecture : factures, journal de vente, lignes, paiements).
+- Modules/modèles : aucun code · `account.move`, `account.move.line`.
+- Commit : aucun code ; entrée de journal sur `feat/journal-ventes-locales`.
+
 ## 2026-11-04 · Synthèse des exports : factures d'export seulement
 - Demande : l'écran affiche toutes les factures clients ; le limiter aux exportations.
 - Constat (PROD, lecture seule) : 163 factures validées : 160 en EUR ou GBP, position fiscale « Import/Export », avec incoterm ; 3 en MAD, sans position ni incoterm (Abdellah, F2026/072 à 074, 498 264 MAD). Les critères concordent.

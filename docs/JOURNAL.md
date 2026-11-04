@@ -11,7 +11,9 @@ Les entrées les plus récentes en haut.
 - Limite : après validation, un autre OF peut encore consommer la même palette avant « Produire » ; l'alerte sur écart de 5 % reste indépendante.
 - Bases : lecture seule PROD (lot `014MO31102026`, `WH/MOF/04001` et son fil).
 - Modules/modèles : `mrp_component_lot_check` · `mrp.component.lot.wizard`, `mrp.component.lot.wizard.line`.
-- Commit : `aeb44bf` sur `fix/popup-stock-palette`. **Validé en TEST** par l'utilisateur ; PR deepcodesystem/sofalgri#37, ouverte, PROD non déployée.
+- Commit : `aeb44bf` sur `fix/popup-stock-palette`. **Validé en TEST** par l'utilisateur ; PR deepcodesystem/sofalgri#37 **fusionnée** dans `18.0` (`87a6357`).
+- PROD (par l'utilisateur, contrôlé en lecture le 04/11) : 18.0.1.6.0 en base ; E156 ajustée, `P-20260131-0277` à 0 kg non calibré. Popup non contrôlé sur un OF réel en PROD.
+- Reste : −2 kg sur le lot `017FE01112026`, `Zone de réception`, sans palette (quant créé le 03/11 à 14:04 par Administrator), non analysé.
 - Déploiement : aucun champ ajouté, mise à jour normale du module.
 
 ## 2026-11-03 · Tableau des achats d'avocats

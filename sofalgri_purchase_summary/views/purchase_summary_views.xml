@@ -61,10 +61,15 @@
         <field name="search_view_id" ref="view_purchase_summary_search"/>
     </record>
 
+    <menuitem id="menu_bi_purchase"
+              name="Achats"
+              parent="synconics_bi_dashboard.parent_dashboard_menu"
+              sequence="6"/>
+
     <menuitem id="menu_purchase_summary"
               name="Achats d'avocats"
-              parent="synconics_bi_dashboard.parent_dashboard_menu"
+              parent="menu_bi_purchase"
               action="action_purchase_summary"
               groups="purchase.group_purchase_user,account.group_account_manager"
-              sequence="6"/>
+              sequence="10"/>
 </odoo>

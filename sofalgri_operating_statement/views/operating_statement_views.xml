@@ -88,17 +88,22 @@
         <field name="target">current</field>
     </record>
 
+    <menuitem id="menu_bi_finance"
+              name="Finance"
+              parent="synconics_bi_dashboard.parent_dashboard_menu"
+              sequence="7"/>
+
     <menuitem id="menu_operating_statement"
               name="Compte d'exploitation"
-              parent="synconics_bi_dashboard.parent_dashboard_menu"
+              parent="menu_bi_finance"
               action="action_operating_statement"
               groups="account.group_account_manager"
-              sequence="7"/>
+              sequence="10"/>
 
     <menuitem id="menu_operating_report"
               name="Détail du compte d'exploitation"
-              parent="synconics_bi_dashboard.parent_dashboard_menu"
+              parent="menu_bi_finance"
               action="action_operating_report"
               groups="account.group_account_manager"
-              sequence="8"/>
+              sequence="20"/>
 </odoo>

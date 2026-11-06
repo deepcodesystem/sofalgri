@@ -5,6 +5,14 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-06 · Connexions MCP TEST et PROD réparées
+- Symptôme : `odoo-test` et `odoo-ai-hub` en échec au démarrage de la session (« Connection closed »).
+- Cause : poste de travail, pas les serveurs (les deux `/mcp_gateway` répondent). Le pont `mcp-remote` lancé par `npx` était incomplet dans le cache npm (`%LOCALAPPDATA%\npm-cache\_npx\705d23756ff7dacc` : exécutable `mcp-remote` absent, seul `mcp-remote-client` présent) ; `cmd` répondait « 'mcp-remote' n'est pas reconnu ».
+- Fait : dossier de cache supprimé et réinstallé par `npx` (mcp-remote 0.16.1) ; serveurs reconnectés par l'utilisateur. `.mcp.json` et jetons inchangés.
+- Contrôle (lecture seule) : `res.company` lue en TEST (`sofalgri-test.deeposapps.com`) et en PROD (`sofalgri.deeposapps.com`).
+- Bases : TEST et PROD (lecture seule).
+- Modules/modèles : aucun code.
+
 ## 2026-11-06 · Compte d'exploitation par période (d'après l'Excel de coût de revient du client)
 - Demande : mettre en place comme rapport du tableau de bord le classeur `Cout_revient_camion_export_avocat_vGH.xlsx` (compte d'exploitation d'un camion export + palettes locales + écarts, sensibilité au prix ferme).
 - Analyse du classeur : sert à coter avant la vente et à contrôler après (d'après l'utilisateur). Défauts relevés : prix ferme `=17.75*0.98` et poids réel `=D19*1.015` écrits en dur, « Frais divers » rapportés aux kg achetés (les autres postes aux kg vendus), prix moyen mal affiché (`TEXT` au format anglais), mode d'emploi aux hypothèses périmées, emballage théorique.
@@ -15,11 +23,13 @@ Les entrées les plus récentes en haut.
   - vue SQL `sofalgri.operating.report` (une ligne par élément, montant signé : produits positifs, charges négatives, total = marge) : factures et avoirs clients (déchets d'après la rubrique, avocats export ou local d'après la position fiscale « Export », reste en autres produits) ; lignes de commandes d'achat confirmées (facturé, à défaut commandé, comme « Achats d'avocats ») ; lignes de factures fournisseurs sans commande ; emballages consommés par les OF (couches de valorisation, déconstructions déduites) ; variation de valeur du stock d'avocats (vrac, calibrés, déchets) ;
   - écran « BI Dashboard > Compte d'exploitation » (période, par défaut début de saison → aujourd'hui) : produits, charges, marge, coût de revient au kg vendu (brut et net des déchets), prix moyens export, local et d'achat ; alerte sur les rubriques sans montant ; bouton « Voir le détail » (tableau croisé rubrique × mois, liste) ; menu « Détail du compte d'exploitation ». Accès : Administrateur comptable.
 - Limites : montants en MAD ; kg des ventes = quantité des lignes de facture (supposées en kg) ; kg d'avocats = reçus, montant = facturé ou commandé ; variation de stock et emballages d'après la valorisation Odoo (coût moyen, erreurs passées comprises : calibre 26, Chappe) ; ajustements d'inventaire des emballages non comptés ; pas de provision pour réclamations (les avoirs réduisent déjà les ventes).
-- À faire après installation : renseigner la rubrique sur « Frais Chargement » (récolte et chargement), « Frais de Transport » (transport ferme), « Déchet Station », « Petits Calibres » et déchets ferme (vente de déchets) ; créer les articles de service transport international, transitaire et station et passer ces frais en factures fournisseurs.
-- Bases : aucune requête (MCP non connecté pendant la session) ; catégories et noms d'articles repris de `docs/CONTEXTE.md`. Non installé, non testé ; syntaxe Python non contrôlée (Python absent du poste).
+- Contrôle des données (TEST, lecture seule, après réparation du MCP) : catégories conformes au code (`Tous / Matière Première`, `Tous / Avocats Calibrés à Vendre`, `Tous / Emballages`, `Tous / Produits Déchets`, `Tous / Dépenses`, `Livraison`) ; lignes de vente en kg ; « Frais Chargement », « Frais SAMSSAR » et « Frais de Transport » (Dépenses, service) sur les commandes d'achat d'avocats, et quelques « Frais de Transport » en factures sans commande ; « Déchets usines » (« Déchets Station » en français) vendus (8 993 kg, 107 916 MAD) ; **« Déchets fermes » achetés** aux fermes (13 lignes, 8 120 kg, 115 564,54 MAD) ; « Petits Calibres » (catégorie des calibrés) vendus 31 333 kg, 431 509 MAD ; 9 articles « Livraison … » (transport international par transporteur et destination) jamais facturés ; couches de valorisation présentes sur les OF pour les emballages (WH/MOF, valeurs négatives), le vrac et les calibrés.
+- Correctif (18.0.1.0.1), d'après ce contrôle : rubrique par défaut selon la catégorie étendue (« Produits Déchets » = vente de déchets, « Dépenses » = autres frais, « Livraison » = transport international), pour qu'aucun frais ne soit ignoré sans réglage ; nouvelle rubrique de charge « Achat de déchets fermes » (achats d'un article de rubrique déchets, avec les kg) ; sans elle, les déchets fermes achetés auraient disparu des charges.
+- À faire après installation : rubrique « Récolte et chargement » sur « Frais Chargement », « Transport ferme → station » sur « Frais de Transport », « Vente de déchets » sur « Petits Calibres » ; « Frais SAMSSAR » reste en autres frais (rubrique à confirmer) ; facturer le transport international avec les articles « Livraison … » ; créer les articles transitaire et station et passer ces frais en factures fournisseurs.
+- Bases : lecture seule TEST (catégories, articles, lignes de factures, couches de valorisation). Non installé, non testé ; syntaxe Python non contrôlée (Python absent du poste).
 - Modules/modèles : `sofalgri_operating_statement` · `product.template`, `sofalgri.operating.report`, `sofalgri.operating.statement`.
 - Déploiement : nouveau module, à installer ; le champ de `product.template` n'est créé qu'à l'installation, donc sans risque pour la PROD pendant le test.
-- Commit : `282ee89` sur `feat/compte-exploitation` (non poussé).
+- Commit : `282ee89` et `8815e35` (18.0.1.0.1) sur `feat/compte-exploitation` (poussé).
 
 ## 2026-11-05 · Palette S150 en double
 - Demande : archiver le S150 vide.

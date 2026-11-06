@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_operating_statement_form" model="ir.ui.view">
+        <field name="name">sofalgri.operating.statement.form</field>
+        <field name="model">sofalgri.operating.statement</field>
+        <field name="arch" type="xml">
+            <form string="Compte d'exploitation">
+                <header>
+                    <button name="action_open_details" type="object" string="Voir le détail" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Compte d'exploitation</h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <group>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-warning" role="alert" invisible="not missing_rubrics">
+                        Aucun montant sur la période pour : <field name="missing_rubrics" class="oe_inline"/>.
+                        Résultat incomplet tant que ces frais ne sont pas saisis (factures fournisseurs avec un article de cette rubrique).
+                    </div>
+                    <group string="Produits">
+                        <group>
+                            <field name="amount_sale_export"/>
+                            <field name="amount_sale_local"/>
+                            <field name="amount_sale_waste"/>
+                            <field name="amount_sale_other"/>
+                            <field name="amount_income" class="fw-bold"/>
+                        </group>
+                        <group>
+                            <field name="qty_sale_export"/>
+                            <field name="qty_sale_local"/>
+                            <field name="qty_sale_waste"/>
+                            <field name="qty_sold" class="fw-bold"/>
+                        </group>
+                    </group>
+                    <group string="Charges">
+                        <group>
+                            <field name="amount_avocado"/>
+                            <field name="amount_waste_purchase"/>
+                            <field name="amount_harvest"/>
+                            <field name="amount_farm_transport"/>
+                            <field name="amount_packaging"/>
+                            <field name="amount_station"/>
+                            <field name="amount_forwarder"/>
+                            <field name="amount_export_transport"/>
+                            <field name="amount_other_cost"/>
+                            <field name="amount_stock_variation"/>
+                            <field name="amount_cost" class="fw-bold"/>
+                        </group>
+                        <group>
+                            <field name="qty_avocado"/>
+                            <field name="avocado_price_per_kg"/>
+                            <field name="qty_waste_purchase"/>
+                        </group>
+                    </group>
+                    <group string="Résultat">
+                        <group>
+                            <field name="amount_margin" class="fw-bold"
+                                   decoration-success="amount_margin &gt; 0"
+                                   decoration-danger="amount_margin &lt; 0"/>
+                            <field name="margin_percent"/>
+                            <field name="margin_per_kg"/>
+                        </group>
+                        <group>
+                            <field name="cost_per_kg"/>
+                            <field name="cost_per_kg_net"/>
+                            <field name="export_price_per_kg"/>
+                            <field name="local_price_per_kg"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_operating_statement" model="ir.actions.act_window">
+        <field name="name">Compte d'exploitation</field>
+        <field name="res_model">sofalgri.operating.statement</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+
+    <menuitem id="menu_bi_finance"
+              name="Finance"
+              parent="synconics_bi_dashboard.parent_dashboard_menu"
+              sequence="7"/>
+
+    <menuitem id="menu_operating_statement"
+              name="Compte d'exploitation"
+              parent="menu_bi_finance"
+              action="action_operating_statement"
+              groups="account.group_account_manager"
+              sequence="10"/>
+
+    <menuitem id="menu_operating_report"
+              name="Détail du compte d'exploitation"
+              parent="menu_bi_finance"
+              action="action_operating_report"
+              groups="account.group_account_manager"
+              sequence="20"/>
+</odoo>

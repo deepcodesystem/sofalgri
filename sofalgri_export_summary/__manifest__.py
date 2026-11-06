@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Synthèse des exports',
-    'version': '18.0.1.0.3',
+    'version': '18.0.1.0.4',
     'category': 'Sales/Sales',
     'summary': "Écran de suivi des exports : une ligne par facture client, avec filtre sur la saison et les dates",
     'description': """

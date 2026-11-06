@@ -5,6 +5,88 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-06 · Compte d'exploitation par période (d'après l'Excel de coût de revient du client)
+- Demande : mettre en place comme rapport du tableau de bord le classeur `Cout_revient_camion_export_avocat_vGH.xlsx` (compte d'exploitation d'un camion export + palettes locales + écarts, sensibilité au prix ferme).
+- Analyse du classeur : sert à coter avant la vente et à contrôler après (d'après l'utilisateur). Défauts relevés : prix ferme `=17.75*0.98` et poids réel `=D19*1.015` écrits en dur, « Frais divers » rapportés aux kg achetés (les autres postes aux kg vendus), prix moyen mal affiché (`TEXT` au format anglais), mode d'emploi aux hypothèses périmées, emballage théorique.
+- Réponses de l'utilisateur : 2 % (parfois 3 ou 4 %) = forfait déchets de récolte négocié avec les fermes, déduit du prix ; récolte et transport ferme déjà en factures fournisseurs (articles « Frais Chargement » et « Frais de Transport ») ; transport export, transitaire et station pas encore dans Odoo ; poids des palettes nominal (880 / 1 000 kg), poids réel du vrac sur l'OF ; déchets facturés (« Déchet Station », « AVOCAT HASS CALIBRÉS - Petits Calibres », parfois déchets ferme).
+- Choix : d'abord un compte d'exploitation par période (sommes de données réelles, sans répartition par camion) ; le coût par camion viendra ensuite.
+- Fait : nouveau module `sofalgri_operating_statement` 18.0.1.0.0 :
+  - `product.template.operating_rubric` « Rubrique du compte d'exploitation » (achat d'avocats, récolte et chargement, transport ferme, emballage, station, transitaire, transport international, autres frais, vente de déchets) ; vide : catégorie « Matière Première » = achat d'avocats, « Emballages » = emballage ;
+  - vue SQL `sofalgri.operating.report` (une ligne par élément, montant signé : produits positifs, charges négatives, total = marge) : factures et avoirs clients (déchets d'après la rubrique, avocats export ou local d'après la position fiscale « Export », reste en autres produits) ; lignes de commandes d'achat confirmées (facturé, à défaut commandé, comme « Achats d'avocats ») ; lignes de factures fournisseurs sans commande ; emballages consommés par les OF (couches de valorisation, déconstructions déduites) ; variation de valeur du stock d'avocats (vrac, calibrés, déchets) ;
+  - écran « BI Dashboard > Compte d'exploitation » (période, par défaut début de saison → aujourd'hui) : produits, charges, marge, coût de revient au kg vendu (brut et net des déchets), prix moyens export, local et d'achat ; alerte sur les rubriques sans montant ; bouton « Voir le détail » (tableau croisé rubrique × mois, liste) ; menu « Détail du compte d'exploitation ». Accès : Administrateur comptable.
+- Limites : montants en MAD ; kg des ventes = quantité des lignes de facture (supposées en kg) ; kg d'avocats = reçus, montant = facturé ou commandé ; variation de stock et emballages d'après la valorisation Odoo (coût moyen, erreurs passées comprises : calibre 26, Chappe) ; ajustements d'inventaire des emballages non comptés ; pas de provision pour réclamations (les avoirs réduisent déjà les ventes).
+- À faire après installation : renseigner la rubrique sur « Frais Chargement » (récolte et chargement), « Frais de Transport » (transport ferme), « Déchet Station », « Petits Calibres » et déchets ferme (vente de déchets) ; créer les articles de service transport international, transitaire et station et passer ces frais en factures fournisseurs.
+- Bases : aucune requête (MCP non connecté pendant la session) ; catégories et noms d'articles repris de `docs/CONTEXTE.md`. Non installé, non testé ; syntaxe Python non contrôlée (Python absent du poste).
+- Modules/modèles : `sofalgri_operating_statement` · `product.template`, `sofalgri.operating.report`, `sofalgri.operating.statement`.
+- Déploiement : nouveau module, à installer ; le champ de `product.template` n'est créé qu'à l'installation, donc sans risque pour la PROD pendant le test.
+- Commit : `282ee89` sur `feat/compte-exploitation` (non poussé).
+
+## 2026-11-05 · Palette S150 en double
+- Demande : archiver le S150 vide.
+- Constat (PROD et TEST, lecture seule) : S150 id 6544 (vide, OF `04085`) **déjà archivé** par Administrator le 05/11 à 19:06 UTC ; S150 id 6550 (1 000 kg de calibre 26, OF `04092`, créé en tapant son nom) **sans type de colis**, alors que le modèle d'étiquette palette des colis dépend du type.
+- Fait (TEST, écriture MCP avec accord) : `stock.quant.package` 6550 : type « Palettes de Livraison » (id 2). Contrôle : type en place, contenu inchangé (poids affiché 12 kg = poids du type).
+- Fait (PROD, écriture MCP avec « OK prod », après validation en TEST) : même modification (05/11 à 19:31 UTC). Contrôle : type en place, contenu inchangé.
+- Bases : TEST et PROD (écriture : colis).
+- Modules/modèles : aucun code · `stock.quant.package`.
+
+## 2026-11-05 · Calibre 20 : 10 kg sans palette rattachés à S142 (`WH/MOF/04076`)
+- Demande : même correction que pour le calibre 30, sur les 10 kg de calibre 20 sans palette.
+- Constat (PROD, lecture seule) : `04076` (carton 4 kg, lot `0007S4112026`) : 870 kg produits sur S142 le 04/11 à 22:24 (Maroua Hamdoun) ; le 05/11 vers 18:24-18:30, Administrator ajoute 10 kg (ligne 61117, **sans palette**) et 10 kg de vrac (880 kg de vrac pour 880 kg calibrés) ; une ligne à 0 kg (61116) sans effet ; OF à 220 colis, reverrouillé.
+- Fait (TEST, même état que PROD ; écriture MCP avec accord) : ligne 61117 : `result_package_id` → S142 (6536). Contrôle : S142 à 880 kg (220 colis), plus de quant sans palette pour ce lot en Frigo 01, aucune couche de valorisation.
+- Fait (PROD, écriture MCP avec « OK prod », après validation en TEST) : même modification (05/11 à 19:28 UTC), après contrôle que l'état était inchangé. Contrôle : S142 à 880 kg (220 colis, 18 098,18 MAD), plus de quant sans palette, aucune couche.
+- Reste : réimprimer l'étiquette de S142 (par l'utilisateur).
+- Bases : TEST et PROD (écriture : ligne de mouvement ; lecture : quants, couches).
+- Modules/modèles : aucun code · `stock.move.line`, `stock.quant`.
+
+## 2026-11-05 · Calibre 30 : 9 kg sans palette rattachés à S147 (`WH/MOF/04082`)
+- Demande : les 9 kg de calibre 30 sans palette en Frigo 01 appartiennent à `WH/MOF/04082`.
+- Constat (PROD, lecture seule) : `04082` (plastique 10 kg, lot `0014S05112026`) : 991 kg produits sur S147 (00:38, Maroua Hamdoun) ; ligne de 9 kg (id 61115) ajoutée sur l'OF terminé à 18:06 par Administrator, **sans palette** ; colis de l'OF à 99 (calculé sur 991 kg) ; OF resté déverrouillé. À vérifier : 991 kg de vrac pour 1 000 kg calibrés (rendement > 100 %).
+- Fait (TEST, même état que PROD ; écriture MCP avec accord) : ligne 61115 : `result_package_id` → S147 (6541) ; `mrp.production` 4250 : `product_packaging_qty` 99 → 100. Contrôle : S147 à 1 000 kg (100 colis), plus de quant sans palette pour ce lot en Frigo 01, aucune couche de valorisation, quantités de l'OF inchangées.
+- Fait (PROD, écriture MCP avec « OK prod », après validation en TEST) : mêmes modifications (05/11 vers 19:26 UTC), après contrôle que l'état était inchangé. Contrôle : résultat identique à TEST (S147 à 1 000 kg et 100 colis, plus de quant sans palette, aucune couche, OF à 100 colis et 1 000 kg produits).
+- Reste (par l'utilisateur) : reverrouiller `04082`, réimprimer l'étiquette de S147, vérifier le rendement 991 kg → 1 000 kg.
+- Bases : TEST et PROD (écriture : ligne de mouvement, OF ; lecture : quants, couches).
+- Modules/modèles : aucun code · `stock.move.line`, `mrp.production`, `stock.quant`.
+
+## 2026-11-05 · Vrac `021FE02112026` resté sans palette : lot corrigé sur `WH/MOF/04092`
+- Demande : solder les 1 015 kg de `021FE02112026` sans palette en `Zone de réception`.
+- Constat (PROD, lecture seule) : `UB/00160` a rendu en vrac le `022MO02112026` de `04091` ; `ST/INT/00013` (19:03, Administrator) l'a remis sur E245 (500 kg) et E247 (515 kg) ; `04092` l'a consommé à nouveau. D'après l'utilisateur, E235 à E237 sont **vides physiquement** : le calibrage a utilisé `021FE`.
+- Choix : modifier le lot des deux lignes de vrac de `04092` (quantités inchangées), plutôt qu'une 4e déconstruction.
+- Fait (TEST, recréée à 19:15 avec le même état que PROD ; écriture MCP avec accord) : `stock.move.line` 61232 (500 kg) et 61233 (515 kg) : lot `022MO` → `021FE`, palette E245 / E247 → aucune. Contrôle : `021FE` à 0 en `Zone de réception` ; `022MO` : E245 500 kg (nouveau quant, date d'entrée 19:21), E247 664 kg ; 4 couches « Correction of WH/MOF/04092 (modification of past move) » à 17,64 MAD/kg (+8 820 / −8 820, +9 084,60 / −9 084,60), effet nul ; aucune couche sur le calibre 26.
+- Fait (PROD, écriture MCP avec « OK prod », après validation en TEST) : mêmes modifications des lignes 61232 et 61233 (05/11 à 19:22 UTC), après contrôle que l'état était inchangé. Contrôle : résultat identique à TEST (`021FE` à 0 en `Zone de réception`, E245 500 kg, E247 664 kg, couches 40238 à 40241 à effet nul, aucune couche sur le calibre 26).
+- Reste : rééquilibrer `022MO` sur ses palettes (attendu avant `04091` : E245 69, E246 553, E247 542 ; actuel : E245 500, E246 0, E247 664), de préférence après pesée.
+- Bases : TEST et PROD (écriture : lignes de mouvement ; lecture : quants, couches).
+- Modules/modèles : aucun code · `stock.move.line`, `stock.quant`, `stock.valuation.layer`.
+
+## 2026-11-05 · Calibre 26 : réévaluation du coût après `WH/MOF/04085`
+- Demande : corriger le coût du calibre 26 (voir l'analyse des frigos).
+- Calcul (PROD, lecture seule) : 4 000 kg en stock (S112, S140, S149, S150), valeur 40 958,69 MAD (10,24 MAD/kg ; coût de l'article 10,45). Valeur d'après les OF d'origine (`04042` 18 949,69, `04074` 18 846,79, `04084` 19 418,50, `04092` 19 528,97) : 76 743,95 MAD, soit 19,186 MAD/kg ; écart +35 785,26 MAD.
+- Contrôle préalable : TEST **recréée depuis PROD le 05/11 à 19:15 UTC** (`database.uuid` différent de PROD, `database.create_date` 2026-11-05 19:15:44), donc avec la même erreur.
+- Fait (TEST, écriture MCP avec accord) : `product.product` 109 `standard_price` 10,452429 → 19,1859875 (arrondi par Odoo à 19,186). Couche de valorisation id 40237 « Product value manually modified (from 10.452429039178133 to 19.186) », +35 785,31 MAD, sans écriture comptable ; les 4 palettes valent 19 186 MAD chacune (76 744 MAD). Écart d'arrondi : 0,05 MAD.
+- Fait (PROD, écriture MCP avec « OK prod », après validation en TEST) : même modification ; contrôle préalable : aucune couche nouvelle depuis `04092`, `ST/OUT/00266` encore prête (non validée). Couche id 40237 du 05/11 à 19:17:53 UTC, +35 785,31 MAD, sans écriture comptable, signée « Public user » ; S112, S140, S149, S150 à 19 186 MAD chacune.
+- Reste : avis du comptable.
+- Bases : TEST et PROD (écriture : coût de l'article ; lecture : couches, quants, livraison).
+- Modules/modèles : aucun code · `product.product`, `stock.valuation.layer`.
+
+## 2026-11-05 · Analyse des frigos (PROD)
+- Demande : analyser les frigos et relever les anomalies.
+- Constat (PROD, lecture seule, vers 19 h 10) : 72 quants, tous en Frigo 01 (48) et Frigo 02 (24) ; Frigo 03 et 04 vides ; aucun stock négatif dans les frigos (seul négatif interne : −2 kg de `017FE01112026` en `Zone de réception`, déjà connu). 26 palettes réservées, toutes par `ST/OUT/00266` (Westfalia).
+- Anomalies :
+  - Coût du calibre 26 faussé par `WH/MOF/04085` : 10 000 kg entrés à 2,64 MAD/kg, puis sortis par les déconstructions au coût moyen (6,43 et 7,43). Coût actuel 10,24 MAD/kg, contre 18,8 à 19,5 sur les OF normaux : 4 palettes (S112, S140, S149, S150) valorisées 40 959 MAD au lieu d'environ 78 000.
+  - Correction du soir : `UB/00160` (déconstruction de `04091`) puis `WH/MOF/04092`, qui consomme encore `022MO02112026` (E245 500, E247 515) ; les 1 015 kg de `021FE02112026` restent en vrac sans palette en `Zone de réception`.
+  - Reliquats sans palette en Frigo 01 : 9 kg de calibre 30 (`WH/MOF/04082`) et 10 kg de calibre 20 (`WH/MOF/04076`), ajoutés le 05/11 par Administrator sur des OF terminés ; S147 reste à 991 kg (99,1 colis) et S142 à 870 kg (217,5 colis).
+  - Deux palettes nommées S150 (ids 6544 vide, 6550).
+  - Lots d'OF de formats différents pour la même session : `006S03112026` et `0006S03112026`, `007S03112026`, `0007S03112026` et `0007S3112026`, `0007S4112026`, `0007S5112026` (jour sur un chiffre : filtre « Date du lot » du popup inopérant). Lots du 03/11 sur des OF du 04/11 et du 05/11 (S134 ; S148, créée par Administrator).
+- Bases : lecture seule PROD (emplacements, quants, lignes réservées, couches de valorisation, OF, déconstructions).
+- Modules/modèles : aucun code · `stock.quant`, `stock.move.line`, `stock.valuation.layer`, `mrp.production`, `mrp.unbuild`.
+
+## 2026-11-05 · Déconstruction de `WH/MOF/04085` : contrôle
+- Demande : vérifier la déconstruction de `WH/MOF/04085`, une étape semblant manquer.
+- Constat (PROD, lecture seule ; OF absent de TEST) : `04085` (Maroua Hamdoun, 05/11 à 00:49) : calibre 26, nomenclature carton 4 kg (id 7) mais conditionnement « PLASTIQUE 420G 10KG GOLD FRUTAS » et 1 000 colis, donc **10 000 kg produits** pour 1 015 kg de vrac (`021FE02112026`, E235 170, E236 587, E237 258). Seuls 880 kg sur S150 (id 6544), **9 120 kg sans palette** en Frigo 01 (ligne créée à la validation, sans la palette de l'OF).
+- Corrections (Administrator, 05/11 vers 18:47) : `UB/00158` 880 kg depuis S150 ; `WH/MOF/04091` (plastique 10 kg, id 9) 1 000 kg sur une **nouvelle palette nommée aussi S150** (id 6550), lot `0007S5112026`, vrac pris sur **un autre lot** : `022MO02112026` (E245 69, E246 553, E247 393) ; puis `UB/00159` 9 120 kg sans palette. Stock du produit fini juste (1 000 kg sur S150 id 6550, rien ailleurs). Emballages rendus au prorata.
+- Ce qui manque : les 1 015 kg de `021FE02112026` sont revenus **sans palette** en `Zone de réception` (E235 à E237 vides), et `04091` a été fait avant `UB/00159`, alors qu'il aurait dû consommer ce vrac. Si le calibrage réel a utilisé E235 à E237 : 1 015 kg de `021FE` en trop dans le système, 1 015 kg de `022MO` en moins (E245, E246 à 0, E247 à 149 kg). À confirmer par l'utilisateur. Palette S150 en double (id 6544 vide).
+- Bases : lecture seule PROD (OF, déconstructions, mouvements, lignes, quants des lots et palettes) ; TEST (recherche de l'OF).
+- Modules/modèles : aucun code · `mrp.production`, `mrp.unbuild`, `stock.move.line`, `stock.quant`.
+
 ## 2026-11-04 · Journal « Ventes locales » pour numéroter les factures locales à part
 - Demande : une séquence propre aux ventes locales, sans nouveau modèle si possible.
 - Constat : numérotation par journal ; un seul journal de vente en TEST et en PROD (`FAC`, ordre 5, numéros `F2026/…`). Champ natif `sale.order.journal_id` « Journal de facturation » présent ; visibilité sur le formulaire non contrôlée.
@@ -15,12 +97,15 @@ Les entrées les plus récentes en haut.
 - Constat (PROD, lecture seule) : aucune facture client non annulée sans position fiscale, donc pas de conflit avec l'historique.
 - Limites : vente d'export en MAD sans position classée en local sans alerte ; plusieurs commandes regroupées dans une facture prennent le journal de la première, contrôle à la validation.
 - Test : module 18.0.1.0.0 essayé en TEST par l'utilisateur, « ça fonctionne comme prévu » (détail des 7 essais non précisé).
-- Évolution (18.0.1.1.0) : menu « Ventes locales » sous Facturation > Clients : factures et avoirs du journal coché ; création en facture client. **Validé en TEST** par l'utilisateur (« ça passe »).
+- Évolution (18.0.1.1.0) : menu « Ventes locales » sous Facturation > Clients : factures et avoirs du journal coché ; création en facture client. Retour de l'utilisateur en TEST : « ça passe », mais **le contrôle du 05/11 montre que ce menu n'existe ni en TEST ni en PROD** (voir ci-dessous).
+- Contrôle en lecture du 05/11 : TEST et PROD : module installé en **18.0.1.0.0** (mise à jour TEST le 04/11 à 23:53, installation PROD à 23:57), aucun menu ni action du module, alors que `18.0` porte 18.0.1.1.0. Cause probable : service Odoo non redémarré ou code du serveur non à jour, non vérifié sur le serveur.
+- PROD (journal créé par Claude avec l'accord de l'utilisateur, id 9 ; le reste par l'utilisateur) : case cochée, ordre passé de 10 à 6 (export : 5, reste par défaut). Factures d'Abdellah refaites dans le journal : `FL/2026/0001` à `0004` (C-00210 à C-00213), 539 425 MAD, payées et rapprochées avec les paiements 654 à 657 ; numérotation sans trou ; format `FL/2026/0001` gardé au choix de l'utilisateur, à la place du `FL2026/001` prévu. `F2026/072` reste la dernière facture export. Solde d'Abdellah : −468 798,50 MAD, non analysé.
 - Déploiement : nouveau module, à installer ; aucune colonne ajoutée à `account_journal` dans une base où il n'est pas installé. Puis cocher la case sur le journal « Ventes locales ».
-- Reste : essais en TEST, avis du comptable, création du journal et installation en PROD avec « OK prod ».
+- PROD (par l'utilisateur, contrôlé en lecture le 05/11, 00:07 UTC) : 18.0.1.1.0, menu « Invoicing/Customers/Ventes locales » présent. Écran non contrôlé. TEST au même contrôle : code du serveur en 18.0.1.1.0, mais base encore en 18.0.1.0.0, sans menu.
+- Reste : mettre à jour le module sur `sofalgri-test` ; avis du comptable.
 - Bases : TEST (écriture : `account.journal` ; lecture : journaux, champ `sale.order.journal_id`) ; PROD (lecture seule : journaux de vente).
 - Modules/modèles : `sofalgri_local_sale_journal` · `account.journal`, `account.move`, `sale.order`.
-- Commit : `0083223` et `ae2e24f` sur `feat/journal-ventes-locales` (poussé) ; PR deepcodesystem/sofalgri#41.
+- Commit : `0083223` et `ae2e24f` sur `feat/journal-ventes-locales` (poussé) ; PR deepcodesystem/sofalgri#41 **fusionnée** dans `18.0` (`812a414`).
 
 ## 2026-11-04 · Renumérotation de la dernière facture après suppression des factures locales (TEST et PROD)
 - Demande : factures locales supprimées par l'utilisateur, en TEST puis en PROD ; ramener la dernière facture à F2026/072.

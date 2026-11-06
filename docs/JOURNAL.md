@@ -5,12 +5,23 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-06 · Déconstruction de 1 kg de `WH/MOF/04105` : 1 009 kg de vrac rendus
+- Demande : après la déconstruction de 1 kg de `04105`, 1 009 kg d'« AVOCAT HASS NON CALIBRÉ » apparaissent au lieu d'environ 1 kg.
+- Constat (PROD, lecture seule) : `04105` (Maroua Hamdoun, 05/11 à 23:54) : Petits Calibres calibre 28, nomenclature « EN VRAC » (id 19, 1 kg), quantité laissée à **1 kg**, alors que le poids réel saisi dans le popup est de 1 009 kg (lot `011FE31102026`, sans palette, `Zone de réception`) ; alerte d'écart confirmée par l'opératrice. L'OF a donc transformé 1 009 kg de vrac en 1 kg de calibré (lot `0007S04112026`), valorisé 17 304,35 MAD le kg. `UB/00162` (Mohamed ELMALKI, 06/11 à 15:18) déconstruit ce 1 kg, soit tout l'OF : Odoo rend les composants au prorata (1 009 × 1/1), donc 1 009 kg de `011FE` reviennent sans palette en `Zone de réception` (couche 40644, +17 304,35 MAD) et le kg de calibré sort (couche 40643, −17 304,35 MAD). Effet net nul en valeur : l'OF est entièrement annulé. Comportement natif, pas de défaut des modules.
+- Lot `011FE31102026` : 9 314 kg reçus, consommés en totalité par `04103` à `04113` (dont `04105`) avant la déconstruction ; seuls les 1 009 kg rendus sont en stock.
+- D'après l'utilisateur, les 1 009 kg sont bien retournés physiquement en vrac (non calibrés) : le stock après `UB/00162` est juste, **aucune correction**. Seule différence avec le physique possible : ce vrac est en stock sans palette ; le remettre sur une palette par transfert interne s'il est physiquement sur une palette.
+- Piste : l'alerte d'écart de 5 % du popup (`mrp_component_lot_check`) n'a demandé qu'une confirmation pour 1 009 kg contre 1 kg ; un refus au-delà d'un écart énorme ou une quantité d'OF alignée sur le poids réel éviterait ce cas.
+- Bases : lecture seule PROD (OF, déconstruction, lignes de mouvement, quants du lot, couches, fil de l'OF) et TEST (présence de l'OF).
+- Modules/modèles : aucun code · `mrp.production`, `mrp.unbuild`, `stock.move.line`, `stock.quant`, `stock.valuation.layer`.
+
 ## 2026-11-06 · BI Dashboard : rapports rangés en sous-rubriques
 - Demande : regrouper les rapports du menu BI Dashboard en sous-rubriques.
 - Constat (TEST, lecture seule) : sous BI Dashboard, My Dashboard, Synthèse des exports, Achats d'avocats, Compte d'exploitation, Détail du compte d'exploitation et Configuration au même niveau. Le tableau des palettes (`sofalgri_stock_calibre_report`) n'a pas de menu (source d'un graphique).
 - Fait : rubriques créées chacune par le module qui l'utilise, sans nouvelle dépendance : « Ventes » (`sofalgri_export_summary` 18.0.1.0.4 : Synthèse des exports), « Achats » (`sofalgri_purchase_summary` 18.0.1.2.1 : Achats d'avocats), « Finance » (`sofalgri_operating_statement` 18.0.1.0.2 : Compte d'exploitation, Détail). Droits des écrans inchangés ; une rubrique sans écran autorisé n'est pas affichée.
 - Validé à l'écran par l'utilisateur : compte d'exploitation jugé cohérent en TEST (avant ce changement de menus). Menus non testés.
 - Déploiement : aucun champ ajouté, mise à jour normale des trois modules.
+- PR deepcodesystem/sofalgri#42 **fusionnée** dans `18.0` (`8b7bd4c`) ; PROD mise à jour par l'utilisateur (« tout est OK »).
+- Contrôle PROD (lecture seule, 06/11) : `sofalgri_operating_statement` installé (16:18) ; menus « BI Dashboard / Ventes », « Achats », « Finance » et leurs écrans présents ; rubriques : « Frais Chargement » et « Frais SAMSSAR » en récolte et chargement, « Frais de Transport » en transport ferme (16:20, par l'utilisateur) ; « Petits Calibres » sans rubrique. Anomalie : versions lues en base 18.0.1.0.3 (exports), 18.0.1.2.0 (achats) et 18.0.1.0.1 (compte d'exploitation), alors que `18.0` porte 18.0.1.0.4, 18.0.1.2.1 et 18.0.1.0.2 et que les nouveaux menus sont chargés ; cause non établie (cache du service ?), à revoir dans Applications après redémarrage.
 - Bases : lecture seule TEST (menus).
 - Modules/modèles : `sofalgri_export_summary`, `sofalgri_purchase_summary`, `sofalgri_operating_statement` · `ir.ui.menu`.
 - Commit : `345259a` sur `feat/compte-exploitation` (poussé), même PR que le compte d'exploitation.

@@ -22,7 +22,8 @@ class ProductTemplate(models.Model):
         help="Ligne du compte d'exploitation où l'article est compté.\n"
              "Frais : lignes de commandes d'achat et de factures fournisseurs.\n"
              "Emballage : consommation par les OF.\n"
-             "Vente de déchets : lignes de factures clients.\n"
-             "Vide : catégorie « Matière Première » = achat d'avocats, catégorie « Emballages » = emballage, "
-             "sinon l'article n'est pas compté dans les charges.",
+             "Vente de déchets : ventes en « Ventes de déchets », achats en « Achat de déchets fermes ».\n"
+             "Vide : d'après la catégorie : « Matière Première » = achat d'avocats, « Emballages » = emballage, "
+             "« Produits Déchets » = vente de déchets, « Dépenses » = autres frais, "
+             "« Livraison » = transport international ; sinon l'article n'est pas compté dans les charges.",
     )

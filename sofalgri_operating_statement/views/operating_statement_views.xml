@@ -44,6 +44,7 @@
                     <group string="Charges">
                         <group>
                             <field name="amount_avocado"/>
+                            <field name="amount_waste_purchase"/>
                             <field name="amount_harvest"/>
                             <field name="amount_farm_transport"/>
                             <field name="amount_packaging"/>
@@ -57,6 +58,7 @@
                         <group>
                             <field name="qty_avocado"/>
                             <field name="avocado_price_per_kg"/>
+                            <field name="qty_waste_purchase"/>
                         </group>
                     </group>
                     <group string="Résultat">

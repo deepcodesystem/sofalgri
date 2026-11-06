@@ -8,6 +8,7 @@ INCOME_RUBRICS = [
 ]
 COST_RUBRICS = [
     ('avocado', "Achat d'avocats"),
+    ('waste_purchase', "Achat de déchets fermes"),
     ('harvest', "Récolte et chargement"),
     ('farm_transport', "Transport ferme → station"),
     ('packaging', "Emballages consommés"),
@@ -17,8 +18,12 @@ COST_RUBRICS = [
     ('other_cost', "Autres frais"),
     ('stock_variation', "Variation du stock d'avocats"),
 ]
-# Frais lus sur les commandes d'achat et les factures fournisseurs (les emballages viennent des OF).
-PURCHASE_RUBRICS = "('avocado', 'harvest', 'farm_transport', 'station', 'forwarder', 'export_transport', 'other_cost')"
+# Articles lus sur les commandes d'achat et les factures fournisseurs (les emballages viennent des OF ;
+# les déchets achetés aux fermes vont en « Achat de déchets fermes »).
+PURCHASE_RUBRICS = ("('avocado', 'waste', 'harvest', 'farm_transport', 'station', 'forwarder', "
+                    "'export_transport', 'other_cost')")
+PURCHASE_RUBRIC_SQL = "CASE WHEN info.rubric = 'waste' THEN 'waste_purchase' ELSE info.rubric END"
+PURCHASE_KG_RUBRICS = "('avocado', 'waste')"
 
 
 class OperatingReport(models.Model):
@@ -51,7 +56,8 @@ class OperatingReport(models.Model):
         help="Produits en positif, charges en négatif : le total est la marge.")
     quantity = fields.Float(
         string="Quantité (kg)", readonly=True,
-        help="Kg facturés pour les ventes, kg reçus pour l'achat d'avocats ; vide pour les autres rubriques.")
+        help="Kg facturés pour les ventes, kg reçus pour les achats d'avocats et de déchets fermes ; "
+             "vide pour les autres rubriques.")
 
     current_season = fields.Boolean(
         string="Saison en cours", compute='_compute_current_season', search='_search_current_season')
@@ -78,6 +84,9 @@ class OperatingReport(models.Model):
                            COALESCE(template.operating_rubric,
                                     CASE WHEN category.complete_name ILIKE '%Matière Première%' THEN 'avocado'
                                          WHEN category.complete_name ILIKE '%Emballage%' THEN 'packaging'
+                                         WHEN category.complete_name ILIKE '%Déchet%' THEN 'waste'
+                                         WHEN category.complete_name ILIKE '%Dépenses%' THEN 'other_cost'
+                                         WHEN category.complete_name ILIKE 'Livraison%' THEN 'export_transport'
                                     END) AS rubric,
                            (category.complete_name ILIKE '%Matière Première%'
                             OR category.complete_name ILIKE '%Avocats Calibr%') AS is_avocado,
@@ -123,9 +132,9 @@ class OperatingReport(models.Model):
                 purchases AS (
                     SELECT po.date_order::date AS date, po.company_id, line.product_id, po.partner_id,
                            NULL::integer AS account_move_id, po.id AS purchase_order_id,
-                           info.rubric,
+                           {PURCHASE_RUBRIC_SQL} AS rubric,
                            -COALESCE(billed.amount, line.price_subtotal) AS amount,
-                           CASE WHEN info.rubric = 'avocado' THEN line.qty_received ELSE 0 END AS quantity
+                           CASE WHEN info.rubric IN {PURCHASE_KG_RUBRICS} THEN line.qty_received ELSE 0 END AS quantity
                     FROM purchase_order_line line
                     JOIN purchase_order po ON po.id = line.order_id
                     JOIN product_info info ON info.product_id = line.product_id
@@ -137,9 +146,9 @@ class OperatingReport(models.Model):
                 bills AS (
                     SELECT move.date, move.company_id, line.product_id, move.partner_id,
                            move.id AS account_move_id, NULL::integer AS purchase_order_id,
-                           info.rubric,
+                           {PURCHASE_RUBRIC_SQL} AS rubric,
                            -line.balance AS amount,
-                           CASE WHEN info.rubric <> 'avocado' THEN 0
+                           CASE WHEN info.rubric NOT IN {PURCHASE_KG_RUBRICS} THEN 0
                                 WHEN move.move_type = 'in_refund' THEN -line.quantity
                                 ELSE line.quantity
                            END AS quantity

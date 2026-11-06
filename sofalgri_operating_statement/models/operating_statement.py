@@ -31,6 +31,7 @@ class OperatingStatement(models.TransientModel):
 
     # Charges (montants positifs)
     amount_avocado = fields.Monetary(string="Achat d'avocats", compute='_compute_statement')
+    amount_waste_purchase = fields.Monetary(string="Achat de déchets fermes", compute='_compute_statement')
     amount_harvest = fields.Monetary(string="Récolte et chargement", compute='_compute_statement')
     amount_farm_transport = fields.Monetary(string="Transport ferme → station", compute='_compute_statement')
     amount_packaging = fields.Monetary(string="Emballages consommés", compute='_compute_statement')
@@ -44,6 +45,7 @@ class OperatingStatement(models.TransientModel):
              "Négatif : le stock a augmenté, une partie des achats et des emballages n'est pas encore vendue.")
     amount_cost = fields.Monetary(string="Total charges", compute='_compute_statement')
     qty_avocado = fields.Float(string="Kg d'avocats reçus", compute='_compute_statement')
+    qty_waste_purchase = fields.Float(string="Kg de déchets fermes reçus", compute='_compute_statement')
 
     # Résultat et indicateurs
     amount_margin = fields.Monetary(string="Marge", compute='_compute_statement')
@@ -94,6 +96,7 @@ class OperatingStatement(models.TransientModel):
 
             # Dans le détail, les charges sont négatives (effet sur le résultat).
             statement.amount_avocado = -amounts['avocado']
+            statement.amount_waste_purchase = -amounts['waste_purchase']
             statement.amount_harvest = -amounts['harvest']
             statement.amount_farm_transport = -amounts['farm_transport']
             statement.amount_packaging = -amounts['packaging']
@@ -103,6 +106,7 @@ class OperatingStatement(models.TransientModel):
             statement.amount_other_cost = -amounts['other_cost']
             statement.amount_stock_variation = -amounts['stock_variation']
             statement.qty_avocado = quantities['avocado']
+            statement.qty_waste_purchase = quantities['waste_purchase']
             cost = -sum(amounts[rubric] for rubric, _label in COST_RUBRICS)
             statement.amount_cost = cost
 

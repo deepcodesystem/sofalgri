@@ -5,6 +5,16 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-06 · BI Dashboard : rapports rangés en sous-rubriques
+- Demande : regrouper les rapports du menu BI Dashboard en sous-rubriques.
+- Constat (TEST, lecture seule) : sous BI Dashboard, My Dashboard, Synthèse des exports, Achats d'avocats, Compte d'exploitation, Détail du compte d'exploitation et Configuration au même niveau. Le tableau des palettes (`sofalgri_stock_calibre_report`) n'a pas de menu (source d'un graphique).
+- Fait : rubriques créées chacune par le module qui l'utilise, sans nouvelle dépendance : « Ventes » (`sofalgri_export_summary` 18.0.1.0.4 : Synthèse des exports), « Achats » (`sofalgri_purchase_summary` 18.0.1.2.1 : Achats d'avocats), « Finance » (`sofalgri_operating_statement` 18.0.1.0.2 : Compte d'exploitation, Détail). Droits des écrans inchangés ; une rubrique sans écran autorisé n'est pas affichée.
+- Validé à l'écran par l'utilisateur : compte d'exploitation jugé cohérent en TEST (avant ce changement de menus). Menus non testés.
+- Déploiement : aucun champ ajouté, mise à jour normale des trois modules.
+- Bases : lecture seule TEST (menus).
+- Modules/modèles : `sofalgri_export_summary`, `sofalgri_purchase_summary`, `sofalgri_operating_statement` · `ir.ui.menu`.
+- Commit : `345259a` sur `feat/compte-exploitation` (poussé), même PR que le compte d'exploitation.
+
 ## 2026-11-06 · Connexions MCP TEST et PROD réparées
 - Symptôme : `odoo-test` et `odoo-ai-hub` en échec au démarrage de la session (« Connection closed »).
 - Cause : poste de travail, pas les serveurs (les deux `/mcp_gateway` répondent). Le pont `mcp-remote` lancé par `npx` était incomplet dans le cache npm (`%LOCALAPPDATA%\npm-cache\_npx\705d23756ff7dacc` : exécutable `mcp-remote` absent, seul `mcp-remote-client` présent) ; `cmd` répondait « 'mcp-remote' n'est pas reconnu ».
@@ -30,6 +40,8 @@ Les entrées les plus récentes en haut.
 - Modules/modèles : `sofalgri_operating_statement` · `product.template`, `sofalgri.operating.report`, `sofalgri.operating.statement`.
 - Déploiement : nouveau module, à installer ; le champ de `product.template` n'est créé qu'à l'installation, donc sans risque pour la PROD pendant le test.
 - Commit : `282ee89` et `8815e35` (18.0.1.0.1) sur `feat/compte-exploitation` (poussé).
+- Installé en TEST par l'utilisateur. Retour : prix moyen local à 0 alors que « Petits Calibres » est vendu en local. Cause : rubrique « Vente de déchets » mise sur l'article (06/11 à 14:48, sur conseil de Claude), qui passe avant le classement export / local ; ses 4 factures `FL/2026/0001` à `0004` allaient en ventes de déchets.
+- Fait (TEST, écriture MCP avec accord) : `product.template` 107 `operating_rubric` vidé. Contrôle de la vue : 4 lignes en ventes locales (31 333 kg, 431 509 MAD, soit 13,77 MAD/kg) ; ventes de déchets réduites à « Déchets usines » (`FL/2026/0003`, 8 993 kg, 107 916 MAD). À retenir : « Petits Calibres » sans rubrique en PROD aussi.
 
 ## 2026-11-05 · Palette S150 en double
 - Demande : archiver le S150 vide.

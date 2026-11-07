@@ -11,7 +11,7 @@ Les entrées les plus récentes en haut.
 - Fait : `product_packaging_unit_price` 18.0.6.11.0 : sous-template `report_partner_legal_ids` (valeurs du contact, à défaut de sa société ; rien si vides), appelé sous l'adresse du client dans les trois variantes de la facture client, avant la note interne ; la transitaire et la pro forma l'utilisent aussi (mêmes libellés qu'avant, avec en plus le repli sur la société). Valable pour tout client dont les champs sont remplis.
 - Bases : lecture seule TEST (`res.partner`).
 - Modules/modèles : `product_packaging_unit_price` · rapports facture, facture transitaire, pro forma.
-- Commit : sur `feat/mentions-legales-facture`. Non testé dans Odoo (XML contrôlé bien formé).
+- Commit : `e2ee5dc` sur `feat/mentions-legales-facture` (poussé). **Validé en TEST** par l'utilisateur.
 - Déploiement : aucun champ ajouté, mise à jour normale du module.
 
 ## 2026-11-06 · Déconstruction de 1 kg de `WH/MOF/04105` : 1 009 kg de vrac rendus

@@ -5,6 +5,15 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-07 · Identifiants légaux du client sur la facture client
+- Demande : afficher sur la facture de Westfalia Fruit GmbH ses EORI Number, Tax Code, Btw-identificatienummer NL et GLN.
+- Constat (TEST, lecture seule) : champs déjà présents sur la fiche contact (`product_packaging_unit_price`) et remplis sur Westfalia Fruit GmbH (id 44 : DE-4124588, 143/192/31480, NL825594376B01, 4008794000004) et sur « Westfalia Gmbh » (id 474) ; vides sur son adresse de livraison (id 476). Imprimés sur la transitaire et la pro forma, pas sur la facture client.
+- Fait : `product_packaging_unit_price` 18.0.6.11.0 : sous-template `report_partner_legal_ids` (valeurs du contact, à défaut de sa société ; rien si vides), appelé sous l'adresse du client dans les trois variantes de la facture client, avant la note interne ; la transitaire et la pro forma l'utilisent aussi (mêmes libellés qu'avant, avec en plus le repli sur la société). Valable pour tout client dont les champs sont remplis.
+- Bases : lecture seule TEST (`res.partner`).
+- Modules/modèles : `product_packaging_unit_price` · rapports facture, facture transitaire, pro forma.
+- Commit : sur `feat/mentions-legales-facture`. Non testé dans Odoo (XML contrôlé bien formé).
+- Déploiement : aucun champ ajouté, mise à jour normale du module.
+
 ## 2026-11-06 · Déconstruction de 1 kg de `WH/MOF/04105` : 1 009 kg de vrac rendus
 - Demande : après la déconstruction de 1 kg de `04105`, 1 009 kg d'« AVOCAT HASS NON CALIBRÉ » apparaissent au lieu d'environ 1 kg.
 - Constat (PROD, lecture seule) : `04105` (Maroua Hamdoun, 05/11 à 23:54) : Petits Calibres calibre 28, nomenclature « EN VRAC » (id 19, 1 kg), quantité laissée à **1 kg**, alors que le poids réel saisi dans le popup est de 1 009 kg (lot `011FE31102026`, sans palette, `Zone de réception`) ; alerte d'écart confirmée par l'opératrice. L'OF a donc transformé 1 009 kg de vrac en 1 kg de calibré (lot `0007S04112026`), valorisé 17 304,35 MAD le kg. `UB/00162` (Mohamed ELMALKI, 06/11 à 15:18) déconstruit ce 1 kg, soit tout l'OF : Odoo rend les composants au prorata (1 009 × 1/1), donc 1 009 kg de `011FE` reviennent sans palette en `Zone de réception` (couche 40644, +17 304,35 MAD) et le kg de calibré sort (couche 40643, −17 304,35 MAD). Effet net nul en valeur : l'OF est entièrement annulé. Comportement natif, pas de défaut des modules.

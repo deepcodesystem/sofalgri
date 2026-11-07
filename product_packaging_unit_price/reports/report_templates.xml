@@ -7,6 +7,22 @@
         <div t-if="not is_html_empty(partner_note)" class="mt-2" t-out="partner_note"/>
     </template>
 
+    <!-- Identifiants légaux du client (EORI, Tax Code, Btw NL, GLN) : ceux du contact,
+         à défaut ceux de sa société. Rien d'imprimé si vides. Variable attendue : partner. -->
+    <template id="report_partner_legal_ids">
+        <t t-set="legal_partner" t-value="partner.commercial_partner_id"/>
+        <t t-set="eori" t-value="partner.eori_number or legal_partner.eori_number"/>
+        <t t-set="tax_code" t-value="partner.tax_code or legal_partner.tax_code"/>
+        <t t-set="btw" t-value="partner.btw_identification or legal_partner.btw_identification"/>
+        <t t-set="gln" t-value="partner.gln or legal_partner.gln"/>
+        <div t-if="eori or tax_code or btw or gln" name="partner_legal_ids">
+            <t t-if="eori">EORI-Number : <t t-out="eori"/><br/></t>
+            <t t-if="tax_code">Tax-Code : <t t-out="tax_code"/><br/></t>
+            <t t-if="btw">Btw-identificatienummer NL : <t t-out="btw"/><br/></t>
+            <t t-if="gln">GLN : <t t-out="gln"/></t>
+        </div>
+    </template>
+
     <!-- ======================================================= -->
     <!--     REMPLACEMENT COMPLET DU TABLEAU DE LA FACTURE       -->
     <!-- ======================================================= -->
@@ -35,14 +51,17 @@
             </div>
         </xpath>
 
-        <!-- Note interne du client sous son adresse (trois variantes du bloc adresse natif) -->
+        <!-- Identifiants légaux puis note interne du client sous son adresse (trois variantes du bloc adresse natif) -->
         <xpath expr="//div[@name='address_not_same_as_shipping']/t[@t-set='address']" position="inside">
+            <t t-call="product_packaging_unit_price.report_partner_legal_ids"><t t-set="partner" t-value="o.partner_id"/></t>
             <t t-call="product_packaging_unit_price.report_partner_note"><t t-set="partner" t-value="o.partner_id"/></t>
         </xpath>
         <xpath expr="//div[@name='address_same_as_shipping']/t[@t-set='address']" position="inside">
+            <t t-call="product_packaging_unit_price.report_partner_legal_ids"><t t-set="partner" t-value="o.partner_id"/></t>
             <t t-call="product_packaging_unit_price.report_partner_note"><t t-set="partner" t-value="o.partner_id"/></t>
         </xpath>
         <xpath expr="//div[@name='no_shipping']/t[@t-set='address']" position="inside">
+            <t t-call="product_packaging_unit_price.report_partner_legal_ids"><t t-set="partner" t-value="o.partner_id"/></t>
             <t t-call="product_packaging_unit_price.report_partner_note"><t t-set="partner" t-value="o.partner_id"/></t>
         </xpath>
 

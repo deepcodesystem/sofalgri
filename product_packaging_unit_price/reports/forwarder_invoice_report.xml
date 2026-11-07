@@ -47,10 +47,7 @@
                         <t t-if="partner.street2"><t t-out="partner.street2"/><br/></t>
                         <t t-if="partner.zip or partner.city"><t t-out="' '.join(p for p in [partner.zip, partner.city] if p)"/><t t-if="partner.country_id">, <t t-out="partner.country_id.name"/></t><br/></t>
                         <t t-if="partner.vat">UST-ID / VAT-ID : <t t-out="partner.vat"/><br/></t>
-                        <t t-if="partner.eori_number">EORI-Number : <t t-out="partner.eori_number"/><br/></t>
-                        <t t-if="partner.tax_code">Tax-Code : <t t-out="partner.tax_code"/><br/></t>
-                        <t t-if="partner.btw_identification">Btw-identificatienummer NL : <t t-out="partner.btw_identification"/><br/></t>
-                        <t t-if="partner.gln">GLN : <t t-out="partner.gln"/></t>
+                        <t t-call="product_packaging_unit_price.report_partner_legal_ids"/>
                         <t t-call="product_packaging_unit_price.report_partner_note"/>
                     </td>
                 </tr>

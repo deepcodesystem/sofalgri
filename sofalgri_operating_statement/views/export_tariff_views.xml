@@ -27,6 +27,27 @@
               groups="account.group_account_manager"
               sequence="30"/>
 
+    <record id="view_export_summary_list_truck_cost" model="ir.ui.view">
+        <field name="name">account.move.export.summary.list.truck.cost</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="sofalgri_export_summary.view_export_summary_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='export_claim_amount']" position="after">
+                <field name="company_currency_id" column_invisible="1"/>
+                <field name="export_goods_cost" sum="Total" groups="account.group_account_manager"/>
+                <field name="export_approach_cost" sum="Total" groups="account.group_account_manager"/>
+                <field name="export_transport_cost" sum="Total" readonly="1" groups="account.group_account_manager"/>
+                <field name="export_forwarder_cost" sum="Total" readonly="1" groups="account.group_account_manager"/>
+                <field name="export_station_cost" sum="Total" readonly="1" groups="account.group_account_manager"/>
+                <field name="export_total_cost" sum="Total" groups="account.group_account_manager"/>
+                <field name="export_cost_per_kg" groups="account.group_account_manager"/>
+                <field name="export_margin" sum="Total" groups="account.group_account_manager"
+                       decoration-danger="export_margin &lt; 0" decoration-success="export_margin &gt; 0"/>
+                <field name="export_margin_percent" groups="account.group_account_manager"/>
+            </xpath>
+        </field>
+    </record>
+
     <record id="view_move_form_export_costs" model="ir.ui.view">
         <field name="name">account.move.form.export.costs</field>
         <field name="model">account.move</field>

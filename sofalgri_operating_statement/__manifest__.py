@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': "Compte d'exploitation",
-    'version': '18.0.1.1.0',
+    'version': '18.0.1.2.0',
     'category': 'Accounting/Accounting',
     'summary': "Compte d'exploitation par période : ventes, achats d'avocats, frais, emballages, variation de stock, marge et coût de revient au kg",
     'description': """

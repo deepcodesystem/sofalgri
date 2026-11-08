@@ -5,6 +5,16 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-08 · Synthèse des exports : coût par camion
+- Demande : le coût par camion dans la Synthèse des exports.
+- Fait : `sofalgri_operating_statement` 18.0.1.2.0 : colonnes réservées à l'Administrateur comptable, champs calculés non stockés, sur les factures d'export de la saison : fruit et emballage (couches de valorisation des mouvements livrés de la commande), frais d'approche (récolte, chargement, transport ferme, autres frais de la saison par kg reçu × kg de la facture), transport, transitaire, station, coût total, coût/kg, marge (hors taxes en dirhams, avoirs déduits), marge %. Colonnes ajoutées par ce module, qui dépend déjà de la Synthèse.
+- Attendu en TEST pour `F2026/069` (Paris, 22 880 kg d'après la livraison) : fruit et emballage 473 601,39 ; frais d'approche ≈ 7 160 (138 940 MAD pour 444 001 kg reçus, 0,313 MAD/kg) ; transport 48 000 ; transitaire 3 000 ; station 22 880 ; coût total ≈ 554 641 (≈ 24,24 MAD/kg) ; CA 646 226,69 ; marge ≈ 91 586 (≈ 14,2 %).
+- Limites : valeur au coût moyen d'Odoo, erreurs passées comprises ; frais d'approche à la moyenne de la saison, donc évolutifs ; une commande livrée en une fois mais facturée en plusieurs compterait la livraison sur chaque facture ; totaux de la liste sur les lignes affichées.
+- Bases : lecture seule TEST (factures de la saison, livraisons `ST/OUT/00256` et `00268`, couches, vue du compte d'exploitation, version du module : 18.0.1.1.0).
+- Modules/modèles : `sofalgri_operating_statement` · `account.move`, vue de la Synthèse.
+- Déploiement : aucun champ stocké ajouté par cette version ; `18.0.1.1.0` en ajoute (voir l'entrée suivante).
+- Commit : `8703de1` sur `feat/couts-export-factures` (poussé).
+
 ## 2026-11-08 · Compte d'exploitation : articles transitaire et station
 - Demande : intégrer les tarifs reçus du client : transport Rotterdam 57 000 dh, Paris 48 000 dh, transitaire 3 000 dh, station 1 dh/kg exporté.
 - Proposition initiale : une facture fournisseur par camion. Écartée par l'utilisateur : prix négociés, factures des fournisseurs reçues plus tard.

@@ -1,9 +1,21 @@
-# Sofalgri — Journal des interventions
+﻿# Sofalgri — Journal des interventions
 
 Format d'une entrée : date · demande · ce qui a été fait · base(s) concernée(s) · modules/modèles touchés · commit éventuel.
 Les entrées les plus récentes en haut.
 
 ---
+
+## 2026-11-08 · Compte d'exploitation : articles transitaire et station
+- Demande : intégrer les tarifs reçus du client : transport Rotterdam 57 000 dh, Paris 48 000 dh, transitaire 3 000 dh, station 1 dh/kg exporté.
+- Proposition initiale : une facture fournisseur par camion. Écartée par l'utilisateur : prix négociés, factures des fournisseurs reçues plus tard.
+- Fait (code) : `sofalgri_operating_statement` 18.0.1.1.0 : modèle `sofalgri.export.tariff` (menu BI Dashboard > Finance > Tarifs d'export ; Paris 48 000, Rotterdam 57 000, transitaire 3 000, station 1 dh/kg ; données `noupdate`) ; onglet « Coûts d'export » sur la facture d'export : `export_destination_id`, `export_transport_cost`, `export_forwarder_cost`, `export_station_cost` (stockés, proposés d'après les tarifs, modifiables, y compris après validation ; transitaire et station sur la saison en cours seulement). Compte d'exploitation : ces trois charges viennent de ces champs ; les achats et factures fournisseurs de ces rubriques vont en contrôle (`supplier_billed`, `control_amount`, hors marge), avec écart à l'échelle de la période et alerte sur les factures d'export sans transport. Migration `18.0.1.1.0` : transitaire et station remplis sur les factures d'export de la saison.
+- Limites : changer une ligne d'une facture en brouillon recalcule la station ; changer la destination recalcule le transport ; Spalding à ajouter dans les tarifs. Non installé, non testé ; syntaxe Python non contrôlée (Python absent du poste).
+- Déploiement : nouveaux champs stockés sur `account.move` → mise à jour en ligne de commande de `sofalgri_operating_statement` sur **les deux bases** avant le redémarrage, sinon erreur sur les factures dans les deux bases.
+- Fait (TEST, création MCP avec accord) : `product.template` 109 « Transitaire » (service, Dépenses, Unités, coût 3 000, rubrique `forwarder`) et 110 « Prestation station de conditionnement » (service, Dépenses, kg, coût 1, rubrique `station`). Contrôle en lecture : valeurs en place, aucun achat ni facture.
+- Reste : essai en TEST ; mêmes articles en PROD avec « OK prod », pour les factures reçues plus tard. Transport : le client doit préciser le tarif de Spalding et si les prix changent selon le transporteur.
+- Bases : TEST (écriture : articles ; lecture : articles existants).
+- Modules/modèles : `sofalgri_operating_statement` · `account.move`, `sofalgri.export.tariff`, `sofalgri.operating.report`, `sofalgri.operating.statement`, `product.template`.
+- Commit : `6206761` sur `feat/couts-export-factures` (poussé).
 
 ## 2026-11-07 · Identifiants légaux du client sur la facture client
 - Demande : afficher sur la facture de Westfalia Fruit GmbH ses EORI Number, Tax Code, Btw-identificatienummer NL et GLN.

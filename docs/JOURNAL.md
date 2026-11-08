@@ -1,4 +1,4 @@
-﻿# Sofalgri — Journal des interventions
+# Sofalgri — Journal des interventions
 
 Format d'une entrée : date · demande · ce qui a été fait · base(s) concernée(s) · modules/modèles touchés · commit éventuel.
 Les entrées les plus récentes en haut.

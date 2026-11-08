@@ -13,6 +13,7 @@ Les entrées les plus récentes en haut.
 - Bases : lecture seule TEST (factures de la saison, livraisons `ST/OUT/00256` et `00268`, couches, vue du compte d'exploitation, version du module : 18.0.1.1.0).
 - Modules/modèles : `sofalgri_operating_statement` · `account.move`, vue de la Synthèse.
 - Déploiement : aucun champ stocké ajouté par cette version ; `18.0.1.1.0` en ajoute (voir l'entrée suivante).
+- **Validé en TEST** par l'utilisateur (après redémarrage du service : la première mise à jour avait échoué, le processus n'ayant pas rechargé le code Python).
 - Commit : `8703de1` sur `feat/couts-export-factures` (poussé).
 
 ## 2026-11-08 · Compte d'exploitation : articles transitaire et station

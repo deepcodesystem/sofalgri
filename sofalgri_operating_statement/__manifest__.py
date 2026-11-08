@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': "Compte d'exploitation",
-    'version': '18.0.1.0.2',
+    'version': '18.0.1.2.0',
     'category': 'Accounting/Accounting',
     'summary': "Compte d'exploitation par période : ventes, achats d'avocats, frais, emballages, variation de stock, marge et coût de revient au kg",
     'description': """
@@ -24,7 +24,9 @@
         'security/ir.model.access.csv',
         'views/product_template_views.xml',
         'views/operating_report_views.xml',
+        'data/export_tariff_data.xml',
         'views/operating_statement_views.xml',
+        'views/export_tariff_views.xml',
     ],
     'installable': True,
     'application': False,

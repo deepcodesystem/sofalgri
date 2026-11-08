@@ -1,6 +1,6 @@
 from odoo import api, fields, models
 
-from .operating_report import COST_RUBRICS, INCOME_RUBRICS
+from .operating_report import CONTROL_RUBRICS, COST_RUBRICS, INCOME_RUBRICS
 
 # Rubriques sans montant à signaler : frais pas encore saisis dans Odoo.
 EXPECTED_COST_RUBRICS = ['harvest', 'farm_transport', 'packaging', 'station', 'forwarder', 'export_transport']
@@ -60,6 +60,14 @@ class OperatingStatement(models.TransientModel):
         string="Prix moyen d'achat par kg reçu", digits=(12, 2), compute='_compute_statement')
     missing_rubrics = fields.Char(string="Rubriques sans montant", compute='_compute_statement')
 
+    # Contrôle des prix négociés
+    amount_negotiated = fields.Monetary(string="Prix négociés (transport, transitaire, station)", compute='_compute_statement')
+    amount_supplier_billed = fields.Monetary(string="Facturé par les fournisseurs", compute='_compute_statement')
+    amount_supplier_gap = fields.Monetary(
+        string="Reste à recevoir ou écart", compute='_compute_statement',
+        help="Prix négociés moins factures reçues. Hors marge.")
+    missing_destination_count = fields.Integer(string="Factures d'export sans destination", compute='_compute_statement')
+
     def _get_domain(self):
         self.ensure_one()
         domain = [('company_id', '=', self.company_id.id)]
@@ -69,18 +77,36 @@ class OperatingStatement(models.TransientModel):
             domain.append(('date', '<=', self.date_to))
         return domain
 
+    def _get_missing_destination_domain(self):
+        return self._get_domain() + [
+            ('state', '=', 'posted'),
+            ('move_type', '=', 'out_invoice'),
+            ('fiscal_position_id.name', 'ilike', 'Export'),
+            ('export_destination_id', '=', False),
+            ('export_transport_cost', '=', 0),
+        ]
+
     @api.depends('date_from', 'date_to', 'company_id')
     def _compute_statement(self):
         report = self.env['sofalgri.operating.report']
         labels = dict(COST_RUBRICS)
         for statement in self:
-            amounts = {rubric: 0.0 for rubric, _label in INCOME_RUBRICS + COST_RUBRICS}
+            amounts = {rubric: 0.0 for rubric, _label in INCOME_RUBRICS + COST_RUBRICS + CONTROL_RUBRICS}
+            control_amount = 0.0
             quantities = dict.fromkeys(amounts, 0.0)
             if statement.company_id:
-                for rubric, amount, quantity in report._read_group(
-                        statement._get_domain(), ['rubric'], ['amount:sum', 'quantity:sum']):
+                for rubric, amount, quantity, control in report._read_group(
+                        statement._get_domain(), ['rubric'], ['amount:sum', 'quantity:sum', 'control_amount:sum']):
+                    control_amount += control or 0.0
                     amounts[rubric] = amount or 0.0
                     quantities[rubric] = quantity or 0.0
+
+            negotiated = -(amounts['export_transport'] + amounts['forwarder'] + amounts['station'])
+            statement.amount_negotiated = negotiated
+            statement.amount_supplier_billed = control_amount
+            statement.amount_supplier_gap = negotiated - control_amount
+            statement.missing_destination_count = self.env['account.move'].search_count(
+                statement._get_missing_destination_domain()) if statement.company_id else 0
 
             statement.amount_sale_export = amounts['sale_export']
             statement.amount_sale_local = amounts['sale_local']

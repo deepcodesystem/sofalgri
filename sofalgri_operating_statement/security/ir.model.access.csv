@@ -1,3 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_sofalgri_operating_report_account,sofalgri.operating.report account,model_sofalgri_operating_report,account.group_account_manager,1,0,0,0
+access_sofalgri_export_tariff_invoice,sofalgri.export.tariff invoice,model_sofalgri_export_tariff,account.group_account_invoice,1,0,0,0
+access_sofalgri_export_tariff_manager,sofalgri.export.tariff manager,model_sofalgri_export_tariff,account.group_account_manager,1,1,1,1
 access_sofalgri_operating_statement_account,sofalgri.operating.statement account,model_sofalgri_operating_statement,account.group_account_manager,1,1,1,1

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="export_tariff_paris" model="sofalgri.export.tariff">
+        <field name="name">Paris</field>
+        <field name="cost_type">transport</field>
+        <field name="amount">48000</field>
+    </record>
+    <record id="export_tariff_rotterdam" model="sofalgri.export.tariff">
+        <field name="name">Rotterdam</field>
+        <field name="cost_type">transport</field>
+        <field name="amount">57000</field>
+    </record>
+    <record id="export_tariff_forwarder" model="sofalgri.export.tariff">
+        <field name="name">Transitaire</field>
+        <field name="cost_type">forwarder</field>
+        <field name="amount">3000</field>
+    </record>
+    <record id="export_tariff_station" model="sofalgri.export.tariff">
+        <field name="name">Station de conditionnement</field>
+        <field name="cost_type">station</field>
+        <field name="amount">1</field>
+    </record>
+</odoo>

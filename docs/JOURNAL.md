@@ -23,7 +23,8 @@ Les entrées les plus récentes en haut.
 - Limites : changer une ligne d'une facture en brouillon recalcule la station ; changer la destination recalcule le transport ; Spalding à ajouter dans les tarifs. Non installé, non testé ; syntaxe Python non contrôlée (Python absent du poste).
 - Déploiement : nouveaux champs stockés sur `account.move` → mise à jour en ligne de commande de `sofalgri_operating_statement` sur **les deux bases** avant le redémarrage, sinon erreur sur les factures dans les deux bases.
 - Fait (TEST, création MCP avec accord) : `product.template` 109 « Transitaire » (service, Dépenses, Unités, coût 3 000, rubrique `forwarder`) et 110 « Prestation station de conditionnement » (service, Dépenses, kg, coût 1, rubrique `station`). Contrôle en lecture : valeurs en place, aucun achat ni facture.
-- Reste : essai en TEST ; mêmes articles en PROD avec « OK prod », pour les factures reçues plus tard. Transport : le client doit préciser le tarif de Spalding et si les prix changent selon le transporteur.
+- Fait (PROD, création MCP avec « OK prod », après validation en TEST) : mêmes articles, `product.template` 109 et 110 (08/11 à 21:19 UTC), pour les factures fournisseurs reçues plus tard. Contrôle en lecture : valeurs identiques à TEST, aucun achat ni facture.
+- Reste : tarif de Spalding ; préciser si les prix changent selon le transporteur. PR deepcodesystem/sofalgri#45 fusionnée dans `18.0` (`d1032e4`).
 - Bases : TEST (écriture : articles ; lecture : articles existants).
 - Modules/modèles : `sofalgri_operating_statement` · `account.move`, `sofalgri.export.tariff`, `sofalgri.operating.report`, `sofalgri.operating.statement`, `product.template`.
 - Commit : `6206761` sur `feat/couts-export-factures` (poussé).

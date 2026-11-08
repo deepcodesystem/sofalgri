@@ -22,7 +22,12 @@ COST_RUBRICS = [
 # les déchets achetés aux fermes vont en « Achat de déchets fermes »).
 PURCHASE_RUBRICS = ("('avocado', 'waste', 'harvest', 'farm_transport', 'station', 'forwarder', "
                     "'export_transport', 'other_cost')")
-PURCHASE_RUBRIC_SQL = "CASE WHEN info.rubric = 'waste' THEN 'waste_purchase' ELSE info.rubric END"
+# Transport, transitaire et station : le coût vient des prix négociés saisis sur la facture d'export ;
+# les factures de ces fournisseurs, reçues plus tard, ne servent qu'au contrôle (pas de double comptage).
+CONTROL_RUBRICS = [('supplier_billed', "Facturé par les fournisseurs (contrôle)")]
+PURCHASE_RUBRIC_SQL = ("CASE WHEN info.rubric = 'waste' THEN 'waste_purchase' "
+                       "WHEN info.rubric IN ('station', 'forwarder', 'export_transport') THEN 'supplier_billed' "
+                       "ELSE info.rubric END")
 PURCHASE_KG_RUBRICS = "('avocado', 'waste')"
 
 
@@ -34,7 +39,8 @@ class OperatingReport(models.Model):
     _depends = {
         'product.template': ['operating_rubric', 'categ_id'],
         'product.category': ['complete_name'],
-        'account.move': ['state', 'move_type', 'date', 'partner_id', 'fiscal_position_id', 'company_id'],
+        'account.move': ['state', 'move_type', 'date', 'partner_id', 'fiscal_position_id', 'company_id',
+                         'export_transport_cost', 'export_forwarder_cost', 'export_station_cost'],
         'account.move.line': ['move_id', 'product_id', 'display_type', 'balance', 'quantity', 'purchase_line_id'],
         'purchase.order': ['state', 'date_order', 'partner_id', 'company_id'],
         'purchase.order.line': ['order_id', 'product_id', 'price_subtotal', 'qty_received'],
@@ -45,8 +51,9 @@ class OperatingReport(models.Model):
     date = fields.Date(string="Date", readonly=True)
     company_id = fields.Many2one('res.company', string="Société", readonly=True)
     currency_id = fields.Many2one('res.currency', string="Devise", readonly=True)
-    section = fields.Selection([('income', "Produits"), ('cost', "Charges")], string="Section", readonly=True)
-    rubric = fields.Selection(INCOME_RUBRICS + COST_RUBRICS, string="Rubrique", readonly=True)
+    section = fields.Selection(
+        [('income', "Produits"), ('cost', "Charges"), ('control', "Contrôle")], string="Section", readonly=True)
+    rubric = fields.Selection(INCOME_RUBRICS + COST_RUBRICS + CONTROL_RUBRICS, string="Rubrique", readonly=True)
     product_id = fields.Many2one('product.product', string="Article", readonly=True)
     partner_id = fields.Many2one('res.partner', string="Partenaire", readonly=True)
     account_move_id = fields.Many2one('account.move', string="Facture", readonly=True)
@@ -54,6 +61,9 @@ class OperatingReport(models.Model):
     amount = fields.Monetary(
         string="Montant", readonly=True,
         help="Produits en positif, charges en négatif : le total est la marge.")
+    control_amount = fields.Monetary(
+        string="Facturé par les fournisseurs", readonly=True,
+        help="Factures de transport international, de transitaire et de station : contrôle, hors marge.")
     quantity = fields.Float(
         string="Quantité (kg)", readonly=True,
         help="Kg facturés pour les ventes, kg reçus pour les achats d'avocats et de déchets fermes ; "
@@ -161,6 +171,23 @@ class OperatingReport(models.Model):
                       AND line.purchase_line_id IS NULL
                       AND info.rubric IN {PURCHASE_RUBRICS}
                 ),
+                -- Prix négociés saisis sur les factures d'export.
+                export_costs AS (
+                    SELECT move.date, move.company_id, NULL::integer AS product_id, move.partner_id,
+                           move.id AS account_move_id, NULL::integer AS purchase_order_id,
+                           cost.rubric,
+                           -cost.amount AS amount,
+                           0 AS quantity
+                    FROM account_move move
+                    CROSS JOIN LATERAL (VALUES
+                        ('export_transport', move.export_transport_cost),
+                        ('forwarder', move.export_forwarder_cost),
+                        ('station', move.export_station_cost)
+                    ) AS cost(rubric, amount)
+                    WHERE move.state = 'posted'
+                      AND move.move_type = 'out_invoice'
+                      AND COALESCE(cost.amount, 0) <> 0
+                ),
                 -- Emballages consommés par les OF, moins ce que les déconstructions ont rendu.
                 packaging AS (
                     SELECT layer.create_date::date AS date, layer.company_id, layer.product_id,
@@ -194,6 +221,7 @@ class OperatingReport(models.Model):
                     SELECT * FROM sales
                     UNION ALL SELECT * FROM purchases
                     UNION ALL SELECT * FROM bills
+                    UNION ALL SELECT * FROM export_costs
                     UNION ALL SELECT * FROM packaging
                     UNION ALL SELECT * FROM stock_variation
                 )
@@ -201,13 +229,21 @@ class OperatingReport(models.Model):
                        all_lines.date,
                        all_lines.company_id,
                        company.currency_id,
-                       CASE WHEN all_lines.rubric LIKE 'sale_%' THEN 'income' ELSE 'cost' END AS section,
+                       CASE WHEN all_lines.rubric LIKE 'sale_%' THEN 'income'
+                            WHEN all_lines.rubric = 'supplier_billed' THEN 'control'
+                            ELSE 'cost'
+                       END AS section,
                        all_lines.rubric,
                        all_lines.product_id,
                        all_lines.partner_id,
                        all_lines.account_move_id,
                        all_lines.purchase_order_id,
-                       ROUND(all_lines.amount::numeric, 2) AS amount,
+                       CASE WHEN all_lines.rubric = 'supplier_billed' THEN 0
+                            ELSE ROUND(all_lines.amount::numeric, 2)
+                       END AS amount,
+                       CASE WHEN all_lines.rubric = 'supplier_billed' THEN ROUND(-all_lines.amount::numeric, 2)
+                            ELSE 0
+                       END AS control_amount,
                        all_lines.quantity
                 FROM all_lines
                 JOIN res_company company ON company.id = all_lines.company_id

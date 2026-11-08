@@ -24,7 +24,10 @@
                     </group>
                     <div class="alert alert-warning" role="alert" invisible="not missing_rubrics">
                         Aucun montant sur la période pour : <field name="missing_rubrics" class="oe_inline"/>.
-                        Résultat incomplet tant que ces frais ne sont pas saisis (factures fournisseurs avec un article de cette rubrique).
+                        Résultat incomplet tant que ces frais ne sont pas saisis (transport, transitaire et station : onglet « Coûts d'export » de la facture ; autres frais : factures fournisseurs).
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="not missing_destination_count">
+                        <field name="missing_destination_count" class="oe_inline"/> facture(s) d'export sans transport international : choisir la destination dans l'onglet « Coûts d'export ».
                     </div>
                     <group string="Produits">
                         <group>
@@ -74,6 +77,13 @@
                             <field name="cost_per_kg_net"/>
                             <field name="export_price_per_kg"/>
                             <field name="local_price_per_kg"/>
+                        </group>
+                    </group>
+                    <group string="Contrôle des prix négociés (hors marge)">
+                        <group>
+                            <field name="amount_negotiated"/>
+                            <field name="amount_supplier_billed"/>
+                            <field name="amount_supplier_gap"/>
                         </group>
                     </group>
                 </sheet>

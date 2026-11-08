@@ -28,6 +28,7 @@
                 <field name="purchase_order_id"/>
                 <field name="quantity" sum="Total"/>
                 <field name="amount" sum="Total"/>
+                <field name="control_amount" sum="Total" optional="hide"/>
             </list>
         </field>
     </record>

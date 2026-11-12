@@ -14,7 +14,7 @@ Les entrées les plus récentes en haut.
 - Bases : lecture seule TEST et PROD (`account.cash.deposit`, `account.journal`, `account.payment`, `account.move.line`, `purchase.order`, `res.partner`, modules).
 - Modules/modèles : `sofalgri_operator_cash` · `sofalgri.operator.cash.report`, `sofalgri.operator.cash.statement`.
 - Déploiement : nouveau module, à installer ; aucun champ ajouté aux modèles existants, donc sans risque pour la PROD pendant le test.
-- Commit : sur `feat/caisse-operateur` (non poussé).
+- Commit : `aa14bf8` sur `feat/caisse-operateur` (poussé). À valider en TEST.
 
 ## 2026-11-08 · Synthèse des exports : coût par camion
 - Demande : le coût par camion dans la Synthèse des exports.

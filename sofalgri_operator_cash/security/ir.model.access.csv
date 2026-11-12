@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_sofalgri_operator_cash_report_manager,sofalgri.operator.cash.report manager,model_sofalgri_operator_cash_report,account.group_account_manager,1,0,0,0
+access_sofalgri_operator_cash_statement_manager,sofalgri.operator.cash.statement manager,model_sofalgri_operator_cash_statement,account.group_account_manager,1,1,1,1

@@ -15,7 +15,8 @@ Les entrées les plus récentes en haut.
 - Modules/modèles : `sofalgri_operator_cash` · `sofalgri.operator.cash.report`, `sofalgri.operator.cash.statement`.
 - Déploiement : nouveau module, à installer ; aucun champ ajouté aux modèles existants, donc sans risque pour la PROD pendant le test.
 - Contrôle TEST (lecture, après installation par l'utilisateur le 13/11) : saison : 9 remises (`CASH-DEP-020` à `028`, 9 400 000 MAD) ; 2 encaissements de ventes locales (`PCSH1/2026/00173` 132 612,50, `00174` 16 800) ; `PCSH1/2026/00187` (190 706,80, `FA2026/11/053`) réparti en 188 806,80 d'avocats et 1 900 de frais, comme la facture ; aucun paiement non rapproché, autre achat ni autre mouvement. Totaux des paiements de la saison non recomptés par Claude. **Validé en TEST** par l'utilisateur.
-- Commit : `aa14bf8` sur `feat/caisse-operateur` (poussé).
+- Commit : `aa14bf8` sur `feat/caisse-operateur` (poussé) ; PR deepcodesystem/sofalgri#47 **fusionnée** dans `18.0` (`ca22537`).
+- PROD (installé par l'utilisateur, contrôlé en lecture le 13/11) : `sofalgri_operator_cash` 18.0.1.0.0 installé (00:30 UTC), menus « BI Dashboard / Achats / Caisse de l'opérateur » et « Détail de la caisse de l'opérateur » présents. Écran non contrôlé en PROD.
 
 ## 2026-11-08 · Synthèse des exports : coût par camion
 - Demande : le coût par camion dans la Synthèse des exports.

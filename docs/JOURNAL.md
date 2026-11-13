@@ -5,6 +5,21 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-13 · Versements d'espèces en banque (Mohamed, CDM ADIL)
+- Demande : un module pour que Mohamed (groupe « Mes factures uniquement ») verse les espèces qu'il reçoit sur le nouveau compte bancaire « CDM ADIL », dans son menu « Mes factures ».
+- Constat (PROD, lecture seule) : journal `BNK3` (id 12, nommé « Bank », compte 514105 « Banque CDM (copie) », RIB `12345678910111213141516170`), créé le 13/11 à 19:04 UTC, absent de TEST ; confirmé par l'utilisateur comme le compte CDM ADIL. Depuis le 01/10, Mohamed ELMALKI a saisi les encaissements des ventes locales : 2 en espèces sur `CSH1` (149 412,50 MAD), 14 sur `BNK1` (1 319 798,50 MAD). Odoo 18 n'a plus de virement interne sur les paiements ; `account_cash_deposit` (comptage des billets) est déjà compté comme remise à l'opérateur dans la caisse : non retenu.
+- Choix de l'utilisateur : espèces prises sur `CSH1` ; dans la caisse de l'opérateur, les versements sont déduits des encaissements clients (tout versé : encaissements à 0) et le reste en espèces est recalculé.
+- Fait :
+  - nouveau module `sofalgri_cash_transfer` 18.0.1.0.0 : modèle `sofalgri.cash.transfer` « Versement d'espèces » (`VER/AAAA/0001`) : date, caisse (par défaut la première de type caisse), compte bancaire (journaux cochés « Reçoit les versements d'espèces », `account.journal.cash_transfer_target`, à défaut toutes les banques), montant, référence du bordereau ; « Valider » passe l'écriture dans le journal de la banque (débit compte de la banque, crédit compte de la caisse), créée par l'utilisateur ; « Annuler » annule l'écriture. Règle globale : le groupe « Mes factures uniquement » ne voit que ses versements. Menus « Mes factures > Versements d'espèces » et « Facturation > Comptabilité > Versements d'espèces » (Administrateur comptable).
+  - `sofalgri_operator_cash` 18.0.1.1.0 : versements validés depuis une caisse en mouvement « Encaissement client » négatif ; dépend de `sofalgri_cash_transfer`.
+- Limites : aucun contrôle du solde de la caisse (le compte 516111 est négatif en PROD) ; tout versement depuis une caisse réduit les encaissements, même s'il ne vient pas des ventes locales.
+- Non installé, non testé ; syntaxe Python non contrôlée (Python absent du poste).
+- À faire : en TEST, recréer le journal de banque (ou redupliquer la base) ; cocher « Reçoit les versements d'espèces » sur `BNK3` ; renommer `BNK3` « CDM ADIL » et corriger le RIB si provisoire.
+- Bases : lecture seule PROD (`account.journal`, `account.payment`, champs de `account.cash.deposit`, modules).
+- Modules/modèles : `sofalgri_cash_transfer`, `sofalgri_operator_cash` · `sofalgri.cash.transfer`, `account.journal`, `sofalgri.operator.cash.report`.
+- Déploiement : installer `sofalgri_cash_transfer` (nouveau champ sur `account.journal` créé seulement à l'installation), puis mettre à jour `sofalgri_operator_cash` sur chaque base où il est installé (TEST et PROD) : sa vue lit la table des versements, qui doit exister.
+- Commit : branche `feat/versement-especes-banque` (non committé).
+
 ## 2026-11-13 · Ventes locales et paiements (espèces, virement)
 - Demande : rapport du BI Dashboard des ventes locales avec les paiements en espèces et par virement.
 - Constat (TEST, lecture seule) : journal « Ventes locales » `FL` (id 9, coché), 17 factures `FL/2026/0001` à `0017` (1 542 700 MAD) ; paiements rapprochés sur `CSH1` (Cash) ou `BNK1` (Bank) ; `BNK2` (Banque AWB) sans écriture. `PCSH1/2026/00173` (132 612,50, « RACHID 10 », mémo `FL/2026/0015`) en cours, non rapproché, alors que `FL/2026/0015` est payée par `PCSH1/2026/00188` : double encaissement possible, à vérifier.
@@ -15,7 +30,7 @@ Les entrées les plus récentes en haut.
 - Bases : lecture seule TEST (`account.journal`, `account.move`, `account.payment`).
 - Modules/modèles : `sofalgri_local_sale_summary` · `sofalgri.local.sale.report`.
 - Déploiement : nouveau module, à installer ; aucun champ ajouté aux modèles existants.
-- Commit : `13ccc20` sur `feat/ventes-locales-paiements` (poussé). Jugé correct par l'utilisateur (« ça me paraît bien », 13/11) ; écran non contrôlé par Claude.
+- Commit : `13ccc20` sur `feat/ventes-locales-paiements` (poussé). Jugé correct par l'utilisateur (« ça me paraît bien », 13/11) ; écran non contrôlé par Claude. PR deepcodesystem/sofalgri#50 **fusionnée** dans `18.0` (`d85c327`). PROD (installé par l'utilisateur, contrôlé en lecture le 13/11) : 18.0.1.0.0 installé (18:59 UTC), menu « BI Dashboard/Ventes/Ventes locales et paiements » présent ; écran non contrôlé.
 
 ## 2026-11-12 · Déchets Station : 12 353 kg « sans lot » bloquant la livraison `ST/OUTD/00046`
 - Demande : « Déchets usines » (Déchets Station) est suivi par lot, mais 12 353 kg apparaissent sans lot et ne peuvent pas être livrés sur `C-00238` (Rachid).

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Comme pour les factures : le groupe « Mes factures uniquement » ne voit que ses versements. -->
+    <record id="rule_own_cash_transfer" model="ir.rule">
+        <field name="name">Mes factures uniquement : versements d'espèces</field>
+        <field name="model_id" ref="model_sofalgri_cash_transfer"/>
+        <field name="domain_force">[('create_uid', '=', user.id)] if user.has_group('sofalgri_own_invoices.group_own_invoices') else [(1, '=', 1)]</field>
+    </record>
+
+    <record id="rule_cash_transfer_company" model="ir.rule">
+        <field name="name">Versements d'espèces : sociétés autorisées</field>
+        <field name="model_id" ref="model_sofalgri_cash_transfer"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+</odoo>

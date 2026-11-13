@@ -31,6 +31,7 @@ class OperatorCashReport(models.Model):
         'account.move.line': ['move_id', 'account_id', 'balance', 'display_type', 'product_id', 'purchase_line_id'],
         'account.partial.reconcile': ['debit_move_id', 'credit_move_id', 'amount'],
         'purchase.order.line': ['order_id'],
+        'sofalgri.cash.transfer': ['state', 'date', 'cash_journal_id', 'bank_journal_id', 'amount', 'name'],
     }
 
     date = fields.Date(string="Date", readonly=True)
@@ -177,6 +178,19 @@ class OperatorCashReport(models.Model):
                            NULL, payment.amount
                     FROM cash_payments payment
                     WHERE payment.payment_type = 'inbound'
+
+                    UNION ALL
+                    -- Espèces des clients versées en banque : déduites des encaissements.
+                    SELECT transfer.date, transfer.company_id, 'collection',
+                           transfer.name, NULL,
+                           NULL, NULL, NULL, NULL,
+                           'Versement en banque : ' || COALESCE(bank_journal.code, ''),
+                           -transfer.amount
+                    FROM sofalgri_cash_transfer transfer
+                    JOIN account_journal cash_journal ON cash_journal.id = transfer.cash_journal_id
+                    LEFT JOIN account_journal bank_journal ON bank_journal.id = transfer.bank_journal_id
+                    WHERE transfer.state = 'posted'
+                      AND cash_journal.type = 'cash'
 
                     UNION ALL
                     -- Paiements en espèces rapprochés de factures fournisseurs, répartis par catégorie.

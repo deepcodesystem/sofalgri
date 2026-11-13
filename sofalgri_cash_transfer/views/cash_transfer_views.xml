@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cash_transfer_list" model="ir.ui.view">
+        <field name="name">sofalgri.cash.transfer.list</field>
+        <field name="model">sofalgri.cash.transfer</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state == 'cancel'" decoration-info="state == 'draft'">
+                <field name="currency_id" column_invisible="1"/>
+                <field name="name"/>
+                <field name="date"/>
+                <field name="cash_journal_id"/>
+                <field name="bank_journal_id"/>
+                <field name="ref" optional="show"/>
+                <field name="create_uid" string="Saisi par" optional="show"/>
+                <field name="amount" sum="Total"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'posted'"
+                       decoration-info="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cash_transfer_form" model="ir.ui.view">
+        <field name="name">sofalgri.cash.transfer.form</field>
+        <field name="model">sofalgri.cash.transfer</field>
+        <field name="arch" type="xml">
+            <form string="Versement d'espèces">
+                <header>
+                    <button name="action_post" type="object" string="Valider" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_cancel" type="object" string="Annuler"
+                            invisible="state != 'posted'"
+                            confirm="Annuler ce versement et son écriture ?"/>
+                    <button name="action_draft" type="object" string="Remettre en brouillon"
+                            invisible="state != 'cancel'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,posted"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_move" type="object" class="oe_stat_button"
+                                icon="fa-book" string="Écriture" invisible="not move_id"/>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date" readonly="state != 'draft'"/>
+                            <field name="cash_journal_id" readonly="state != 'draft'"
+                                   options="{'no_create': True, 'no_open': True}"/>
+                            <field name="allowed_bank_journal_ids" invisible="1"/>
+                            <field name="bank_journal_id" readonly="state != 'draft'"
+                                   options="{'no_create': True, 'no_open': True}"/>
+                        </group>
+                        <group>
+                            <field name="amount" readonly="state != 'draft'"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="ref" readonly="state != 'draft'"/>
+                            <field name="move_id" invisible="not move_id" readonly="1"/>
+                            <field name="company_id" groups="base.group_multi_company" readonly="state != 'draft'"/>
+                        </group>
+                    </group>
+                    <field name="notes" placeholder="Notes…"/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_cash_transfer_search" model="ir.ui.view">
+        <field name="name">sofalgri.cash.transfer.search</field>
+        <field name="model">sofalgri.cash.transfer</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="ref"/>
+                <field name="bank_journal_id"/>
+                <field name="create_uid" string="Saisi par"/>
+                <filter name="draft" string="Brouillons" domain="[('state', '=', 'draft')]"/>
+                <filter name="posted" string="Validés" domain="[('state', '=', 'posted')]"/>
+                <separator/>
+                <filter name="date" string="Date" date="date"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="group_bank" string="Compte bancaire" context="{'group_by': 'bank_journal_id'}"/>
+                    <filter name="group_user" string="Saisi par" context="{'group_by': 'create_uid'}"/>
+                    <filter name="group_month" string="Mois" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_cash_transfer" model="ir.actions.act_window">
+        <field name="name">Versements d'espèces</field>
+        <field name="res_model">sofalgri.cash.transfer</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_cash_transfer_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Verser des espèces sur un compte bancaire</p>
+            <p>Indiquez la caisse, le compte bancaire et le montant, puis validez : l'écriture est passée
+               dans le journal de la banque.</p>
+        </field>
+    </record>
+
+    <!-- Groupe « Mes factures uniquement » : dans son menu dédié. -->
+    <menuitem id="menu_own_cash_transfer"
+              name="Versements d'espèces"
+              parent="sofalgri_own_invoices.menu_own_invoices_root"
+              action="action_cash_transfer"
+              sequence="40"/>
+
+    <!-- Comptables : menu Facturation, rubrique Comptabilité. -->
+    <menuitem id="menu_account_cash_transfer"
+              name="Versements d'espèces"
+              parent="account.menu_finance_entries"
+              action="action_cash_transfer"
+              groups="account.group_account_manager"
+              sequence="90"/>
+</odoo>

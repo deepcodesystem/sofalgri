@@ -18,7 +18,7 @@ Les entrées les plus récentes en haut.
 - Bases : lecture seule PROD (`account.journal`, `account.payment`, champs de `account.cash.deposit`, modules).
 - Modules/modèles : `sofalgri_cash_transfer`, `sofalgri_operator_cash` · `sofalgri.cash.transfer`, `account.journal`, `sofalgri.operator.cash.report`.
 - Déploiement : installer `sofalgri_cash_transfer` (nouveau champ sur `account.journal` créé seulement à l'installation), puis mettre à jour `sofalgri_operator_cash` sur chaque base où il est installé (TEST et PROD) : sa vue lit la table des versements, qui doit exister.
-- Commit : branche `feat/versement-especes-banque` (non committé).
+- Commit : `0e52ca8` sur `feat/versement-especes-banque` (poussé). Installé en TEST par l'utilisateur, **validé en TEST** (« ça fonctionne », 13/11) ; détail des essais non précisé, non contrôlé par Claude.
 
 ## 2026-11-13 · Ventes locales et paiements (espèces, virement)
 - Demande : rapport du BI Dashboard des ventes locales avec les paiements en espèces et par virement.

@@ -5,6 +5,18 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-13 · Ventes locales et paiements (espèces, virement)
+- Demande : rapport du BI Dashboard des ventes locales avec les paiements en espèces et par virement.
+- Constat (TEST, lecture seule) : journal « Ventes locales » `FL` (id 9, coché), 17 factures `FL/2026/0001` à `0017` (1 542 700 MAD) ; paiements rapprochés sur `CSH1` (Cash) ou `BNK1` (Bank) ; `BNK2` (Banque AWB) sans écriture. `PCSH1/2026/00173` (132 612,50, « RACHID 10 », mémo `FL/2026/0015`) en cours, non rapproché, alors que `FL/2026/0015` est payée par `PCSH1/2026/00188` : double encaissement possible, à vérifier.
+- Choix de l'utilisateur : une ligne par facture ; encaissements non rapprochés des clients locaux en lignes à part.
+- Fait : nouveau module `sofalgri_local_sale_summary` 18.0.1.0.0 : vue SQL `sofalgri.local.sale.report` : une ligne par facture ou avoir validé d'un journal « ventes locales » (client, kg, montant, payé en espèces, payé par virement, autre règlement, reste à payer, état, dernier paiement) ; payé réparti d'après le journal de l'écriture rapprochée (caisse = espèces, banque = virement, autre = avoir ou opération diverse) ; une ligne « Paiement non rapproché » par encaissement client en caisse ou banque dont une part est libre, pour les clients sans facture d'export (montant en espèces ou virement, et en négatif dans le reste à payer : total du reste = solde net). Menu « BI Dashboard > Ventes > Ventes locales et paiements » (saison en cours par défaut, filtres, liste avec totaux, tableau croisé client × mois, graphique), clic vers la facture ou le paiement. Accès : Administrateur comptable et Responsable des ventes.
+- Attendu en TEST : 17 factures, 1 542 700 MAD ; espèces 149 412,50 (`FL/2026/0015`, `0016`) ; virement 1 319 798,50 ; reste 73 489 (`FL/2026/0012`, Driss) ; ligne non rapprochée `PCSH1/2026/00173` 132 612,50 en espèces.
+- Limites : montants en MAD ; kg = quantités des lignes de facture ; filtre de dates sur la date de facture (le payé compte tous les paiements, quelle que soit leur date) ; un chèque passé en banque compte en virement. Non installé, non testé ; syntaxe Python non contrôlée (Python absent du poste).
+- Bases : lecture seule TEST (`account.journal`, `account.move`, `account.payment`).
+- Modules/modèles : `sofalgri_local_sale_summary` · `sofalgri.local.sale.report`.
+- Déploiement : nouveau module, à installer ; aucun champ ajouté aux modèles existants.
+- Commit : `13ccc20` sur `feat/ventes-locales-paiements` (poussé). Jugé correct par l'utilisateur (« ça me paraît bien », 13/11) ; écran non contrôlé par Claude.
+
 ## 2026-11-12 · Déchets Station : 12 353 kg « sans lot » bloquant la livraison `ST/OUTD/00046`
 - Demande : « Déchets usines » (Déchets Station) est suivi par lot, mais 12 353 kg apparaissent sans lot et ne peuvent pas être livrés sur `C-00238` (Rachid).
 - Constat (PROD, lecture seule) : il ne s'agit pas de stock : quant sans lot à 0 kg en `Zone de stockage déchets`, avec 12 353 kg réservés (disponible −12 353), créé le 12/11 à 18:53 UTC par Mohamed ELMALKI quand la quantité a été saisie directement sur la livraison, sans lot (ligne 66276). Stock réel : 12 981 kg, dont 5 502 en zone déchets (lots `0012S09112026` 1 026, `0013S09112026` 666, `0024S10112026` 637, `0013S10112026` 3 173) et 7 479 kg du lot `0010S07112026` dans `ST/Stock`, hors de l'emplacement source de la livraison. OF déchets `ST/SFD/00283` (456 kg) non terminé.

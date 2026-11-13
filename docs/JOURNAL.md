@@ -18,7 +18,8 @@ Les entrées les plus récentes en haut.
 - Bases : lecture seule PROD (`account.journal`, `account.payment`, champs de `account.cash.deposit`, modules).
 - Modules/modèles : `sofalgri_cash_transfer`, `sofalgri_operator_cash` · `sofalgri.cash.transfer`, `account.journal`, `sofalgri.operator.cash.report`.
 - Déploiement : installer `sofalgri_cash_transfer` (nouveau champ sur `account.journal` créé seulement à l'installation), puis mettre à jour `sofalgri_operator_cash` sur chaque base où il est installé (TEST et PROD) : sa vue lit la table des versements, qui doit exister.
-- Commit : `0e52ca8` sur `feat/versement-especes-banque` (poussé). Installé en TEST par l'utilisateur, **validé en TEST** (« ça fonctionne », 13/11) ; détail des essais non précisé, non contrôlé par Claude.
+- Commit : `0e52ca8` sur `feat/versement-especes-banque` (poussé). Installé en TEST par l'utilisateur, **validé en TEST** (« ça fonctionne », 13/11) ; détail des essais non précisé, non contrôlé par Claude. PR deepcodesystem/sofalgri#51 **fusionnée** dans `18.0` (`a29a398`).
+- PROD (installé par l'utilisateur, contrôlé en lecture le 13/11) : `sofalgri_cash_transfer` 18.0.1.0.0 installé (19:36 UTC), menus « Mes factures/Versements d'espèces » et « Invoicing/Accounting/Versements d'espèces », séquence `VER/%(year)s/` (prochain n° 1) ; `sofalgri_operator_cash` 18.0.1.1.0, vue de la caisse lisible ; `BNK3` coché « Reçoit les versements d'espèces » (19:37), encore nommé « Bank », RIB `12345678910111213141516170` inchangé ; aucun versement saisi. Écran et droits de Mohamed non contrôlés en PROD.
 
 ## 2026-11-13 · Ventes locales et paiements (espèces, virement)
 - Demande : rapport du BI Dashboard des ventes locales avec les paiements en espèces et par virement.

@@ -19,7 +19,10 @@ class OperatorCashStatement(models.TransientModel):
         string="Reste au début de la période", compute='_compute_statement',
         help="Espèces remises et encaissées avant la période, moins les paiements en espèces avant la période.")
     amount_deposit = fields.Monetary(string="Remises d'espèces", compute='_compute_statement')
-    amount_collection = fields.Monetary(string="Encaissements clients (ventes locales)", compute='_compute_statement')
+    amount_collection = fields.Monetary(
+        string="Encaissements clients (ventes locales)", compute='_compute_statement',
+        help="Encaissements en espèces des clients, moins les espèces versées en banque "
+             "(versements d'espèces). Tout versé : 0.")
     amount_received = fields.Monetary(string="Total reçu", compute='_compute_statement')
 
     amount_avocado = fields.Monetary(string="Paiements d'avocats", compute='_compute_statement')

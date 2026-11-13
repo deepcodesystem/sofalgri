@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_operator_cash_statement_form" model="ir.ui.view">
+        <field name="name">sofalgri.operator.cash.statement.form</field>
+        <field name="model">sofalgri.operator.cash.statement</field>
+        <field name="arch" type="xml">
+            <form string="Caisse de l'opérateur">
+                <header>
+                    <button name="action_open_details" type="object" string="Voir le détail" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Caisse de l'opérateur</h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <group>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-warning" role="alert" invisible="closing_balance &gt;= 0">
+                        Reste négatif : plus de paiements en espèces saisis que d'espèces remises.
+                        Une remise manque peut-être, ou des paiements ont été faits avec d'autres espèces.
+                    </div>
+                    <group>
+                        <group string="Reçu par l'opérateur">
+                            <field name="opening_balance"/>
+                            <field name="amount_deposit"/>
+                            <field name="amount_collection"/>
+                            <field name="amount_received" class="fw-bold"/>
+                        </group>
+                        <group string="Dépensé par l'opérateur">
+                            <field name="amount_avocado"/>
+                            <field name="amount_fees"/>
+                            <field name="amount_other_purchase"/>
+                            <field name="amount_unreconciled"/>
+                            <field name="amount_spent" class="fw-bold"/>
+                        </group>
+                    </group>
+                    <group string="Reste à justifier">
+                        <group>
+                            <field name="amount_other_payment" invisible="not amount_other_payment"/>
+                            <field name="amount_period"/>
+                            <field name="closing_balance" class="fw-bold"
+                                   decoration-success="closing_balance &gt;= 0"
+                                   decoration-danger="closing_balance &lt; 0"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_operator_cash_statement" model="ir.actions.act_window">
+        <field name="name">Caisse de l'opérateur</field>
+        <field name="res_model">sofalgri.operator.cash.statement</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+
+    <menuitem id="menu_operator_cash_statement"
+              name="Caisse de l'opérateur"
+              parent="sofalgri_purchase_summary.menu_bi_purchase"
+              action="action_operator_cash_statement"
+              groups="account.group_account_manager"
+              sequence="20"/>
+
+    <menuitem id="menu_operator_cash_report"
+              name="Détail de la caisse de l'opérateur"
+              parent="sofalgri_purchase_summary.menu_bi_purchase"
+              action="action_operator_cash_report"
+              groups="account.group_account_manager"
+              sequence="30"/>
+</odoo>

@@ -14,7 +14,8 @@ Les entrées les plus récentes en haut.
 - Bases : lecture seule TEST et PROD (`account.cash.deposit`, `account.journal`, `account.payment`, `account.move.line`, `purchase.order`, `res.partner`, modules).
 - Modules/modèles : `sofalgri_operator_cash` · `sofalgri.operator.cash.report`, `sofalgri.operator.cash.statement`.
 - Déploiement : nouveau module, à installer ; aucun champ ajouté aux modèles existants, donc sans risque pour la PROD pendant le test.
-- Commit : `aa14bf8` sur `feat/caisse-operateur` (poussé). À valider en TEST.
+- Contrôle TEST (lecture, après installation par l'utilisateur le 13/11) : saison : 9 remises (`CASH-DEP-020` à `028`, 9 400 000 MAD) ; 2 encaissements de ventes locales (`PCSH1/2026/00173` 132 612,50, `00174` 16 800) ; `PCSH1/2026/00187` (190 706,80, `FA2026/11/053`) réparti en 188 806,80 d'avocats et 1 900 de frais, comme la facture ; aucun paiement non rapproché, autre achat ni autre mouvement. Totaux des paiements de la saison non recomptés par Claude. **Validé en TEST** par l'utilisateur.
+- Commit : `aa14bf8` sur `feat/caisse-operateur` (poussé).
 
 ## 2026-11-08 · Synthèse des exports : coût par camion
 - Demande : le coût par camion dans la Synthèse des exports.

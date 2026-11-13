@@ -15,7 +15,7 @@ Les entrées les plus récentes en haut.
 - Bases : lecture seule TEST (`account.journal`, `account.move`, `account.payment`).
 - Modules/modèles : `sofalgri_local_sale_summary` · `sofalgri.local.sale.report`.
 - Déploiement : nouveau module, à installer ; aucun champ ajouté aux modèles existants.
-- Commit : branche `feat/ventes-locales-paiements` (non committé).
+- Commit : `13ccc20` sur `feat/ventes-locales-paiements` (poussé). Jugé correct par l'utilisateur (« ça me paraît bien », 13/11) ; écran non contrôlé par Claude.
 
 ## 2026-11-12 · Déchets Station : 12 353 kg « sans lot » bloquant la livraison `ST/OUTD/00046`
 - Demande : « Déchets usines » (Déchets Station) est suivi par lot, mais 12 353 kg apparaissent sans lot et ne peuvent pas être livrés sur `C-00238` (Rachid).

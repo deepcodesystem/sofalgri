@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_local_sale_report_list" model="ir.ui.view">
+        <field name="name">sofalgri.local.sale.report.list</field>
+        <field name="model">sofalgri.local.sale.report</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0" delete="0" action="action_open_source" type="object"
+                  decoration-muted="line_kind == 'advance'">
+                <field name="currency_id" column_invisible="1"/>
+                <field name="date"/>
+                <field name="line_kind"/>
+                <field name="reference"/>
+                <field name="partner_id"/>
+                <field name="quantity" sum="Total" optional="show"/>
+                <field name="amount_total" sum="Total"/>
+                <field name="paid_cash" sum="Total"/>
+                <field name="paid_bank" sum="Total"/>
+                <field name="paid_other" sum="Total" optional="hide"/>
+                <field name="amount_residual" sum="Total"
+                       decoration-danger="amount_residual &gt; 0"/>
+                <field name="payment_state" widget="badge" optional="show"
+                       decoration-success="payment_state in ('paid', 'in_payment')"
+                       decoration-warning="payment_state == 'partial'"
+                       decoration-danger="payment_state == 'not_paid'"/>
+                <field name="last_payment_date" optional="show"/>
+                <field name="payment_journal_id" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_local_sale_report_pivot" model="ir.ui.view">
+        <field name="name">sofalgri.local.sale.report.pivot</field>
+        <field name="model">sofalgri.local.sale.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Ventes locales et paiements" disable_linking="1">
+                <field name="partner_id" type="row"/>
+                <field name="date" interval="month" type="col"/>
+                <field name="amount_total" type="measure"/>
+                <field name="paid_cash" type="measure"/>
+                <field name="paid_bank" type="measure"/>
+                <field name="amount_residual" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_local_sale_report_graph" model="ir.ui.view">
+        <field name="name">sofalgri.local.sale.report.graph</field>
+        <field name="model">sofalgri.local.sale.report</field>
+        <field name="arch" type="xml">
+            <graph string="Ventes locales et paiements" type="bar" stacked="1">
+                <field name="date" interval="month"/>
+                <field name="paid_cash" type="measure"/>
+                <field name="paid_bank" type="measure"/>
+                <field name="amount_residual" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_local_sale_report_search" model="ir.ui.view">
+        <field name="name">sofalgri.local.sale.report.search</field>
+        <field name="model">sofalgri.local.sale.report</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="reference"/>
+                <field name="partner_id"/>
+                <filter name="current_season" string="Saison en cours" domain="[('current_season', '=', True)]"/>
+                <separator/>
+                <filter name="invoices" string="Factures et avoirs" domain="[('line_kind', 'in', ('invoice', 'refund'))]"/>
+                <filter name="advances" string="Paiements non rapprochés" domain="[('line_kind', '=', 'advance')]"/>
+                <separator/>
+                <filter name="with_cash" string="Payé en espèces" domain="[('paid_cash', '!=', 0)]"/>
+                <filter name="with_bank" string="Payé par virement" domain="[('paid_bank', '!=', 0)]"/>
+                <filter name="to_pay" string="Reste à payer" domain="[('amount_residual', '&gt;', 0)]"/>
+                <separator/>
+                <filter name="date" string="Date" date="date"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="group_partner" string="Client" context="{'group_by': 'partner_id'}"/>
+                    <filter name="group_kind" string="Type" context="{'group_by': 'line_kind'}"/>
+                    <filter name="group_state" string="État du paiement" context="{'group_by': 'payment_state'}"/>
+                    <filter name="group_month" string="Mois" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_local_sale_report" model="ir.actions.act_window">
+        <field name="name">Ventes locales et paiements</field>
+        <field name="res_model">sofalgri.local.sale.report</field>
+        <field name="view_mode">list,pivot,graph</field>
+        <field name="search_view_id" ref="view_local_sale_report_search"/>
+        <field name="context">{'search_default_current_season': 1}</field>
+    </record>
+
+    <menuitem id="menu_local_sale_report"
+              name="Ventes locales et paiements"
+              parent="sofalgri_export_summary.menu_bi_sales"
+              action="action_local_sale_report"
+              groups="account.group_account_manager,sales_team.group_sale_manager"
+              sequence="20"/>
+</odoo>

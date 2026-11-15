@@ -87,7 +87,8 @@ class ProductionShift(models.Model):
                              date=shift._format_dt(shift.date_start)),
                 'type': 'success',
                 'sticky': False,
-                'next': {'type': 'ir.actions.client', 'tag': 'soft_reload'},
+                # Rechargement complet : le navigateur garde sinon la liste avec l'ancien bouton
+                'next': {'type': 'ir.actions.client', 'tag': 'reload'},
             },
         }
 
@@ -108,12 +109,11 @@ class ProductionShift(models.Model):
             'user_end_id': self.env.user.id,
         })
         self._send_report()
+        # Page rechargée sur le shift terminé : en revenant à la liste des OF, seul « Démarrer le shift » reste
         return {
-            'type': 'ir.actions.act_window',
-            'res_model': self._name,
-            'res_id': self.id,
-            'view_mode': 'form',
-            'target': 'current',
+            'type': 'ir.actions.act_url',
+            'url': '/odoo/action-sofalgri_production_shift.action_production_shift/%s' % self.id,
+            'target': 'self',
         }
 
     def action_send_report(self):

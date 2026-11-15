@@ -19,7 +19,7 @@ Les entrées les plus récentes en haut.
 - Bases : lecture seule TEST (serveurs d'envoi, modules, vue liste des OF, vue des paramètres, menus) et PROD (serveur d'envoi, OF récents).
 - Modules/modèles : `sofalgri_production_shift` · `sofalgri.production.shift`, `mrp.production`, `res.company`, `res.config.settings`.
 - Déploiement : nouveau module, à installer ; table de destinataires créée seulement à l'installation, donc sans risque pour la PROD pendant le test. Dès l'installation, « Produire » exige un shift en cours. Puis choisir les destinataires dans les paramètres de la Fabrication.
-- Commit : branche `feat/shifts-production` (non committé).
+- Commit : `76d1ec5` sur `feat/shifts-production` (poussé).
 
 ## 2026-11-13 · Versements d'espèces en banque (Mohamed, CDM ADIL)
 - Demande : un module pour que Mohamed (groupe « Mes factures uniquement ») verse les espèces qu'il reçoit sur le nouveau compte bancaire « CDM ADIL », dans son menu « Mes factures ».

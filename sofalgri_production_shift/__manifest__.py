@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': "Shifts de production",
-    'version': '18.0.1.1.0',
+    'version': '18.0.1.1.1',
     'category': 'Manufacturing/Manufacturing',
     'summary': "Démarrer et terminer le shift depuis la liste des OF, rapport des palettes produites envoyé par email",
     'description': """

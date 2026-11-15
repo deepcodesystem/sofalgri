@@ -27,11 +27,11 @@
                     <td t-att-style="td_style">Vrac consommé</td>
                     <td t-att-style="num_style"><strong t-out="'{:,.0f}'.format(data['component_qty']).replace(',', ' ')"/> kg</td>
                     <td t-att-style="td_style">OF terminés</td>
-                    <td t-att-style="num_style"><strong t-out="len(data['productions'])"/></td>
+                    <td t-att-style="num_style"><strong t-out="data['production_count']"/></td>
                 </tr>
             </table>
 
-            <t t-if="not data['productions']">
+            <t t-if="not data['production_count']">
                 <p style="font-size:13px;">Aucun ordre de fabrication terminé pendant ce shift.</p>
             </t>
 

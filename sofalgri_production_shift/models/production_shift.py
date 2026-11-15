@@ -159,6 +159,9 @@ class ProductionShift(models.Model):
         pallets = {}
         bulk_lines = []
         summary = {}
+        component_qty = 0.0
+        production_count = 0  # OF entièrement déconstruits exclus
+        has_component_qty = 'component_lot_qty' in productions._fields
         for production in productions:
             qty = production.qty_produced
             if not qty:
@@ -170,6 +173,10 @@ class ProductionShift(models.Model):
             remaining = qty - unbuilt
             if remaining <= 0:
                 continue
+            # La déconstruction rend le vrac au prorata de la quantité déconstruite
+            if has_component_qty:
+                component_qty += production.component_lot_qty * remaining / qty
+            production_count += 1
             product = production.product_id
             packaging = production.product_packaging_id
             # Champ de sofalgri_package_reports, affiché s'il existe
@@ -211,9 +218,9 @@ class ProductionShift(models.Model):
         for item in summary_lines:
             item['pallet_count'] = len(item['pallets'])
         all_lines = [line for group in pallet_groups for line in group['lines']] + bulk_lines
-        component_qty = sum(productions.mapped('component_lot_qty')) if 'component_lot_qty' in productions._fields else 0.0
         return {
             'productions': productions,
+            'production_count': production_count,
             'pallets': pallet_groups,
             'bulk_lines': bulk_lines,
             'summary': summary_lines,
@@ -241,7 +248,7 @@ class ProductionShift(models.Model):
                 continue
             data = shift._get_report_data()
             shift.production_ids = data['productions']
-            shift.production_count = len(data['productions'])
+            shift.production_count = data['production_count']
             shift.pallet_count = data['pallet_count']
             shift.box_count = data['box_count']
             shift.qty_produced = data['qty']

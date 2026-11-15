@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="seq_production_shift" model="ir.sequence">
+        <field name="name">Shift de production</field>
+        <field name="code">sofalgri.production.shift</field>
+        <field name="prefix">SHIFT/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+</odoo>

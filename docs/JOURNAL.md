@@ -5,6 +5,22 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-15 · Shifts de production et rapport des palettes par email
+- Demande : boutons « Démarrer le shift » et « Terminer le shift » dans la liste des OF ; à la fin, email du rapport des palettes produites pendant le shift.
+- Constat : aucun module installé ne gère des shifts (seul `hr_attendance`, pointage des employés). PROD : serveur d'envoi Gmail configuré (`sofalgri.sys@…`) ; TEST : envoi neutralisé (serveur « neutralization - disable emails »), donc aucun email réel depuis TEST. OF de PROD terminés par Maroua Hamdoun et Mohamed ELMALKI.
+- Choix de l'utilisateur : un seul shift ouvert à la fois pour la station (n'importe quel opérateur peut le terminer) ; rapport sur tous les OF terminés pendant le shift, quel que soit l'utilisateur ; destinataires fixes en configuration ; « Produire » refusé sans shift ouvert.
+- Fait : nouveau module `sofalgri_production_shift` 18.0.1.0.0 (dépend de `mrp`, `mail`, `mrp_production_storage`, `mrp_component_lot_check`) :
+  - modèle `sofalgri.production.shift` « Shift de production » (`SHIFT/AAAA/0001`) : début, fin, démarré par, terminé par, durée, remarques, état (En cours, Terminé) ; un seul shift en cours par société (contrainte) ; OF du shift = OF terminés (`date_finished`) entre le début et la fin ; totaux (OF, palettes, colis, kg, vrac consommé) et rapport calculés, non stockés ;
+  - liste des OF : boutons « Démarrer le shift » et « Terminer le shift » (utilisables sans sélection, confirmation à la fin) ; `button_mark_done` refusé sans shift en cours (contexte `skip_production_shift_check` pour contourner) ;
+  - rapport : synthèse par calibre et conditionnement (palettes, colis, kg), détail par palette (OF, date, calibre, conditionnement, lot, frigo, colis, kg ; palette mixte sur plusieurs lignes), production sans palette (vrac, déchets) à part ; quantités déconstruites retirées ; heures au fuseau de l'utilisateur (à défaut Africa/Casablanca) ;
+  - fin du shift : email (`mail.mail`) aux destinataires de « Fabrication > Configuration > Paramètres > Shifts de production » (`res.company.production_shift_partner_ids`), corps HTML = rapport, PDF « Rapport de shift » en pièce jointe, trace dans le fil du shift ; sans destinataire, note dans le fil ; bouton « Renvoyer le rapport » ;
+  - menu « Fabrication > Opérations > Shifts de production » (onglets Rapport et Ordres de fabrication) ; droits : Utilisateur fabrication (sans suppression), Responsable fabrication.
+- Limites : une palette mixte dont un calibre a été produit dans un shift précédent n'affiche que les OF du shift ; un OF terminé sans « Produire » (autre chemin) n'est pas bloqué ; le rapport est recalculé à chaque affichage (une déconstruction ultérieure le modifie). Non installé, non testé ; syntaxe Python non contrôlée (Python absent du poste).
+- Bases : lecture seule TEST (serveurs d'envoi, modules, vue liste des OF, vue des paramètres, menus) et PROD (serveur d'envoi, OF récents).
+- Modules/modèles : `sofalgri_production_shift` · `sofalgri.production.shift`, `mrp.production`, `res.company`, `res.config.settings`.
+- Déploiement : nouveau module, à installer ; table de destinataires créée seulement à l'installation, donc sans risque pour la PROD pendant le test. Dès l'installation, « Produire » exige un shift en cours. Puis choisir les destinataires dans les paramètres de la Fabrication.
+- Commit : branche `feat/shifts-production` (non committé).
+
 ## 2026-11-13 · Versements d'espèces en banque (Mohamed, CDM ADIL)
 - Demande : un module pour que Mohamed (groupe « Mes factures uniquement ») verse les espèces qu'il reçoit sur le nouveau compte bancaire « CDM ADIL », dans son menu « Mes factures ».
 - Constat (PROD, lecture seule) : journal `BNK3` (id 12, nommé « Bank », compte 514105 « Banque CDM (copie) », RIB `12345678910111213141516170`), créé le 13/11 à 19:04 UTC, absent de TEST ; confirmé par l'utilisateur comme le compte CDM ADIL. Depuis le 01/10, Mohamed ELMALKI a saisi les encaissements des ventes locales : 2 en espèces sur `CSH1` (149 412,50 MAD), 14 sur `BNK1` (1 319 798,50 MAD). Odoo 18 n'a plus de virement interne sur les paiements ; `account_cash_deposit` (comptage des billets) est déjà compté comme remise à l'opérateur dans la caisse : non retenu.

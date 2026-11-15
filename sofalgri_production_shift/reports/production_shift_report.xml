@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Contenu commun : corps de l'email, onglet « Rapport » du shift et PDF.
+         Styles en ligne pour les clients de messagerie. Variables : shift, data. -->
+    <template id="production_shift_report_content">
+        <t t-set="th_style" t-value="'border:1px solid #9ca3af;background:#e5e7eb;padding:4px 6px;text-align:left;font-size:12px;'"/>
+        <t t-set="td_style" t-value="'border:1px solid #d1d5db;padding:4px 6px;font-size:12px;'"/>
+        <t t-set="num_style" t-value="'border:1px solid #d1d5db;padding:4px 6px;font-size:12px;text-align:right;'"/>
+        <div style="font-family:Arial,Helvetica,sans-serif;color:#111827;">
+            <h2 style="margin:0 0 6px 0;font-size:18px;">
+                Rapport du shift <t t-out="shift.name"/>
+            </h2>
+            <p style="margin:0 0 10px 0;font-size:13px;">
+                Du <strong t-out="data['date_start']"/> au <strong t-out="data['date_end']"/>
+                · démarré par <t t-out="shift.user_start_id.name"/>
+                <t t-if="shift.user_end_id"> · terminé par <t t-out="shift.user_end_id.name"/></t>
+            </p>
+
+            <table style="border-collapse:collapse;margin-bottom:14px;">
+                <tr>
+                    <td t-att-style="td_style">Palettes produites</td>
+                    <td t-att-style="num_style"><strong t-out="data['pallet_count']"/></td>
+                    <td t-att-style="td_style">Colis</td>
+                    <td t-att-style="num_style"><strong t-out="'{:,.0f}'.format(data['box_count']).replace(',', ' ')"/></td>
+                    <td t-att-style="td_style">Poids produit</td>
+                    <td t-att-style="num_style"><strong t-out="'{:,.0f}'.format(data['qty']).replace(',', ' ')"/> kg</td>
+                    <td t-att-style="td_style">Vrac consommé</td>
+                    <td t-att-style="num_style"><strong t-out="'{:,.0f}'.format(data['component_qty']).replace(',', ' ')"/> kg</td>
+                    <td t-att-style="td_style">OF terminés</td>
+                    <td t-att-style="num_style"><strong t-out="len(data['productions'])"/></td>
+                </tr>
+            </table>
+
+            <t t-if="not data['productions']">
+                <p style="font-size:13px;">Aucun ordre de fabrication terminé pendant ce shift.</p>
+            </t>
+
+            <t t-if="data['summary']">
+                <h3 style="margin:10px 0 4px 0;font-size:15px;">Synthèse par calibre et conditionnement</h3>
+                <table style="border-collapse:collapse;width:100%;margin-bottom:14px;">
+                    <thead>
+                        <tr>
+                            <th t-att-style="th_style">Calibre</th>
+                            <th t-att-style="th_style">Article</th>
+                            <th t-att-style="th_style">Conditionnement</th>
+                            <th t-att-style="th_style + 'text-align:right;'">Palettes</th>
+                            <th t-att-style="th_style + 'text-align:right;'">Colis</th>
+                            <th t-att-style="th_style + 'text-align:right;'">Poids (kg)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="data['summary']" t-as="item">
+                            <td t-att-style="td_style" t-out="item['calibre']"/>
+                            <td t-att-style="td_style" t-out="item['product']"/>
+                            <td t-att-style="td_style" t-out="item['packaging'] or '-'"/>
+                            <td t-att-style="num_style" t-out="item['pallet_count'] or '-'"/>
+                            <td t-att-style="num_style" t-out="'%.0f' % item['boxes'] if item['boxes'] else '-'"/>
+                            <td t-att-style="num_style" t-out="'{:,.0f}'.format(item['qty']).replace(',', ' ')"/>
+                        </tr>
+                    </tbody>
+                </table>
+            </t>
+
+            <t t-if="data['pallets']">
+                <h3 style="margin:10px 0 4px 0;font-size:15px;">Détail des palettes</h3>
+                <table style="border-collapse:collapse;width:100%;margin-bottom:14px;">
+                    <thead>
+                        <tr>
+                            <th t-att-style="th_style">Palette</th>
+                            <th t-att-style="th_style">OF</th>
+                            <th t-att-style="th_style">Terminé le</th>
+                            <th t-att-style="th_style">Calibre</th>
+                            <th t-att-style="th_style">Conditionnement</th>
+                            <th t-att-style="th_style">Lot</th>
+                            <th t-att-style="th_style">Frigo</th>
+                            <th t-att-style="th_style + 'text-align:right;'">Colis</th>
+                            <th t-att-style="th_style + 'text-align:right;'">Poids (kg)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="data['pallets']" t-as="pallet">
+                            <tr t-foreach="pallet['lines']" t-as="line">
+                                <td t-if="line_first" t-att-rowspan="len(pallet['lines'])" t-att-style="td_style + 'font-weight:bold;'">
+                                    <t t-out="pallet['name']"/>
+                                    <span t-if="pallet['mixed']" style="font-weight:normal;"> (mixte)</span>
+                                </td>
+                                <td t-att-style="td_style" t-out="line['production']"/>
+                                <td t-att-style="td_style" t-out="line['date']"/>
+                                <td t-att-style="td_style" t-out="line['calibre']"/>
+                                <td t-att-style="td_style" t-out="line['packaging'] or '-'"/>
+                                <td t-att-style="td_style" t-out="line['lot']"/>
+                                <td t-att-style="td_style" t-out="line['location']"/>
+                                <td t-att-style="num_style" t-out="'%.0f' % line['boxes']"/>
+                                <td t-att-style="num_style" t-out="'{:,.0f}'.format(line['qty']).replace(',', ' ')"/>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </t>
+
+            <t t-if="data['bulk_lines']">
+                <h3 style="margin:10px 0 4px 0;font-size:15px;">Production sans palette (vrac, déchets)</h3>
+                <table style="border-collapse:collapse;width:100%;margin-bottom:14px;">
+                    <thead>
+                        <tr>
+                            <th t-att-style="th_style">OF</th>
+                            <th t-att-style="th_style">Terminé le</th>
+                            <th t-att-style="th_style">Article</th>
+                            <th t-att-style="th_style">Calibre</th>
+                            <th t-att-style="th_style">Lot</th>
+                            <th t-att-style="th_style">Emplacement</th>
+                            <th t-att-style="th_style + 'text-align:right;'">Quantité</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="data['bulk_lines']" t-as="line">
+                            <td t-att-style="td_style" t-out="line['production']"/>
+                            <td t-att-style="td_style" t-out="line['date']"/>
+                            <td t-att-style="td_style" t-out="line['product']"/>
+                            <td t-att-style="td_style" t-out="line['calibre']"/>
+                            <td t-att-style="td_style" t-out="line['lot']"/>
+                            <td t-att-style="td_style" t-out="line['location']"/>
+                            <td t-att-style="num_style">
+                                <t t-out="'{:,.0f}'.format(line['qty']).replace(',', ' ')"/> <t t-out="line['uom']"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </t>
+
+            <p t-if="shift.note" style="font-size:13px;"><strong>Remarques : </strong><t t-out="shift.note"/></p>
+        </div>
+    </template>
+
+    <template id="report_production_shift_document">
+        <t t-call="web.external_layout">
+            <div class="page">
+                <t t-call="sofalgri_production_shift.production_shift_report_content">
+                    <t t-set="shift" t-value="doc"/>
+                    <t t-set="data" t-value="doc._get_report_data()"/>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <template id="report_production_shift">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="sofalgri_production_shift.report_production_shift_document"/>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_production_shift" model="ir.actions.report">
+        <field name="name">Rapport de shift</field>
+        <field name="model">sofalgri.production.shift</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">sofalgri_production_shift.report_production_shift</field>
+        <field name="report_file">sofalgri_production_shift.report_production_shift</field>
+        <field name="print_report_name">'Shift - %s' % object.name.replace('/', '-')</field>
+        <field name="binding_model_id" ref="model_sofalgri_production_shift"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+</odoo>

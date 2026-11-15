@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mrp_production_tree_view_production_shift" model="ir.ui.view">
+        <field name="name">mrp.production.list.production.shift</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list/header" position="inside">
+                <button name="action_start_production_shift" type="object" string="Démarrer le shift"
+                        class="btn-primary" display="always"/>
+                <button name="action_end_production_shift" type="object" string="Terminer le shift"
+                        class="btn-secondary" display="always"
+                        confirm="Terminer le shift en cours et envoyer le rapport des palettes produites ?"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,6 +1,6 @@
 # Sofalgri — Contexte de l'instance Odoo
 
-_Dernière mise à jour : 29/10/2026 (déploiement PROD des PR #5 à #7)_
+_Dernière mise à jour : 15/11/2026 (module `sofalgri_production_shift` sur branche)_
 
 ## Environnement
 
@@ -24,6 +24,7 @@ _Dernière mise à jour : 29/10/2026 (déploiement PROD des PR #5 à #7)_
 | `custom_lot_sequences` | Numéros de lot personnalisés (réceptions, OF) | 18.0.2.2.0 (`18.0`, PROD) ; 18.0.2.3.0 sur `feat/lot-du-jour-of` | stock, mrp, picking_custom_addons | ✅ |
 | `mrp_component_lot_check` | OF : popup de vérification des palettes / lots composants à la confirmation, obligatoire avant « Produire » | 18.0.1.6.0 (`18.0`, PROD) | mrp | ✅ |
 | `mrp_production_storage` | OF : conditionnement, quantité, frigo et n° de palette S saisis sur l'OF, étiquette palette produit fini (avec fabrication en 1 étape, remplace le transfert SFP) | 18.0.1.5.0 (`18.0`) | mrp | ✅ |
+| `sofalgri_production_shift` | Shifts de production : « Démarrer / Terminer le shift » dans la liste des OF (un shift en cours pour la station, « Produire » refusé sans shift), rapport des palettes produites envoyé par email avec PDF | 18.0.1.0.0 (branche `feat/shifts-production`) | mrp, mail, mrp_production_storage, mrp_component_lot_check | ❌ (à installer) |
 | `sofalgri_packing_list` | Liste de colisage (packing list) depuis le bon de livraison, Excel et PDF | 18.0.1.0.1 (branche `feat/liste-colisage`) | stock, sale_stock, account, delivery_carrier_custom, sofalgri_package_reports | ❌ (à installer) |
 | `sofalgri_report_signature` | Signature et cachet de la société (image) sur la facture client, la transitaire et la pro forma | 18.0.1.0.1 (branche `feat/signature-factures`) | account, product_packaging_unit_price | ❌ (à installer) |
 | `sofalgri_stock_calibre_report` | Vue des palettes en frigo par calibre et conditionnement, source d'un tableau de BI Dashboard | 18.0.1.0.0 (`18.0`) | stock, sofalgri_package_reports | ✅ |

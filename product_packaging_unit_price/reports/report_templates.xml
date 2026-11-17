@@ -96,11 +96,13 @@
                     <t t-set="lines" t-value="o.invoice_line_ids.sorted(key=lambda l: (-l.sequence, l.date, l.move_name, -l.id), reverse=True)"/>
 
                     <t t-foreach="lines" t-as="line">
-                        <t t-if="line.display_type == 'product'">
+                        <!-- Ligne avec article : comptée dans le poids net et les colis -->
+                        <t t-if="line.display_type == 'product' and line.product_id">
                              <t t-set="current_total_qty" t-value="current_total_qty + line.quantity"/>
                              <t t-set="current_total_package" t-value="current_total_package + line.product_packaging_qty"/>
                              <tr style="font-size:12px;">
-                                <td name="account_invoice_line_name"><span t-field="line.product_id.description_sale"/></td>
+                                <!-- Description de vente de l'article, à défaut le libellé de la ligne -->
+                                <td name="account_invoice_line_name"><span t-out="line.product_id.description_sale or line.name or ''"/></td>
                                 <td t-if="display_calibre" class="text-center"><span t-field="line.product_id.calibre"/></td>
                                 <td class="text-center"><span t-field="line.product_packaging_qty" t-options='{"widget": "float", "precision": 0}'/></td>
                                 <!-- Description de vente du conditionnement, à défaut son nom (souvent la seule information renseignée) -->
@@ -109,6 +111,23 @@
                                     <span t-field="line.quantity" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 2}"/>
                                     <span t-field="line.product_uom_id" groups="uom.group_uom"/>
                                 </td>
+                                <td class="text-center">
+                                    <span class="text-nowrap" t-field="line.price_unit_package" t-options='{"widget": "float", "precision": 4}'/>
+                                </td>
+                                <td class="text-end">
+                                    <span class="text-nowrap" t-field="line.price_subtotal" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                </td>
+                            </tr>
+                        </t>
+                        <!-- Ligne sans article (remise, frais saisis en texte) : libellé et montant seulement,
+                             hors poids net et colis -->
+                        <t t-elif="line.display_type == 'product'">
+                             <tr style="font-size:12px;">
+                                <td name="account_invoice_line_name"><span t-field="line.name" t-options="{'widget': 'text'}"/></td>
+                                <td t-if="display_calibre"/>
+                                <td/>
+                                <td/>
+                                <td/>
                                 <td class="text-center">
                                     <span class="text-nowrap" t-field="line.price_unit_package" t-options='{"widget": "float", "precision": 4}'/>
                                 </td>

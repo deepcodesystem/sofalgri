@@ -9,11 +9,11 @@ Les entrées les plus récentes en haut.
 - Demande : sur un avoir, une ligne saisie avec seulement une description (sans article ni service) n'apparaît pas à l'impression.
 - Constat (PROD, lecture seule) : `RFAC/2026/00001` (extourne de `F2026/069`, GEORGES HELFER, FARAH LAMA, 17/11), ligne 6804 sans article, « Remise sur Avocat Hass ( Sous Callibrage ) », 1 × 1 500 €. Le tableau de la facture (`product_packaging_unit_price`) imprime en Désignation la description de vente de l'article, vide sans article ; la ligne comptait aussi 1 kg dans le poids net total.
 - Fait : `product_packaging_unit_price` 18.0.6.11.1 : ligne sans article imprimée avec son libellé, son prix et son montant, sans colis, emballage ni poids, et hors des totaux de poids net et de colis ; ligne avec article : description de vente, à défaut le libellé de la ligne. Valable pour les factures et les avoirs. Lignes de section et de note toujours non imprimées.
-- Non testé dans Odoo (XML contrôlé comme bien formé).
+- **Validé en TEST** par l'utilisateur (« ça fonctionne », 17/11) ; détail des essais non précisé, non contrôlé par Claude.
 - Bases : lecture seule PROD (`account.move.line`).
 - Modules/modèles : `product_packaging_unit_price` · rapport facture.
 - Déploiement : aucun champ ajouté, mise à jour normale du module.
-- Commit : `360974d` sur `fix/ligne-facture-sans-article` (worktree `E:\Claude\Sofalgri\sofalgri-fix-ligne`), non poussé.
+- Commit : `360974d` sur `fix/ligne-facture-sans-article` (poussé) ; PR deepcodesystem/sofalgri#54 vers `18.0`.
 
 ## 2026-11-16 · Déchets Station saisis en Déchets fermes (`WH/MOF/04460`, `04461`, `04474`, `04475`)
 - Demande : ces 4 OF devaient produire des Déchets Station ; l'opératrice les a faits en Déchets fermes.

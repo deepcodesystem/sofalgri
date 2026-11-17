@@ -13,7 +13,8 @@ Les entrées les plus récentes en haut.
 - Bases : lecture seule PROD (`account.move.line`).
 - Modules/modèles : `product_packaging_unit_price` · rapport facture.
 - Déploiement : aucun champ ajouté, mise à jour normale du module.
-- Commit : `360974d` sur `fix/ligne-facture-sans-article` (poussé) ; PR deepcodesystem/sofalgri#54 vers `18.0`.
+- Commit : `360974d` sur `fix/ligne-facture-sans-article` (poussé) ; PR deepcodesystem/sofalgri#54 **fusionnée** dans `18.0` (`8ea3097`).
+- PROD (mis à jour par l'utilisateur, contrôlé en lecture le 17/11) : `product_packaging_unit_price` 18.0.6.11.1 installé (12:14 UTC), vue `report_invoice_document_inherit_packaging_replace` avec le nouveau traitement des lignes sans article. Impression de `RFAC/2026/00001` non contrôlée par Claude.
 
 ## 2026-11-16 · Déchets Station saisis en Déchets fermes (`WH/MOF/04460`, `04461`, `04474`, `04475`)
 - Demande : ces 4 OF devaient produire des Déchets Station ; l'opératrice les a faits en Déchets fermes.

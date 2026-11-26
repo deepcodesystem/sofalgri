@@ -16,6 +16,7 @@ Les entrées les plus récentes en haut.
 - Modules/modèles : `sofalgri_bank_position` · `sofalgri.bank.position.report`, `sofalgri.bank.position.statement`.
 - Déploiement : nouveau module, à installer ; aucun champ ajouté aux modèles existants.
 - Commit : `9a8edd1` sur `feat/situation-banque` (worktree `E:\Claude\Sofalgri\sofalgri-banque`), non poussé.
+- Contrôle TEST (lecture, après installation par l'utilisateur le 26/11 à 20:42 UTC) : 18.0.1.0.0 installée, menus « BI Dashboard/Finance/Situation du compte bancaire » et « Détail du compte bancaire » présents ; vue SQL lisible. `BNK3` : 3 lignes « Encaissement client » identiques aux paiements du journal (`PBNK3/2026/00001` à `00003`, factures `FL/2026/0018`, `0012`, `0019` liées), 125 014 MAD, aucune sortie, aucun versement ni remise. Autres journaux (100 premières lignes) : remises d'espèces rattachées à `BNK1` (13 lignes, −86 348 102,37) et `BNK2` (5 lignes, −4 600 000) : la situation de ces comptes sera négative, ces remises n'ayant pas d'entrée en face. Écran non contrôlé à l'écran par Claude.
 
 ## 2026-11-17 · Facture et avoir : libellé d'une ligne sans article non imprimé
 - Demande : sur un avoir, une ligne saisie avec seulement une description (sans article ni service) n'apparaît pas à l'impression.

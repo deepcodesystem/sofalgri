@@ -1,6 +1,6 @@
 # Sofalgri — Contexte de l'instance Odoo
 
-_Dernière mise à jour : 17/11/2026 (`product_packaging_unit_price` 18.0.6.11.1 en PROD)_
+_Dernière mise à jour : 26/11/2026 (module `sofalgri_bank_position` sur branche)_
 
 ## Environnement
 
@@ -33,6 +33,7 @@ _Dernière mise à jour : 17/11/2026 (`product_packaging_unit_price` 18.0.6.11.1
 | `sofalgri_operating_statement` | Écran « Compte d'exploitation » par période (ventes export, locales, déchets ; achats d'avocats, frais par rubrique d'article, emballages consommés, variation de stock ; marge et coût au kg), détail en tableau croisé | 18.0.1.0.2 (`18.0`, PROD ; menu BI Dashboard > Finance) ; 18.0.1.2.0 sur `feat/couts-export-factures` (tarifs négociés, coûts sur la facture d'export, coût par camion dans la Synthèse) | account, purchase_stock, stock_account, sofalgri_export_summary, synconics_bi_dashboard | ✅ |
 | `sofalgri_operator_cash` | Écran « Caisse de l'opérateur » : remises d'espèces à l'opérateur des achats, encaissements clients en espèces (ventes locales), paiements en espèces (avocats, frais, autres, non rapprochés), reste en espèces par période ; détail en liste et tableau croisé | 18.0.1.1.0 (`18.0`, PROD ; menu BI Dashboard > Achats ; versements en banque déduits des encaissements) | account, purchase, account_cash_deposit, purchase_advance_payment, sofalgri_export_summary, sofalgri_purchase_summary, sofalgri_cash_transfer, synconics_bi_dashboard | ✅ |
 | `sofalgri_local_sale_summary` | Écran « Ventes locales et paiements » : une ligne par facture du journal des ventes locales (montant, payé en espèces, payé par virement, reste), encaissements non rapprochés des clients locaux ; filtres saison et dates | 18.0.1.0.0 (`18.0`, PROD ; menu BI Dashboard > Ventes) | account, sofalgri_local_sale_journal, sofalgri_export_summary, synconics_bi_dashboard | ✅ |
+| `sofalgri_bank_position` | Écran « Situation du compte bancaire » (CDM ADIL par défaut) : encaissements clients, versements d'espèces, paiements d'achats, remises d'espèces vers la caisse, autres écritures, soldes par période ; détail en liste et tableau croisé | 18.0.1.0.0 (branche `feat/situation-banque`) | account, account_cash_deposit, sofalgri_cash_transfer, sofalgri_export_summary, sofalgri_operating_statement, synconics_bi_dashboard | ❌ (à installer) |
 | `sofalgri_cash_transfer` | Versements d'espèces d'une caisse sur un compte bancaire (écriture caisse → banque) ; menu « Mes factures » (chacun ses versements) et Facturation > Comptabilité | 18.0.1.0.0 (`18.0`, PROD) | account, mail, sofalgri_own_invoices | ✅ |
 | `sofalgri_own_invoices` | Groupe « Mes factures uniquement » : créer, valider et payer ses propres factures sans voir les autres ; menu dédié | 18.0.1.0.0 (`18.0`) | account | ✅ |
 | `sofalgri_local_sale_journal` | Journal de vente choisi selon la position fiscale (export ou local), facture refusée à la validation dans le mauvais journal ; inactif sans journal coché ; menu « Ventes locales » (Facturation > Clients) | 18.0.1.1.0 (`18.0`, PROD) ; TEST encore en 18.0.1.0.0, sans le menu (contrôle du 05/11) | account, sale | ✅ |

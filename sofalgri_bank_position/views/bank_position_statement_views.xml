@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_bank_position_statement_form" model="ir.ui.view">
+        <field name="name">sofalgri.bank.position.statement.form</field>
+        <field name="model">sofalgri.bank.position.statement</field>
+        <field name="arch" type="xml">
+            <form string="Situation du compte bancaire">
+                <header>
+                    <button name="action_open_details" type="object" string="Voir le détail" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Situation du compte bancaire</h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="journal_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <group>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-warning" role="alert" invisible="closing_balance &gt;= 0">
+                        Solde négatif : plus de sorties saisies que d'entrées sur ce compte.
+                        Une entrée manque peut-être, ou une sortie a été saisie sur le mauvais journal.
+                    </div>
+                    <group>
+                        <group string="Entrées">
+                            <field name="opening_balance"/>
+                            <field name="amount_collection"/>
+                            <field name="amount_cash_transfer"/>
+                            <field name="amount_other_in" invisible="not amount_other_in"/>
+                            <field name="amount_in" class="fw-bold"/>
+                        </group>
+                        <group string="Sorties">
+                            <field name="amount_supplier_payment"/>
+                            <field name="amount_cash_deposit"/>
+                            <field name="amount_other_out" invisible="not amount_other_out"/>
+                            <field name="amount_out" class="fw-bold"/>
+                        </group>
+                    </group>
+                    <group string="Solde">
+                        <group>
+                            <field name="amount_period"/>
+                            <field name="closing_balance" class="fw-bold"
+                                   decoration-success="closing_balance &gt;= 0"
+                                   decoration-danger="closing_balance &lt; 0"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_bank_position_statement" model="ir.actions.act_window">
+        <field name="name">Situation du compte bancaire</field>
+        <field name="res_model">sofalgri.bank.position.statement</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+
+    <menuitem id="menu_bank_position_statement"
+              name="Situation du compte bancaire"
+              parent="sofalgri_operating_statement.menu_bi_finance"
+              action="action_bank_position_statement"
+              groups="account.group_account_manager"
+              sequence="30"/>
+
+    <menuitem id="menu_bank_position_report"
+              name="Détail du compte bancaire"
+              parent="sofalgri_operating_statement.menu_bi_finance"
+              action="action_bank_position_report"
+              groups="account.group_account_manager"
+              sequence="40"/>
+</odoo>

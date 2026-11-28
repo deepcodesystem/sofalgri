@@ -5,6 +5,17 @@ Les entrées les plus récentes en haut.
 
 ---
 
+## 2026-11-28 · Étiquette palette des OF sur toute l'étiquette 100 × 150 mm
+- Demande : l'étiquette palette (S918, imprimante d'étiquettes 100 × 150 mm) n'occupe qu'une partie de l'étiquette ; elle doit la remplir.
+- Cause : format papier A5 paysage (210 × 148 mm), réduit par l'impression, et tableau à la hauteur de son contenu.
+- Fait : `mrp_production_storage` 18.0.1.6.0 : format papier « Étiquette palette produit fini 100 x 150 mm » (personnalisé 100 × 150, paysage comme avant, marges 3 mm, sans réduction automatique, 96 dpi) ; tableau de l'étiquette à 144 × 93 mm, rangées étirées sur toute la hauteur ; n° de palette et de lot un peu plus petits, codes-barres 62 × 10 mm, logo 12 mm, lignes de la palette mixte resserrées.
+- Limites : une palette mixte de plus de 3 ou 4 calibres peut dépasser sur une deuxième étiquette ; l'étiquette de réception (`picking_custom_addons`) et celle des colis (`sofalgri_package_reports`) restent en A5.
+- Non testé dans Odoo (XML contrôlé comme bien formé) ; rendu à vérifier à l'impression en TEST.
+- Bases : aucune requête.
+- Modules/modèles : `mrp_production_storage` · rapport `report_production_pallet`, `report.paperformat`.
+- Déploiement : aucun champ ajouté, mise à jour normale du module (le format papier est rechargé).
+- Commit : sur `feat/etiquette-palette-100x150`.
+
 ## 2026-11-26 · Situation du compte CDM ADIL (entrées et sorties)
 - Demande : situation du compte CDM ADIL dans les tableaux de bord : entrées (surtout ventes locales), sorties (paiements des factures d'achat sur ce journal, remises d'espèces vers la caisse).
 - Constat (PROD, lecture seule) : CDM ADIL = journal `BNK3` (id 12, encore nommé « Bank », compte 514105, coché « Reçoit les versements d'espèces »). 3 paiements clients de Mohamed ELMALKI, rapprochés de factures locales : `PBNK3/2026/00001` (Adam, `FL/2026/0018`, 13 500, 06/11), `00002` (Driss, `FL/2026/0012`, 73 489, 14/11), `00003` (Rachid, `FL/2026/0019`, 38 025, 14/11), soit 125 014 MAD ; aucun versement d'espèces, aucun paiement fournisseur, aucune remise d'espèces liée. Les paiements passent par le compte d'attente 514102 « Paiements entrants en suspens », commun avec `BNK1` : solde du compte inutilisable, situation calculée sur les paiements du journal. Les remises d'espèces (`account.cash.deposit`) portent un compte bancaire (`CASH-DEP-036` et `037` : Banque AWB, « récupéré Adil / Yassine Harhour »), sans écriture côté banque.

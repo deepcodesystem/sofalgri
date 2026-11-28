@@ -8,7 +8,8 @@
         <field name="page_height">150</field>
         <field name="orientation">Landscape</field>
         <field name="margin_top">3</field>
-        <field name="margin_bottom">3</field>
+        <!-- Bas de l'étiquette : bord de la tête d'impression, où l'impression pâlit -->
+        <field name="margin_bottom">6</field>
         <field name="margin_left">3</field>
         <field name="margin_right">3</field>
         <field name="header_line" eval="False"/>
@@ -36,10 +37,10 @@
         <t t-call="web.basic_layout">
             <style>
                 html, body { margin: 0; padding: 0; }
-                /* Toute la page : 150 x 100 mm moins 3 mm de marge de chaque côté (1 mm de sécurité en hauteur) */
-                .spl-label { width: 144mm; height: 93mm; border: 2px solid #000; border-collapse: collapse; font-size: 13px; color: #000; }
+                /* Toute la page : 150 x 100 mm moins les marges (3 mm, 6 mm en bas ; 1 mm de sécurité en hauteur) */
+                .spl-label { width: 144mm; height: 90mm; border: 2px solid #000; border-collapse: collapse; font-size: 13px; color: #000; }
                 .spl-label td { border: 1px solid #000; padding: 4px 8px; vertical-align: middle; }
-                .spl-caption { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: #555; }
+                .spl-caption { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: #000; }
                 .spl-value { font-size: 15px; font-weight: bold; }
                 .spl-head td { border-bottom: 2px solid #000; vertical-align: middle; }
                 .spl-company { font-size: 18px; font-weight: bold; }
@@ -47,12 +48,12 @@
                 .spl-pallet { font-size: 56px; font-weight: bold; line-height: 60px; }
                 .spl-lot { font-size: 30px; font-weight: bold; line-height: 60px; }
                 .spl-weights td { text-align: center; vertical-align: middle; border-top: 2px solid #000; }
-                .spl-weight { font-size: 24px; font-weight: bold; }
-                .spl-net { background-color: #000; color: #fff; }
-                .spl-net .spl-caption { color: #ddd; }
-                .spl-net .spl-weight { font-size: 30px; }
+                .spl-weight { font-size: 26px; font-weight: bold; }
+                /* Poids net encadré plutôt qu'en fond noir : un aplat noir s'imprime mal en transfert thermique */
+                .spl-label td.spl-net { border: 4px solid #000; }
+                .spl-net .spl-weight { font-size: 34px; }
                 .spl-lines { width: 100%; border-collapse: collapse; }
-                .spl-lines th { padding: 2px 8px; border-bottom: 1px solid #000; font-size: 10px; font-weight: normal; letter-spacing: 1px; text-transform: uppercase; color: #555; }
+                .spl-lines th { padding: 2px 8px; border-bottom: 1px solid #000; font-size: 10px; font-weight: normal; letter-spacing: 1px; text-transform: uppercase; color: #000; }
                 .spl-lines td { padding: 2px 8px; border: none; border-bottom: 1px solid #000; font-size: 13px; font-weight: bold; }
             </style>
             <t t-foreach="docs" t-as="o">

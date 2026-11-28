@@ -14,7 +14,9 @@ Les entrées les plus récentes en haut.
 - Bases : aucune requête.
 - Modules/modèles : `mrp_production_storage` · rapport `report_production_pallet`, `report.paperformat`.
 - Déploiement : aucun champ ajouté, mise à jour normale du module (le format papier est rechargé).
-- Commit : sur `feat/etiquette-palette-100x150`.
+- Commit : `d79ba4f` sur `feat/etiquette-palette-100x150` (poussé) ; PR deepcodesystem/sofalgri#57.
+- Essai d'impression (S1035, photo de l'utilisateur) : l'étiquette remplit la page, dans le bon sens ; la ligne du bas (nb colis, poids par colis, frigo, poids net) sort pâle, libellés gris presque invisibles, fond noir du poids net granuleux.
+- Ajustement (18.0.1.6.1) : marge du bas 3 → 6 mm (tableau à 90 mm de haut), libellés en noir, poids net encadré (4 px) au lieu du fond noir, chiffres du bas agrandis. Si la ligne du bas reste pâle : pression ou alignement de la tête et du ruban de l'imprimante, pas le modèle.
 
 ## 2026-11-26 · Situation du compte CDM ADIL (entrées et sorties)
 - Demande : situation du compte CDM ADIL dans les tableaux de bord : entrées (surtout ventes locales), sorties (paiements des factures d'achat sur ce journal, remises d'espèces vers la caisse).

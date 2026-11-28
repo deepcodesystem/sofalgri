@@ -14,7 +14,14 @@ Les entrées les plus récentes en haut.
 - Bases : aucune requête.
 - Modules/modèles : `mrp_production_storage` · rapport `report_production_pallet`, `report.paperformat`.
 - Déploiement : aucun champ ajouté, mise à jour normale du module (le format papier est rechargé).
-- Commit : sur `feat/etiquette-palette-100x150`.
+- Commit : `d79ba4f` sur `feat/etiquette-palette-100x150` (poussé) ; PR deepcodesystem/sofalgri#57.
+- Essai d'impression (S1035, photo de l'utilisateur) : l'étiquette remplit la page, dans le bon sens ; la ligne du bas (nb colis, poids par colis, frigo, poids net) sort pâle, libellés gris presque invisibles, fond noir du poids net granuleux.
+- Ajustement (18.0.1.6.1) : marge du bas 3 → 6 mm (tableau à 90 mm de haut), libellés en noir, poids net encadré (4 px) au lieu du fond noir, chiffres du bas agrandis. Si la ligne du bas reste pâle : pression ou alignement de la tête et du ruban de l'imprimante, pas le modèle. Commit `14a874a` (poussé).
+- Précision de l'utilisateur : le bas était correct, la pâleur vient de l'encre (ruban) de l'imprimante ; c'est la partie droite qui dépasse un peu.
+- Correctif (18.0.1.6.2) : retour à la présentation de 18.0.1.6.0 (marge du bas 3 mm, fond noir du poids net, libellés gris) ; largeur du tableau 144 → 141 mm. Commit `4491570` (poussé).
+- PDF de S036 (TEST, 18.0.1.6.2, fourni par l'utilisateur) : tableau décalé d'environ 4 mm à droite (retrait des conteneurs de la mise en page) et coupé à droite ; nom d'article sur deux lignes (« … GOLD FRUTAS (24) »), d'où la ligne nb colis / poids net rejetée sur une deuxième page.
+- Correctif (18.0.1.6.3) : retrait des conteneurs supprimé, tableau à 100 % de la largeur utile ; contenu resserré (marges des cellules, n° de palette 50 px, lot 28 px, codes-barres 60 × 8 mm, logo 10 mm, valeurs 14 px) pour tenir dans 93 mm même avec un nom d'article sur deux lignes. Commit `5c9574e` (poussé).
+- Un 2e PDF de S036 était encore en 18.0.1.6.2 (code non récupéré sur le serveur). Après mise à jour, TEST en 18.0.1.6.3 (contrôle en lecture, 16:10 UTC) ; **validé en TEST** par l'utilisateur (« c'est ok maintenant », 28/11).
 
 ## 2026-11-26 · Situation du compte CDM ADIL (entrées et sorties)
 - Demande : situation du compte CDM ADIL dans les tableaux de bord : entrées (surtout ventes locales), sorties (paiements des factures d'achat sur ce journal, remises d'espèces vers la caisse).

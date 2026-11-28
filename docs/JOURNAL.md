@@ -16,7 +16,9 @@ Les entrées les plus récentes en haut.
 - Déploiement : aucun champ ajouté, mise à jour normale du module (le format papier est rechargé).
 - Commit : `d79ba4f` sur `feat/etiquette-palette-100x150` (poussé) ; PR deepcodesystem/sofalgri#57.
 - Essai d'impression (S1035, photo de l'utilisateur) : l'étiquette remplit la page, dans le bon sens ; la ligne du bas (nb colis, poids par colis, frigo, poids net) sort pâle, libellés gris presque invisibles, fond noir du poids net granuleux.
-- Ajustement (18.0.1.6.1) : marge du bas 3 → 6 mm (tableau à 90 mm de haut), libellés en noir, poids net encadré (4 px) au lieu du fond noir, chiffres du bas agrandis. Si la ligne du bas reste pâle : pression ou alignement de la tête et du ruban de l'imprimante, pas le modèle.
+- Ajustement (18.0.1.6.1) : marge du bas 3 → 6 mm (tableau à 90 mm de haut), libellés en noir, poids net encadré (4 px) au lieu du fond noir, chiffres du bas agrandis. Si la ligne du bas reste pâle : pression ou alignement de la tête et du ruban de l'imprimante, pas le modèle. Commit `14a874a` (poussé).
+- Précision de l'utilisateur : le bas était correct, la pâleur vient de l'encre (ruban) de l'imprimante ; c'est la partie droite qui dépasse un peu.
+- Correctif (18.0.1.6.2) : retour à la présentation de 18.0.1.6.0 (marge du bas 3 mm, fond noir du poids net, libellés gris) ; largeur du tableau 144 → 141 mm.
 
 ## 2026-11-26 · Situation du compte CDM ADIL (entrées et sorties)
 - Demande : situation du compte CDM ADIL dans les tableaux de bord : entrées (surtout ventes locales), sorties (paiements des factures d'achat sur ce journal, remises d'espèces vers la caisse).

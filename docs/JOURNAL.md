@@ -22,6 +22,7 @@ Les entrées les plus récentes en haut.
 - PDF de S036 (TEST, 18.0.1.6.2, fourni par l'utilisateur) : tableau décalé d'environ 4 mm à droite (retrait des conteneurs de la mise en page) et coupé à droite ; nom d'article sur deux lignes (« … GOLD FRUTAS (24) »), d'où la ligne nb colis / poids net rejetée sur une deuxième page.
 - Correctif (18.0.1.6.3) : retrait des conteneurs supprimé, tableau à 100 % de la largeur utile ; contenu resserré (marges des cellules, n° de palette 50 px, lot 28 px, codes-barres 60 × 8 mm, logo 10 mm, valeurs 14 px) pour tenir dans 93 mm même avec un nom d'article sur deux lignes. Commit `5c9574e` (poussé).
 - Un 2e PDF de S036 était encore en 18.0.1.6.2 (code non récupéré sur le serveur). Après mise à jour, TEST en 18.0.1.6.3 (contrôle en lecture, 16:10 UTC) ; **validé en TEST** par l'utilisateur (« c'est ok maintenant », 28/11).
+- PR deepcodesystem/sofalgri#57 fusionnée dans `18.0` (`4940b1e`) en 18.0.1.6.0, avant les ajustements ; PR deepcodesystem/sofalgri#58 (18.0.1.6.1 à 18.0.1.6.3) **fusionnée** (`cb39fb4`). PROD (mise à jour par l'utilisateur, contrôlée en lecture le 28/11) : 18.0.1.6.3 installé (16:14 UTC), format papier 100 × 150 mm paysage, marges 3 mm, sans réduction automatique, 96 dpi. Impression en PROD non contrôlée.
 
 ## 2026-11-26 · Situation du compte CDM ADIL (entrées et sorties)
 - Demande : situation du compte CDM ADIL dans les tableaux de bord : entrées (surtout ventes locales), sorties (paiements des factures d'achat sur ce journal, remises d'espèces vers la caisse).
